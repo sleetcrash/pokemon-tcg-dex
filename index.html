@@ -9,10 +9,13 @@
     --page:#111014; --card:#1a191f; --card-hi:#221f28;
     --ink:#edebe6; --ink-dim:#8d8a94; --line:#2a2830;
     --holo:linear-gradient(120deg,#5dd4e8 0%,#c86fd4 38%,#f2c46b 72%,#5dd4e8 100%);
+    --ball:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeBAMAAADJHrORAAAAA3NCSVQFBQUYJt5DAAAAIVBMVEX///8xMTH/lDqcSjr/1jr////eWjpKUlKlpcV7e4TezvdcMgHRAAAAAXRSTlMAQObYZgAAAH5JREFUGNNjYKALEBQUROEqKSkhCTACuUpqAnC+kAtIIBEurRLqBOSnCeDgCymB1aclwvlg83DyhcH8tDRDKF/cSL0cyE0uhPHLKyLK0szLYXzG6aWh5eXllXD7l86IAHJXwB0sFTlz1apVjQj/dAG5HQJI/u3o6BDEEx60AwCJgyJdBXcpkgAAAABJRU5ErkJggg==);
+    --hball:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADXklEQVRYw+2WTWyTdRzHm43QrRvpCntxWzTqQROjJpDpXlu2vq1P15d1LXAwEi/YzXUoZaPdnm5zslVwToUwHCgXISQcPAw5kEwSEBOoGVJ6AJxuevC2CxdPmnz89WlCIjEatrJTv8k3z5MneZ7vy+/5P/9HpyuggALWDozVRmqfrqB4s46NlRbBpQd/0RXqpivgZOFuBl3JBpgoL9ZRXF9Dar+D07EBvv7lD8YuX2d2IsaXe9vYVP8UL5Q9OSNcv3IJpvyQDDHjbWJOHeTTSZVznlfgsxAc62H40CD1+vybgFQA5pvgkgUWFDiyW9iT4/Qe+HCXGBPOBPj1gJW6fI1ki9T+fTb5fCMP8Y1ZmhCxI48wa+LjIJlwC+NqjBfL82Gipho+6s6J/p8BGQ2fhFjsNbPS306RvBPrEzca4KTUm5T6F1y5+rURyPnkv6SXsaTCraT7LSyGrfz+noOirWXrMLFti8x0T05g6hH+I/muXEvZ9PvaSPfuJN1nYSnSTlldJWtdc3z74x1J5hNBaeCovHSTcn40KKLC6Wzq0MPkWfHU25K+16KJ35bjSl8z0fEEJaaSxzexrc7E1UyGl1/fwU/zZ/gz8hrJKzcZGIwSHRnhJcUDs2FpKKjVfmufWRNe7LNyt6+d5SE3rb4A7yfiVD1T/fgGsq7D8UOsXjxFc8sOjl37ge/On8Rm3Y7D0cDxgTd4tcvHSqSV+xEL90T83jtmlvs7aHPasPm7Sb7VjT/ox1BpWNsYisqK+GBsHK/HTjx2EGvHdi6m7wjTOOwNjI6qON0WXIqFTu9OjU63mXgiwWF1mJ4eD3qTfn0rYWtNKX6vi2F5oNfTQnwwrtHraWVErnmUFk1wRI2TGEvg81hw2pvw+1xU1Zav/ztgMumYmDhIcv+b+PxuzURW3C9Cw6qK3WbGbjfjVjpQXO0oTY08SJ9CVQ+QvTcvX8NS2WDmp+N0dlolpcqoJFWUNizmBpZvnODn1OecjQb5Srh6a44zUxFK870plRh0TB6O4e9sxmZr5MLQbu6LeObacU6Hu1i5eoLVG3NEhwYoNTyhHbHCKD8hzz/H5Ym9LEvSpZuznH83wG+3v+DcTAR9xeb81f5fKJYlaqqv0lj5bK123GTUb/BfUQEFFJAn/A3xe2oF2MNqqgAAAABJRU5ErkJggg==);
     --kanto:#c64b4b; --johto:#c9a13b; --hoenn:#3e9e5f; --sinnoh:#5b84c4; --unova:#8a8f98;
     --kalos:#d16ba5; --alola:#3fa7a0; --galar:#7a6fb8; --hisui:#a8845c; --paldea:#8e4585;
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  input,textarea,button,select{border-radius:0;-webkit-appearance:none;appearance:none}
   html{scroll-behavior:smooth}
   body{background:var(--page);color:var(--ink);font-family:system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
 
@@ -21,6 +24,7 @@
   h1{font-size:15px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
   .count{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--ink-dim)}
   .count b{color:var(--ink);font-weight:600}
+  #pend{color:#c9a13b;font-weight:600}
   .bar{height:4px;background:var(--line);margin:8px 0 10px;overflow:hidden}
   .bar i{display:block;height:100%;width:0;background:var(--holo);background-size:200% 100%;transition:width .3s ease}
 
@@ -46,8 +50,12 @@
   .ddpanel input:checked::after{content:"";width:7px;height:4px;border-left:2px solid #111;border-bottom:2px solid #111;transform:rotate(-45deg) translateY(-1px)}
   .shown{margin-top:6px;font-size:11px;color:var(--ink-dim);display:none}
 
-  main{padding:6px 10px 60px;max-width:560px;margin:0 auto}
-  .row{display:flex;align-items:center;gap:10px;padding:8px 10px;margin:6px 0;background:var(--card);border:1px solid var(--line);cursor:pointer;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent}
+  main{padding:6px 30px 60px 10px;max-width:560px;margin:0 auto}
+  @media(min-width:768px){main{max-width:640px}#binder{max-width:640px}}
+  @media(hover:hover){.row:hover{border-color:#3a3744}.card:hover{border-color:#3a3744}}
+  .ddbtn:disabled{opacity:.4;cursor:default}
+  .row{display:flex;align-items:center;gap:10px;padding:8px 10px;margin:6px 0;background:var(--card);border:1px solid var(--line);cursor:pointer;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;touch-action:pan-y}
+  .row.arm{border-color:#c9a13b}
   .row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#e8eaee,#a7adb6 50%,#e8eaee);opacity:0;transition:opacity .25s}
   .row.done{background:var(--card-hi)}
   .row.done .no,.row.done .spr,.row.done .who{opacity:.55}
@@ -79,8 +87,16 @@
   .chip.f{color:#b9b4c4}
 
   .slot{flex:none;width:26px;height:26px;border-radius:50%;border:1.5px solid #4a4756;display:flex;align-items:center;justify-content:center;transition:all .2s}
-  .row.done .slot{border:1.5px solid #1b1b1b;background:linear-gradient(to bottom,#e3350d 0 43%,#1b1b1b 43% 57%,#f4f4f4 57% 100%)}
-  .row.done .slot::after{content:"";width:9px;height:9px;border-radius:50%;background:#f4f4f4;border:2px solid #1b1b1b}
+  .row.done .slot,.row.pend .slot{border:0;background:var(--ball) center/26px no-repeat;image-rendering:pixelated}
+  .row.pend .slot{transform:rotate(22deg)}
+  .row.pend::before{opacity:1;background:linear-gradient(180deg,#e0b84f,#9a7c26 50%,#e0b84f)}
+  .row.pend .slot::after{content:"";width:8px;height:8px;border-radius:50%;background:radial-gradient(circle,#ff6157 0 45%,rgba(255,65,54,0) 75%);animation:catchpulse 1.1s ease-in-out infinite}
+  .row.hs.done .slot,.row.hs.pend .slot{background-image:var(--hball)}
+  .row.hs.pend .slot::after{content:none}
+  .star{position:fixed;width:10px;height:10px;pointer-events:none;z-index:60;background:#ffd76a;clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:starfly .6s ease-out forwards;opacity:0}
+  .star.w{background:#f4f2ec;width:7px;height:7px}
+  @keyframes starfly{0%{transform:translate(0,0) scale(1) rotate(0deg);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0) rotate(120deg);opacity:0}}
+  @keyframes catchpulse{0%,100%{box-shadow:0 0 4px 1px rgba(255,65,54,.45)}50%{box-shadow:0 0 10px 4px rgba(255,65,54,.95)}}
 
 
   .views{display:flex;gap:6px;margin-top:6px}
@@ -97,14 +113,19 @@
   #binder{padding:10px 10px 60px;max-width:560px;margin:0 auto}
   .bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:#17161b;border:1px solid var(--line);padding:10px}
   .bgrid.four{grid-template-columns:repeat(4,1fr);gap:6px}
-  .card{aspect-ratio:5/7;background:var(--card);border:1px solid var(--line);position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden}
+  .card{aspect-ratio:5/7;background:var(--card);border:1px solid var(--line);position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation}
   .card img{width:72%;image-rendering:pixelated;opacity:.28;filter:grayscale(1);transition:opacity .2s,filter .2s}
   .card.own{border-color:#4a4756;background:var(--card-hi)}
   .card.own img{opacity:1;filter:none}
   .card .cnum{position:absolute;top:4px;left:5px;font-family:ui-monospace,Menlo,monospace;font-size:8px;color:var(--ink-dim)}
   .card .cname{position:absolute;bottom:4px;left:4px;right:4px;font-size:8px;font-weight:650;text-align:center;color:var(--ink-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .card.own .cname{color:var(--ink)}
-  .card.own::after{content:"";position:absolute;top:4px;right:4px;width:12px;height:12px;border-radius:50%;border:1px solid #1b1b1b;background:linear-gradient(to bottom,#e3350d 0 42%,#1b1b1b 42% 58%,#f4f4f4 58% 100%)}
+  .card.own::after,.card.pend::after{content:"";position:absolute;top:3px;right:3px;width:16px;height:16px;background:var(--ball) center/16px no-repeat;image-rendering:pixelated}
+  .card.pend{border-color:#c9a13b}
+  .card.pend img{opacity:.85;filter:none}
+  .card.pend::after{transform:rotate(22deg);animation:catchpulse 1.1s ease-in-out infinite;border-radius:50%}
+  .card.hs.own::after,.card.hs.pend::after{background-image:var(--hball)}
+  .card.hs.pend::after{animation:none;box-shadow:none}
   .card .fbc{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-dim)}
   .card.flash{animation:flash 1.6s ease}
   .pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px}
@@ -133,15 +154,37 @@
   .lrow .ln{flex:1;min-width:0;font-size:14px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .lrow .lc{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink-dim)}
   .lrow button{padding:6px 10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:12px;cursor:pointer}
+  .pdiv{border-top:1px solid var(--line);margin:4px 0}
+
+  #toTop{position:fixed;right:34px;bottom:24px;width:42px;height:42px;border:1px solid var(--line);background:rgba(26,25,31,.95);color:var(--ink);display:flex;align-items:center;justify-content:center;z-index:30;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s;-webkit-tap-highlight-color:transparent}
+  #toTop.show{opacity:1;pointer-events:auto}
+  #toTop svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  #rail{position:fixed;right:0;bottom:0;width:34px;z-index:25;display:flex;justify-content:flex-end;cursor:pointer}
+  #rail,#rail *{touch-action:none}
+  #rail[hidden]{display:none}
+  .track{width:4px;background:#2a2830;margin:8px 5px 8px 0;align-self:stretch;position:relative}
+  .thumb{position:absolute;left:0;width:4px;min-height:26px;background:#6a6675;transition:background .15s}
+  #rail.live .thumb{background:#a9a4b4}
+
+  #bubble{position:fixed;right:34px;z-index:35;display:flex;align-items:center;gap:9px;background:var(--card-hi);border:1px solid #4a4756;padding:7px 11px;transform:translateY(-50%) scale(.6);transform-origin:right center;opacity:0;transition:transform .13s ease-out,opacity .13s;pointer-events:none}
+  #bubble.show{transform:translateY(-50%) scale(1);opacity:1}
+  #bubble img{width:58px;height:58px;image-rendering:pixelated}
+  #bubble .bwho{display:flex;flex-direction:column}
+  #bubble .bno{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-dim)}
+  #bubble .bn{font-size:15px;font-weight:700;white-space:nowrap}
+  #bubble .bb{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim)}
+  #bubble .bigband{font-size:26px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);padding:4px 6px}
+
   .note{max-width:560px;margin:14px auto 0;padding:0 12px;font-size:12px;color:var(--ink-dim);line-height:1.5}
-  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.row.flash{animation:none}}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.row.flash{animation:none}.row.pend .slot::after,.card.pend::after{animation:none}.star{display:none}}
 </style>
 </head>
 <body>
 <header>
   <div class="brand">
     <h1>Illustration Dex</h1>
-    <div class="count"><b id="have">0</b> / <span id="total">0</span></div>
+    <div class="count"><b id="have">0</b><span id="pend"></span> / <span id="total">0</span></div>
   </div>
   <div class="bar"><i id="fill"></i></div>
   <div class="search">
@@ -149,9 +192,17 @@
     <div class="sugg" id="sugg"></div>
   </div>
   <div class="filters">
-    <div class="dd" id="ddGen"><button class="ddbtn" type="button">Generation</button><div class="ddpanel"><label><input type="checkbox" value="1">Gen 1</label><label><input type="checkbox" value="2">Gen 2</label><label><input type="checkbox" value="3">Gen 3</label><label><input type="checkbox" value="4">Gen 4</label><label><input type="checkbox" value="5">Gen 5</label><label><input type="checkbox" value="6">Gen 6</label><label><input type="checkbox" value="7">Gen 7</label><label><input type="checkbox" value="8">Gen 8</label><label><input type="checkbox" value="9">Gen 9</label></div></div>
+    <div class="dd" id="ddGen"><button class="ddbtn" type="button">Gen</button><div class="ddpanel"><label><input type="checkbox" value="1">Gen 1</label><label><input type="checkbox" value="2">Gen 2</label><label><input type="checkbox" value="3">Gen 3</label><label><input type="checkbox" value="4">Gen 4</label><label><input type="checkbox" value="5">Gen 5</label><label><input type="checkbox" value="6">Gen 6</label><label><input type="checkbox" value="7">Gen 7</label><label><input type="checkbox" value="8">Gen 8</label><label><input type="checkbox" value="9">Gen 9</label></div></div>
     <div class="dd" id="ddRegion"><button class="ddbtn" type="button">Region</button><div class="ddpanel"><label><input type="checkbox" value="Kanto">Kanto</label><label><input type="checkbox" value="Johto">Johto</label><label><input type="checkbox" value="Hoenn">Hoenn</label><label><input type="checkbox" value="Sinnoh">Sinnoh</label><label><input type="checkbox" value="Unova">Unova</label><label><input type="checkbox" value="Kalos">Kalos</label><label><input type="checkbox" value="Alola">Alola</label><label><input type="checkbox" value="Galar">Galar</label><label><input type="checkbox" value="Hisui">Hisui</label><label><input type="checkbox" value="Paldea">Paldea</label></div></div>
-    <div class="dd" id="ddForm"><button class="ddbtn" type="button">Form</button><div class="ddpanel"><label><input type="checkbox" value="Mega">Megas</label><label><input type="checkbox" value="Regional">Regionals</label></div></div>
+    <div class="dd" id="ddForm"><button class="ddbtn" type="button">Form</button><div class="ddpanel">
+      <label><input type="radio" name="placement" value="dex" checked>In dex order</label>
+      <label><input type="radio" name="placement" value="group">Grouped at end</label>
+      <div class="pdiv"></div>
+      <label><input type="checkbox" value="" checked>Base</label>
+      <label><input type="checkbox" value="Mega" checked>Megas</label>
+      <label><input type="checkbox" value="Regional" checked>Regionals</label>
+    </div></div>
+    <div class="dd" id="ddStatus"><button class="ddbtn" type="button">Status</button><div class="ddpanel"><label><input type="checkbox" value="Registered">Registered</label><label><input type="checkbox" value="Pending">Pending</label><label><input type="checkbox" value="Missing">Missing</label></div></div>
   </div>
   <div class="views">
     <button id="vList" class="on" type="button" aria-label="List view"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4.5" cy="6" r="0.6"/><circle cx="4.5" cy="12" r="0.6"/><circle cx="4.5" cy="18" r="0.6"/></svg></button>
@@ -159,8 +210,6 @@
     <div class="dd" id="ddOpt">
       <button class="ddbtn" type="button" aria-label="Options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.0 4.8 L13.1 2.5 L16.1 3.3 L15.8 5.9 L17.1 6.9 L19.5 6.0 L21.0 8.8 L19.0 10.4 L19.2 12.0 L21.5 13.1 L20.7 16.1 L18.1 15.8 L17.1 17.1 L18.0 19.5 L15.2 21.0 L13.6 19.0 L12.0 19.2 L10.9 21.5 L7.9 20.7 L8.2 18.1 L6.9 17.1 L4.5 18.0 L3.0 15.2 L5.0 13.6 L4.8 12.0 L2.5 10.9 L3.3 7.9 L5.9 8.2 L6.9 6.9 L6.0 4.5 L8.8 3.0 L10.4 5.0 Z"/><circle cx="12" cy="12" r="3.2"/></svg></button>
       <div class="ddpanel">
-        <label><input type="checkbox" id="optGroup">Group forms separately</label>
-        <label><input type="checkbox" id="optBase">Include base with forms</label>
         <button id="optLists" class="plabel" type="button">Manage lists</button>
       </div>
     </div>
@@ -183,6 +232,9 @@
     <button id="pLast" type="button" aria-label="Last page">&#187;</button>
   </div>
 </section>
+<button id="toTop" type="button" aria-label="Back to top"><svg viewBox="0 0 24 24"><polyline points="6 14 12 8 18 14"/></svg></button>
+<div id="rail" hidden><div class="track"><div class="thumb" id="thumb"></div></div></div>
+<div id="bubble"></div>
 <div id="modal" hidden>
   <div class="mbox">
     <div class="mhead"><b>Lists</b><button id="mClose" type="button">Close</button></div>
@@ -213,7 +265,9 @@ const store={
   save(k,s){try{localStorage.setItem(k,JSON.stringify(s))}catch(e){}}
 };
 let owned=store.load("dex-il");
-let prefs=Object.assign({view:"list",per:9,sort:"dex",incBase:false},store.load("dex-il-ui"));
+let prefs=Object.assign({view:"list",per:9,placement:"dex"},store.load("dex-il-ui"));
+if(prefs.placement!=="group")prefs.placement="dex";
+delete prefs.sort;delete prefs.sortBy;delete prefs.group;delete prefs.incBase;
 
 const $=id=>document.getElementById(id);
 const list=$("list"),binder=$("binder"),bgrid=$("bgrid");
@@ -225,47 +279,138 @@ const rowMap=new Map();
 const frag=document.createDocumentFragment();
 DEX.forEach(([n,id,name,region,gen,form])=>{
   const row=document.createElement("div");
-  row.className="row"+(owned[id]?" done":"");
+  row.className="row"+(owned[id]===true?" done":owned[id]==="p"?" pend":"")+(region==="Hisui"?" hs":"");
   row.dataset.id=id;
   row.innerHTML=
     `<span class="no">#${String(n).padStart(4,"0")}</span>`+
     `<span class="spr">${SPR[id]?`<img loading="lazy" src="data:image/png;base64,${SPR[id]}" alt="">`:`<span class="fb">#${n}</span>`}</span>`+
     `<span class="who"><span class="name">${name}</span><div class="chips">${form?`<span class="chip f">${form==="Mega"?"Mega":"Regional"}</span>`:""}<span class="chip">Gen ${gen}</span><span class="chip r ${region}">${region}</span></div></span>`+
     `<span class="slot"></span>`;
-  row.addEventListener("click",()=>toggle(id));
+  row.addEventListener("click",()=>handleTap(id));
   rowMap.set(id,row);
   frag.appendChild(row);
 });
 list.appendChild(frag);
 $("total").textContent=DEX.length;
 
-function toggle(id){
-  owned[id]=!owned[id];
-  if(!owned[id])delete owned[id];
-  store.save("dex-il",owned);
-  rowMap.get(id).classList.toggle("done",!!owned[id]);
+// states: undefined = missing, true = registered, "p" = pending (bought, not arrived)
+function syncEntryUI(id){
+  const row=rowMap.get(id);
+  row.classList.toggle("done",owned[id]===true);
+  row.classList.toggle("pend",owned[id]==="p");
   const card=bgrid.querySelector(`[data-id="${id}"]`);
-  if(card)card.classList.toggle("own",!!owned[id]);
-  tally();
+  if(card){card.classList.toggle("own",owned[id]===true);card.classList.toggle("pend",owned[id]==="p")}
+}
+function setState(id,st){
+  if(st===undefined)delete owned[id];else owned[id]=st;
+  store.save("dex-il",owned);
+  syncEntryUI(id);tally();
+  if(ddStatus.selected().size)applyFilters();
+}
+// swipe right on a row toggles pending
+let swipe=null,suppressUntil=0;
+list.addEventListener("pointerdown",ev=>{
+  const row=ev.target.closest(".row");
+  if(!row)return;
+  swipe={row,id:Number(row.dataset.id),x:ev.clientX,y:ev.clientY,on:false};
+});
+list.addEventListener("pointermove",ev=>{
+  if(!swipe)return;
+  const dx=ev.clientX-swipe.x,dy=ev.clientY-swipe.y;
+  if(!swipe.on){
+    if(Math.abs(dy)>16&&Math.abs(dy)>Math.abs(dx)){swipe=null;return}
+    if(dx>7&&Math.abs(dx)>Math.abs(dy)*1.1){swipe.on=true;swipe.row.style.transition="none";try{swipe.row.setPointerCapture(ev.pointerId)}catch(e){}}
+  }
+  if(swipe.on){
+    const t=Math.min(76,Math.max(0,dx));
+    swipe.row.style.transform=`translateX(${t}px)`;
+    swipe.row.classList.toggle("arm",t>=50);
+  }
+});
+function endSwipe(ev,commit){
+  if(!swipe)return;
+  if(swipe.on){
+    const dx=ev.clientX-swipe.x;
+    const row=swipe.row,id=swipe.id;
+    row.classList.remove("arm");
+    row.style.transition="transform .18s ease";
+    row.style.transform="";
+    setTimeout(()=>{row.style.transition=""},200);
+    if(commit&&dx>=50)setState(id,owned[id]==="p"?undefined:"p");
+    suppressUntil=Date.now()+150;
+  }
+  swipe=null;
+}
+list.addEventListener("pointerup",ev=>endSwipe(ev,true));
+list.addEventListener("pointercancel",ev=>endSwipe(ev,false));
+
+// catch sparkle: stars shoot up from the ball when an entry completes
+function burst(x,y){
+  for(let i=0;i<6;i++){
+    const s=document.createElement("span");
+    s.className="star"+(i%2?" w":"");
+    s.style.left=(x-5)+"px";
+    s.style.top=(y-5)+"px";
+    s.style.setProperty("--dx",(Math.random()*44-22)+"px");
+    s.style.setProperty("--dy",-(16+Math.random()*30)+"px");
+    s.style.animationDelay=(i*45)+"ms";
+    s.addEventListener("animationend",()=>s.remove());
+    setTimeout(()=>s.remove(),1000);
+    document.body.appendChild(s);
+  }
+}
+function burstAt(id){
+  const el=prefs.view==="binder"
+    ?bgrid.querySelector(`[data-id="${id}"]`)
+    :rowMap.get(id).querySelector(".slot");
+  if(!el)return;
+  const r=el.getBoundingClientRect();
+  burst(r.left+r.width/2,r.top+r.height/2);
+}
+let lastTapId=null,lastTapT=0;
+function handleTap(id){
+  if(Date.now()<suppressUntil)return;
+  const now=Date.now();
+  if(id===lastTapId&&now-lastTapT<300){
+    document.querySelectorAll(".star").forEach(s=>s.remove());
+    setState(id,"p");
+    lastTapId=null;
+  }else{
+    const cur=owned[id];
+    const next=cur===undefined?true:cur===true?undefined:true;
+    setState(id,next);
+    if(next===true)burstAt(id);
+    lastTapId=id;lastTapT=now;
+  }
 }
 function tally(){
-  $("have").textContent=Object.keys(owned).length;
-  $("fill").style.width=(Object.keys(owned).length/DEX.length*100)+"%";
+  const vals=Object.values(owned);
+  const reg=vals.filter(v=>v===true).length,pen=vals.filter(v=>v==="p").length;
+  $("have").textContent=reg;
+  $("pend").textContent=pen?` +${pen}`:"";
+  $("fill").style.width=(reg/DEX.length*100)+"%";
 }
 tally();
 
-// sort orders: dex = interleaved, grouped = bases, then regionals by region, then megas
-const GROUPED=[
-  ...DEX.filter(e=>!e[5]),
-  ...["Alola","Galar","Hisui","Paldea"].flatMap(r=>DEX.filter(e=>e[5]==="Regional"&&e[3]===r)),
-  ...DEX.filter(e=>e[5]==="Mega")
-];
-const order=()=>prefs.sort==="grouped"?GROUPED:DEX;
+// sort: dex keeps forms interleaved; gen/region order by the entry's tag.
+// grouping composes with any sort, pulling forms out within each block.
+const RNAMES=["Kanto","Johto","Hoenn","Sinnoh","Unova","Kalos","Alola","Galar","Hisui","Paldea"];
+const REGIDX=Object.fromEntries(RNAMES.map((r,i)=>[r,i]));
+let ORDERED=DEX;
+function computeOrder(){
+  if(prefs.placement==="dex")return DEX;
+  const key=e=>[0,e[5]===""?0:e[5]==="Regional"?1:2,e[5]==="Regional"?REGIDX[e[3]]:0,e[0],e[1]];
+  return [...DEX].sort((a,b)=>{
+    const ka=key(a),kb=key(b);
+    for(let i=0;i<5;i++)if(ka[i]!==kb[i])return ka[i]-kb[i];
+    return 0;
+  });
+}
 
 // filters: checkbox dropdowns; within a category checks OR together, categories AND
 let visArr=DEX,page=0;
 function ddInit(id,noun,allLabel){
-  const dd=$(id),btn=dd.querySelector(".ddbtn"),boxes=[...dd.querySelectorAll("input")];
+  const dd=$(id),btn=dd.querySelector(".ddbtn"),boxes=[...dd.querySelectorAll('input[type="checkbox"]')];
   btn.addEventListener("click",e=>{
     e.stopPropagation();
     document.querySelectorAll(".dd.open").forEach(x=>{if(x!==dd)x.classList.remove("open")});
@@ -282,43 +427,75 @@ function ddInit(id,noun,allLabel){
     clear(){boxes.forEach(b=>b.checked=false);update()}
   };
 }
-const ddGen=ddInit("ddGen","gens","Generation"),
+const ddGen=ddInit("ddGen","gens","Gen"),
       ddRegion=ddInit("ddRegion","regions","Region"),
-      ddForm=ddInit("ddForm","forms","Form");
+      ddStatus=ddInit("ddStatus","statuses","Status");
+
+// Form menu: bespoke — placement radios + shown-type checkboxes (checked = shown)
+const ddFormEl=$("ddForm"),formBtn=ddFormEl.querySelector(".ddbtn"),
+      formBoxes=[...ddFormEl.querySelectorAll('input[type="checkbox"]')];
+formBtn.addEventListener("click",e=>{
+  e.stopPropagation();
+  document.querySelectorAll(".dd.open").forEach(x=>{if(x!==ddFormEl)x.classList.remove("open")});
+  ddFormEl.classList.toggle("open");
+});
+function formShown(){return new Set(formBoxes.filter(b=>b.checked).map(b=>b.value))}
+function updateFormBtn(){
+  const on=formBoxes.filter(b=>b.checked);
+  formBtn.textContent=on.length===formBoxes.length?"Form":on.length===0?"None":on.length===1?on[0].parentElement.textContent.trim():`${on.length} forms`;
+  ddFormEl.classList.toggle("has",prefs.placement!=="dex"||on.length<formBoxes.length);
+}
+formBoxes.forEach(b=>b.addEventListener("change",()=>{updateFormBtn();page=0;applyFilters()}));
 // gen filter follows base species dex placement, so forms and megas stay with their line
 const GENCUT=[151,251,386,493,649,721,809,905,1025];
 const baseGen=n=>GENCUT.findIndex(c=>n<=c)+1;
-function pred(e){
-  const gs=ddGen.selected(),rs=ddRegion.selected(),fs=ddForm.selected();
-  const formOk=!fs.size||fs.has(e[5])||(optBase.checked&&e[5]==="");
-  return (!gs.size||gs.has(String(baseGen(e[0]))))&&(!rs.size||rs.has(e[3]))&&formOk;
+function predFactory(){
+  const fs=formShown(),gs=ddGen.selected(),rs=ddRegion.selected(),ss=ddStatus.selected();
+  const wantR=ss.has("Registered"),wantP=ss.has("Pending"),wantM=ss.has("Missing");
+  return e=>{
+    if(!fs.has(e[5]))return false;
+    if(ss.size){
+      const st=owned[e[1]];
+      if(!((wantR&&st===true)||(wantP&&st==="p")||(wantM&&!st)))return false;
+    }
+    return (!gs.size||gs.has(String(baseGen(e[0]))))&&(!rs.size||rs.has(e[3]));
+  };
 }
+const pred=e=>predFactory()(e);
 function applyFilters(){
-  visArr=order().filter(pred);
+  visArr=ORDERED.filter(predFactory());
   const set=new Set(visArr.map(e=>e[1]));
   rowMap.forEach((row,id)=>{row.style.display=set.has(id)?"":"none"});
-  const active=ddGen.selected().size||ddRegion.selected().size||ddForm.selected().size;
+  const active=ddGen.selected().size||ddRegion.selected().size||ddStatus.selected().size||formShown().size<formBoxes.length;
   shown.style.display=active?"block":"none";
   shown.textContent=`${visArr.length} of ${DEX.length} shown`;
   if(prefs.view==="binder")renderBinder();
+  renderRail();
 }
-function clearFilters(){ddGen.clear();ddRegion.clear();ddForm.clear();applyFilters()}
-function setSort(s){
-  prefs.sort=s;store.save("dex-il-ui",prefs);
+function clearFilters(){ddGen.clear();ddRegion.clear();ddStatus.clear();formBoxes.forEach(b=>b.checked=true);updateFormBtn();applyFilters()}
+function resort(){
+  store.save("dex-il-ui",prefs);
+  ORDERED=computeOrder();
   const f=document.createDocumentFragment();
-  order().forEach(e=>f.appendChild(rowMap.get(e[1])));
+  ORDERED.forEach(e=>f.appendChild(rowMap.get(e[1])));
   list.appendChild(f);
   page=0;applyFilters();
 }
-const ddOpt=$("ddOpt"),optGroup=$("optGroup"),optBase=$("optBase");
+const placeRadios=[...document.querySelectorAll('input[name="placement"]')];
+function setPlacement(v){
+  prefs.placement=v;
+  placeRadios.forEach(r=>r.checked=r.value===v);
+  updateFormBtn();
+  resort();
+}
+placeRadios.forEach(r=>r.addEventListener("change",()=>{if(r.checked)setPlacement(r.value)}));
+const ddOpt=$("ddOpt");
 ddOpt.querySelector(".ddbtn").addEventListener("click",e=>{
   e.stopPropagation();
   document.querySelectorAll(".dd.open").forEach(x=>{if(x!==ddOpt)x.classList.remove("open")});
   ddOpt.classList.toggle("open");
 });
-function optHas(){ddOpt.classList.toggle("has",optGroup.checked||optBase.checked)}
-optGroup.addEventListener("change",()=>{optHas();setSort(optGroup.checked?"grouped":"dex")});
-optBase.addEventListener("change",()=>{optHas();prefs.incBase=optBase.checked;store.save("dex-il-ui",prefs);page=0;applyFilters()});
+
 
 // binder view: paginated pocket pages
 function renderBinder(){
@@ -328,12 +505,12 @@ function renderBinder(){
   if(page>=pages)page=pages-1;
   if(page<0)page=0;
   bgrid.innerHTML="";
-  visArr.slice(page*per,page*per+per).forEach(([n,id,name])=>{
+  visArr.slice(page*per,page*per+per).forEach(([n,id,name,region])=>{
     const c=document.createElement("div");
-    c.className="card"+(owned[id]?" own":"");
+    c.className="card"+(owned[id]===true?" own":owned[id]==="p"?" pend":"")+(region==="Hisui"?" hs":"");
     c.dataset.id=id;
     c.innerHTML=`<span class="cnum">#${String(n).padStart(4,"0")}</span>${SPR[id]?`<img src="data:image/png;base64,${SPR[id]}" alt="">`:`<span class="fbc">#${n}</span>`}<span class="cname">${name}</span>`;
-    c.addEventListener("click",()=>toggle(id));
+    c.addEventListener("click",()=>handleTap(id));
     bgrid.appendChild(c);
   });
   pIn.value=page+1;
@@ -358,6 +535,7 @@ function setView(v){
   list.hidden=v!=="list";
   binder.hidden=v!=="binder";
   if(v==="binder")renderBinder();
+  renderRail();
 }
 function setPer(n){
   prefs.per=n;store.save("dex-il-ui",prefs);
@@ -384,7 +562,7 @@ q.addEventListener("input",()=>{
     b.innerHTML=`<span class="no">#${String(n).padStart(4,"0")}</span>${name}`;
     b.addEventListener("click",()=>{
       sugg.style.display="none";q.value="";q.blur();
-      if(!pred(entry))clearFilters();
+      if(!pred(entry)){clearFilters();if(!pred(entry))setPlacement("dex")}
       if(prefs.view==="list"){
         const row=rowMap.get(id);
         row.scrollIntoView({block:"center"});
@@ -408,27 +586,39 @@ document.addEventListener("click",e=>{
 
 // named lists + sync code: collection state as a bitmap over DEX order
 function encodeOwned(){
-  const bytes=new Uint8Array(Math.ceil(DEX.length/8));
-  DEX.forEach((e,i)=>{if(owned[e[1]])bytes[i>>3]|=1<<(i&7)});
+  const bytes=new Uint8Array(Math.ceil(DEX.length/4));
+  DEX.forEach((e,i)=>{
+    const v=owned[e[1]]===true?1:owned[e[1]]==="p"?2:0;
+    bytes[i>>2]|=v<<((i&3)*2);
+  });
   let s="";bytes.forEach(b=>s+=String.fromCharCode(b));
-  return `ILDEX1.${DEX.length}.`+btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  return `ILDEX2.${DEX.length}.`+btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 }
 function decodeOwned(code){
-  const m=code.trim().match(/^ILDEX1\.(\d+)\.([A-Za-z0-9_-]+)$/);
-  if(!m||Number(m[1])!==DEX.length)return null;
-  let b64=m[2].replace(/-/g,"+").replace(/_/g,"/");
+  const m=code.trim().match(/^ILDEX([12])\.(\d+)\.([A-Za-z0-9_-]+)$/);
+  if(!m||Number(m[2])!==DEX.length)return null;
+  const v=m[1];
+  let b64=m[3].replace(/-/g,"+").replace(/_/g,"/");
   while(b64.length%4)b64+="=";
   let raw;try{raw=atob(b64)}catch(e){return null}
-  if(raw.length!==Math.ceil(DEX.length/8))return null;
+  const need=v==="1"?Math.ceil(DEX.length/8):Math.ceil(DEX.length/4);
+  if(raw.length!==need)return null;
   const next={};
-  DEX.forEach((e,i)=>{if(raw.charCodeAt(i>>3)&(1<<(i&7)))next[e[1]]=true});
+  DEX.forEach((e,i)=>{
+    if(v==="1"){if(raw.charCodeAt(i>>3)&(1<<(i&7)))next[e[1]]=true}
+    else{const s=(raw.charCodeAt(i>>2)>>((i&3)*2))&3;if(s===1)next[e[1]]=true;else if(s===2)next[e[1]]="p"}
+  });
   return next;
 }
 function applyOwned(next){
   owned=next;store.save("dex-il",owned);
-  rowMap.forEach((row,id)=>row.classList.toggle("done",!!owned[id]));
+  rowMap.forEach((row,id)=>{
+    row.classList.toggle("done",owned[id]===true);
+    row.classList.toggle("pend",owned[id]==="p");
+  });
   tally();
   if(prefs.view==="binder")renderBinder();
+  if(ddStatus.selected().size)applyFilters();
 }
 let LISTS=store.load("dex-il-lists");
 const modal=$("modal"),mLists=$("mLists"),mCode=$("mCode"),mMsg=$("mMsg");
@@ -477,10 +667,78 @@ $("mApply").addEventListener("click",()=>{
   mMsg.textContent=`Applied: ${Object.keys(owned).length} checked.`;
 });
 
-optGroup.checked=prefs.sort==="grouped";
-optBase.checked=!!prefs.incBase;
-optHas();
-setSort(prefs.sort);
+// index rail: iTunes-style scrubber — fast shows the region, slowing shows the Pokemon
+const rail=$("rail"),bubble=$("bubble"),toTop=$("toTop");
+const GENREG=["Kanto","Johto","Hoenn","Sinnoh","Unova","Kalos","Alola","Galar","Paldea"];
+const speciesRegion=n=>(n>=899&&n<=905)?"Hisui":GENREG[baseGen(n)-1];
+function bandOf(e){
+  if(prefs.placement==="group"&&e[5])return e[5]==="Regional"?e[3]:"Mega";
+  return speciesRegion(e[0]);
+}
+function placeRail(){
+  rail.style.top=document.querySelector("header").offsetHeight+"px";
+}
+function renderRail(){
+  if(prefs.view!=="list"||!visArr.length){rail.hidden=true;return}
+  rail.hidden=false;placeRail();
+  requestAnimationFrame(updateThumb);
+}
+let bubbleTimer=null,lastSY=0,lastST=0,vel=0;
+function scrub(clientY){
+  const rect=rail.getBoundingClientRect();
+  const frac=Math.min(1,Math.max(0,(clientY-rect.top)/rect.height));
+  const idx=Math.min(visArr.length-1,Math.floor(frac*visArr.length));
+  const e=visArr[idx];
+  setThumbFrac(frac);
+  const now=performance.now();
+  if(lastST){const inst=Math.abs(clientY-lastSY)/Math.max(1,now-lastST);vel=vel*0.7+inst*0.3}
+  lastSY=clientY;lastST=now;
+  if(vel>0.55){
+    bubble.classList.add("big");
+    bubble.innerHTML=`<span class="bigband">${bandOf(e)}</span>`;
+  }else{
+    bubble.classList.remove("big");
+    bubble.innerHTML=
+      (SPR[e[1]]?`<img src="data:image/png;base64,${SPR[e[1]]}" alt="">`:"")+
+      `<span class="bwho"><span class="bb">${bandOf(e)}</span><span class="bn">${e[2]}</span><span class="bno">#${String(e[0]).padStart(4,"0")}</span></span>`;
+  }
+  bubble.style.top=Math.min(window.innerHeight-80,Math.max(rect.top+46,clientY))+"px";
+  bubble.classList.add("show");
+  clearTimeout(bubbleTimer);
+  const row=rowMap.get(e[1]);
+  window.scrollTo({top:row.offsetTop-document.querySelector("header").offsetHeight-6,behavior:"instant"});
+}
+function endRailScrub(){
+  lastST=0;vel=0;
+  bubbleTimer=setTimeout(()=>bubble.classList.remove("show"),300);
+}
+const track=rail.querySelector(".track"),thumb=$("thumb");
+function setThumbFrac(frac){
+  const doc=document.documentElement;
+  if(!doc.scrollHeight)return;
+  const trh=track.clientHeight;
+  const th=Math.max(26,trh*(window.innerHeight/doc.scrollHeight));
+  thumb.style.height=th+"px";
+  thumb.style.top=(Math.min(1,Math.max(0,frac))*(trh-th))+"px";
+}
+function updateThumb(){
+  if(rail.hidden||rail.classList.contains("live"))return;
+  const doc=document.documentElement;
+  const max=doc.scrollHeight-window.innerHeight;
+  setThumbFrac(max>0?window.scrollY/max:0);
+}
+rail.addEventListener("touchmove",ev=>ev.preventDefault(),{passive:false});
+rail.addEventListener("pointerdown",ev=>{ev.preventDefault();try{rail.setPointerCapture(ev.pointerId)}catch(e){}rail.classList.add("live");lastST=0;vel=0;scrub(ev.clientY)});
+rail.addEventListener("pointermove",ev=>{if(ev.buttons)scrub(ev.clientY)});
+rail.addEventListener("pointerup",()=>{rail.classList.remove("live");updateThumb();endRailScrub()});
+rail.addEventListener("pointercancel",()=>{rail.classList.remove("live");updateThumb();endRailScrub()});
+window.addEventListener("resize",()=>{placeRail();updateThumb()});
+
+// jump to top
+window.addEventListener("scroll",()=>{toTop.classList.toggle("show",window.scrollY>500);updateThumb()},{passive:true});
+toTop.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+
+setPlacement(prefs.placement);
 if(prefs.per===16){$("s9").classList.remove("on");$("s16").classList.add("on")}
 setView(prefs.view);
 </script>
