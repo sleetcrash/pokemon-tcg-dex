@@ -10,13 +10,21 @@ This is a free, comprehensive and open source way to manage your National Dex Ca
 - Keep track of the cards already in your collection, and quickly see which cards you’re still missing.
 - Avoid buying duplicates by marking cards you’ve purchased as Pending until they’re delivered.
 - Quickly find where new cards slot into your existing collection.
-- Choose how to manage Form variations with filters and sorting options.  
+- Choose how to manage Form variations with filters and sorting options.
+
+## TCG vs VG
+
+While a true National Dex strictly by Dex number is the same however you slice it, the forms and variations that can be collected as a card vs in a mainline game have crucial differences.
+
+- A National Dex (or Living Form Dex) is limited in the mainline games to Home compatibility and whether a Pokemon is in a ‘boxable form’. Mega Evolved Pokemon cannot be boxed, so they cannot be included as a separate form in your collection. The TCG, however, does have cards for Megas and G-Max that you can collect.
+- Not every form has been released (I don’t think) so some gaps may persist. 
+
 
 ## Features
 
 Comprehensive National Dex: 
-- Includes all 1,471 Pokemon (through Legends ZA)
-- Regional Forms (ex: Hisuian Arcanine),
+- All 1,025 Pokemon (through Legends ZA)
+- All Regional Forms (ex: Hisuian Arcanine)
 - Base Form Variations (ex: Deerling/Sawsbuck seasonal forms)
 - Mega Evolutions (ex: Mega Dragonite).
 
