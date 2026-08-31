@@ -1,26 +1,51 @@
-# Pokemon National Card Dex
+# Pokemon National Card Dex Tracker
 
-Tracker for collecting the National Card Dex, with optional inclusion of Regional forms and Megas.
+Tracker for collecting the National Card Dex in the Pokemon TCG. 
+
+## Overview
+
+The National Dex lists every Pokemon across all generations and regions. Collecting the National Dex means collecting a card for each of them. 
+
+This is a free, comprehensive and open source way to manage your National Dex Card collection. It combines a few necessary tools into one:
+- Keep track of the cards already in your collection, and quickly see which cards you’re still missing.
+- Avoid buying duplicates by marking cards you’ve purchased as Pending until they’re delivered.
+- Quickly find where new cards slot into your existing collection.
+- Choose how to manage Form variations with filters and sorting options.  
 
 ## Features
 
-- 1,471 entries, including regional forms and mega evolutions. These can be filtered out if just collecting base forms.
-- Also includes base form variations (each seasonal Deerling & Sawsbuck, every Unown letter, Vivillon pattern, Alcremie combo, and more). Off by default, toggle on under Form > Other forms.
-- Intuitive Collection Management: Tap to register (with a catch sparkle), long press for Pending (bought, awaiting shipment; right click on desktop), tap once when it arrives.
+Comprehensive National Dex: 
+- Includes all 1,471 Pokemon (through Legends ZA)
+- Regional Forms (ex: Hisuian Arcanine),
+- Base Form Variations (ex: Deerling/Sawsbuck seasonal forms)
+- Mega Evolutions (ex: Mega Dragonite).
+
+Quick Reference:
 - Filter by generation, region, form, and collection status.
-- Form entries can be shown separately or collapsed under their base Pokemon with a +n button (red, yellow, or green by how many of the forms are complete).
-- Form placement: National Dex order, Regional Dex order (regional forms move to their region in that region's dex order), or grouped at the end.
-- Search for a Pokemon and tap a result or hit Enter. Misspellings still find the right one.
-- Region checkpoints along the right edge: tap to jump, or press and slide to scrub through a region. The highlight follows where you are in the list.
-- View as a list or binder (3x3 or 4x4 pages with full pager and page entry).
-- Named list snapshots and cross-device sync codes.
+- Form entries can be shown separately or collapsed under their base Pokemon.
+- Search for a Pokemon to jump to its spot on the list. (It’s more of a ‘Find’ than a ‘Search’).
 
-## Usage
-
-Open `index.html` in any browser, or host it (GitHub Pages works). Progress saves per browser. To move between devices: gear > Manage lists > Sync code.
+Intuitive Collection Management: 
+- Tap to Register a card to your collection.
+- Long press (mobile) or right click (desktop) to mark as Pending (helpful for tracking cards purchased but not delivered).
+- View as a list or in a binder. 
+- Save multiple lists (I have a separate list for only AR/SIR, another for mixed rarity).
+(Note: Currently runs 100% locally on your device. Share lists across devices with a unique list identifier. Auto sync planned for a future update.)
 
 ## Roadmap
 
-- Male / female variant toggle
-- Per-game regional dex switcher with native numbering
-- Long-press to replace sprites with actual card images in binder view
+- Living Form Dex: Male / female variants
+- Regional Dex: Dex for each region/generation
+- Physical Card Lookup: Search the actual card you want to add to your collection, and see that card in the binder. 
+- Auto sync across devices.
+- Use camera or photos to find a card in the list. 
+
+## Why Pokemon National Dex tracker?
+
+I wanted to collect a card for every Pokemon and quickly found I needed a way to track my progress, including sorting my collection, tracking cards I had purchased but hadn’t received yet, and quickly adding new cards to my collection in the right spot as I got them. This is my solution. 
+
+I built this for me to use personally, but figured I would keep it available in case anyone else wanted to go down this path. There are other trackers out there, but the most useful required making an account and paying a subscription. None of that is necessary here. All Pokemon are freely available for you to track. 
+
+## Thanks
+
+This would not be possible without PokeAPI: https://github.com/PokeAPI/pokeapi
