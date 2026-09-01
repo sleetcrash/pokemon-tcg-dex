@@ -20,28 +20,18 @@
     --ink:oklch(0.22 0.012 95); --ink-dim:oklch(0.47 0.012 95);
     --line:oklch(0.6 0.01 95); --line-hi:oklch(0.24 0.012 95);
     --accent:oklch(0.55 0.19 25);
-    --chipbg:oklch(0.88 0.01 95);
     --holo:linear-gradient(120deg,#5dd4e8 0%,#c86fd4 38%,#f2c46b 72%,#5dd4e8 100%);
     --ball:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeBAMAAADJHrORAAAAA3NCSVQFBQUYJt5DAAAAIVBMVEX///8xMTH/lDqcSjr/1jr////eWjpKUlKlpcV7e4TezvdcMgHRAAAAAXRSTlMAQObYZgAAAH5JREFUGNNjYKALEBQUROEqKSkhCTACuUpqAnC+kAtIIBEurRLqBOSnCeDgCymB1aclwvlg83DyhcH8tDRDKF/cSL0cyE0uhPHLKyLK0szLYXzG6aWh5eXllXD7l86IAHJXwB0sFTlz1apVjQj/dAG5HQJI/u3o6BDEEx60AwCJgyJdBXcpkgAAAABJRU5ErkJggg==);
     --hball:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADXklEQVRYw+2WTWyTdRzHm43QrRvpCntxWzTqQROjJpDpXlu2vq1P15d1LXAwEi/YzXUoZaPdnm5zslVwToUwHCgXISQcPAw5kEwSEBOoGVJ6AJxuevC2CxdPmnz89WlCIjEatrJTv8k3z5MneZ7vy+/5P/9HpyuggALWDozVRmqfrqB4s46NlRbBpQd/0RXqpivgZOFuBl3JBpgoL9ZRXF9Dar+D07EBvv7lD8YuX2d2IsaXe9vYVP8UL5Q9OSNcv3IJpvyQDDHjbWJOHeTTSZVznlfgsxAc62H40CD1+vybgFQA5pvgkgUWFDiyW9iT4/Qe+HCXGBPOBPj1gJW6fI1ki9T+fTb5fCMP8Y1ZmhCxI48wa+LjIJlwC+NqjBfL82Gipho+6s6J/p8BGQ2fhFjsNbPS306RvBPrEzca4KTUm5T6F1y5+rURyPnkv6SXsaTCraT7LSyGrfz+noOirWXrMLFti8x0T05g6hH+I/muXEvZ9PvaSPfuJN1nYSnSTlldJWtdc3z74x1J5hNBaeCovHSTcn40KKLC6Wzq0MPkWfHU25K+16KJ35bjSl8z0fEEJaaSxzexrc7E1UyGl1/fwU/zZ/gz8hrJKzcZGIwSHRnhJcUDs2FpKKjVfmufWRNe7LNyt6+d5SE3rb4A7yfiVD1T/fgGsq7D8UOsXjxFc8sOjl37ge/On8Rm3Y7D0cDxgTd4tcvHSqSV+xEL90T83jtmlvs7aHPasPm7Sb7VjT/ox1BpWNsYisqK+GBsHK/HTjx2EGvHdi6m7wjTOOwNjI6qON0WXIqFTu9OjU63mXgiwWF1mJ4eD3qTfn0rYWtNKX6vi2F5oNfTQnwwrtHraWVErnmUFk1wRI2TGEvg81hw2pvw+1xU1Zav/ztgMumYmDhIcv+b+PxuzURW3C9Cw6qK3WbGbjfjVjpQXO0oTY08SJ9CVQ+QvTcvX8NS2WDmp+N0dlolpcqoJFWUNizmBpZvnODn1OecjQb5Srh6a44zUxFK870plRh0TB6O4e9sxmZr5MLQbu6LeObacU6Hu1i5eoLVG3NEhwYoNTyhHbHCKD8hzz/H5Ym9LEvSpZuznH83wG+3v+DcTAR9xeb81f5fKJYlaqqv0lj5bK123GTUb/BfUQEFFJAn/A3xe2oF2MNqqgAAAABJRU5ErkJggg==);
     --kanto:#c64b4b; --johto:#c9a13b; --hoenn:#3e9e5f; --sinnoh:#5b84c4; --unova:#8a8f98;
     --kalos:#d16ba5; --alola:#3fa7a0; --galar:#7a6fb8; --hisui:#a8845c; --paldea:#8e4585;
   }
-  html{color-scheme:light}
-  html[data-theme="dark"]{color-scheme:dark;
-    --page:oklch(0.19 0.01 95); --card:oklch(0.23 0.01 95); --card-hi:oklch(0.32 0.012 95);
-    --well:oklch(0.27 0.01 95);
-    --ink:oklch(0.94 0.008 95); --ink-dim:oklch(0.67 0.01 95);
-    --line:oklch(0.44 0.01 95); --line-hi:oklch(0.9 0.008 95);
-    --accent:oklch(0.66 0.17 25);
-    --chipbg:oklch(0.3 0.012 95);
-  }
   *{box-sizing:border-box;margin:0;padding:0}
   input,textarea,button,select{border-radius:0;-webkit-appearance:none;appearance:none}
   html{scroll-behavior:smooth}
   body{background:var(--page);color:var(--ink);font-family:system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
 
-  header{position:sticky;top:0;z-index:10;background:color-mix(in oklch,var(--page) 94%,transparent);backdrop-filter:blur(8px);border-bottom:3px solid var(--ink);padding:8px 12px 5px}
+  header{position:sticky;top:0;z-index:10;background:oklch(0.955 0.006 95 / .94);backdrop-filter:blur(8px);border-bottom:3px solid var(--ink);padding:8px 12px 5px}
   header::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:9px;pointer-events:none;background-image:repeating-linear-gradient(90deg,transparent 0 15px,var(--page) 15px 20px,transparent 20px 48px),repeating-linear-gradient(90deg,transparent 0 13px,var(--ink) 13px 22px,transparent 22px 48px);background-size:auto 5px,auto 9px;background-position:0 2px,0 0;background-repeat:repeat-x}
   .hwrap{max-width:640px;margin:0 auto}
   .brand{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
@@ -118,7 +108,7 @@
   .chip.r.Paldea{color:var(--paldea)}
   .chip.r.POGO{color:#4d9de0}
   .chips{display:flex;gap:5px;margin-top:3px;flex-wrap:wrap}
-  .chip{font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:1.5px 6px;background:var(--chipbg);color:var(--ink-dim)}
+  .chip{font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:1.5px 6px;background:oklch(0.88 0.01 95);color:var(--ink-dim)}
   .chip.f{color:#b9b4c4}
 
   .rp{flex:none;font-family:ui-monospace,Menlo,monospace;font-size:11px;margin-right:8px}
@@ -140,8 +130,7 @@
   .views{display:flex;gap:2px;margin-top:2px;align-items:center}
   .views>button,.views .ddbtn{flex:none;width:auto;padding:7px 10px;border:0;background:none;color:var(--ink-dim);display:flex;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .views>button:first-child{padding-left:0}
-  .views .dd{flex:none}
-  #vTheme{margin-left:auto}
+  .views .dd{flex:none;margin-left:auto}
   .views .ddbtn{padding-right:0}
   .views>button.on,.views .dd.has .ddbtn,.views .dd.open .ddbtn{color:var(--ink)}
   .views svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -158,7 +147,7 @@
   #binder{padding:10px 10px 60px;max-width:560px;margin:0 auto}
   #pocket{padding:10px 44px 60px 10px;max-width:560px;margin:0 auto}
   @media(min-width:768px){#pocket{max-width:640px}}
-  .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:var(--well);border:1px solid var(--line);padding:10px}
+  .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   #ppBtn{padding:6px 9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:flex;align-items:center;-webkit-tap-highlight-color:transparent}
   #ppBtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6}
   #ppPop{position:absolute;right:0;top:calc(100% + 6px);z-index:40;background:var(--page);border:1px solid var(--line);padding:10px;box-shadow:0 10px 28px rgba(0,0,0,.25)}
@@ -191,13 +180,14 @@
   .card.pk .part{flex:none;height:46%;border:1px solid var(--line);background:var(--well);display:flex;align-items:center;justify-content:center;overflow:hidden}
   .card.pk .part img{width:62%}
   .card.pk .pmid{flex:1;display:flex;align-items:center;justify-content:center}
-  .card.pk .pball{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line)}
-  .card.pk.own .pball,.card.pk.pend .pball{border:0;background:var(--ball) center/26px no-repeat;image-rendering:pixelated}
+  .card.pk .pball{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line)}
+  .card.pk.own .pball,.card.pk.pend .pball{border:0;background:var(--ball) center/22px no-repeat;image-rendering:pixelated}
   .card.pk.pend .pball{transform:rotate(22deg);animation:catchpulse 1.1s ease-in-out infinite}
   .card.pk.hs.own .pball,.card.pk.hs.pend .pball{background-image:var(--hball)}
   .card.pk.own::after,.card.pk.pend::after{content:none}
   .card.pk .setc{border:0;background:none;padding:0;width:22px;height:22px;cursor:pointer;position:absolute;left:3px;bottom:3px;-webkit-tap-highlight-color:transparent}
-  .card.pk .setc::before{content:"";position:absolute;inset:0;margin:auto;width:16px;height:16px;background:var(--ink-dim);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%222.5%22 width=%2214%22 height=%2219%22/%3E%3Ccircle cx=%2214.5%22 cy=%2215%22 r=%224.2%22/%3E%3Cline x1=%2217.6%22 y1=%2218.1%22 x2=%2221%22 y2=%2221.5%22/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%222.5%22 width=%2214%22 height=%2219%22/%3E%3Ccircle cx=%2214.5%22 cy=%2215%22 r=%224.2%22/%3E%3Cline x1=%2217.6%22 y1=%2218.1%22 x2=%2221%22 y2=%2221.5%22/%3E%3C/svg%3E") center/contain no-repeat}
+  .card.pk .setc::before{content:"";position:absolute;inset:0;margin:auto;width:16px;height:16px;background:#55504e;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%222.5%22 width=%2214%22 height=%2219%22/%3E%3Ccircle cx=%2214.5%22 cy=%2215%22 r=%224.2%22/%3E%3Cline x1=%2217.6%22 y1=%2218.1%22 x2=%2221%22 y2=%2221.5%22/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%222.5%22 width=%2214%22 height=%2219%22/%3E%3Ccircle cx=%2214.5%22 cy=%2215%22 r=%224.2%22/%3E%3Cline x1=%2217.6%22 y1=%2218.1%22 x2=%2221%22 y2=%2221.5%22/%3E%3C/svg%3E") center/contain no-repeat}
+  .card.pk.own .setc::before,.card.pk.pend .setc::before{background:var(--ink-dim)}
   .card.pk .ptag{display:flex;gap:2px;flex-wrap:wrap;overflow:hidden;max-height:14px;padding:2px 0;border-bottom:1px solid var(--line)}
   .card.pk .ptag .chip{font-size:6px;padding:0.5px 3px;letter-spacing:.02em}
   .card .pbadge{position:absolute;left:3px;bottom:3px;background:rgba(10,10,14,.85);border:1px solid rgba(10,10,14,.85);color:oklch(0.95 0.005 95);font-family:ui-monospace,Menlo,monospace;font-size:8px;padding:1.5px 5px;text-decoration:none}
@@ -229,7 +219,7 @@
   .lrow button{padding:6px 10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:12px;cursor:pointer}
   .pdiv{border-top:1px solid var(--line);margin:4px 0}
 
-  #toTop{position:fixed;right:34px;bottom:24px;width:42px;height:42px;border:1px solid var(--line);background:color-mix(in oklch,var(--page) 95%,transparent);color:var(--ink);display:flex;align-items:center;justify-content:center;z-index:30;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s;-webkit-tap-highlight-color:transparent}
+  #toTop{position:fixed;right:34px;bottom:24px;width:42px;height:42px;border:1px solid var(--line);background:oklch(0.93 0.008 95 / .95);color:var(--ink);display:flex;align-items:center;justify-content:center;z-index:30;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s;-webkit-tap-highlight-color:transparent}
   #toTop.show{opacity:1;pointer-events:auto}
   #toTop svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
@@ -305,8 +295,7 @@
   <div class="views">
     <button id="vList" class="on" type="button" aria-label="List view"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4.5" cy="6" r="0.6"/><circle cx="4.5" cy="12" r="0.6"/><circle cx="4.5" cy="18" r="0.6"/></svg></button>
     <button id="vBinder" type="button" aria-label="Binder view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="15" height="18"/><line x1="9" y1="3" x2="9" y2="21"/><circle cx="5" cy="8" r="1.6"/><circle cx="5" cy="16" r="1.6"/></svg></button>
-    <button id="vPocket" type="button" aria-label="Pocket view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="5.4" height="7.6"/><rect x="9.3" y="4" width="5.4" height="7.6"/><rect x="16.1" y="4" width="5.4" height="7.6"/><path d="M2.5 18.5 V16 h5.4 v2.5"/><path d="M9.3 18.5 V16 h5.4 v2.5"/><path d="M16.1 18.5 V16 h5.4 v2.5"/></svg></button>
-    <button id="vTheme" type="button" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 3.5 a8.8 8.8 0 1 0 6 15.2 a9.3 9.3 0 0 1 -6 -15.2 Z"/></svg></button>
+    <button id="vPocket" type="button" aria-label="Pocket view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="3" width="5.2" height="7.5"/><rect x="9.4" y="3" width="5.2" height="7.5"/><rect x="16.3" y="3" width="5.2" height="7.5"/><path d="M2.5 26 V14.5 h5.2 V26"/><path d="M9.4 26 V14.5 h5.2 V26"/><path d="M16.3 26 V14.5 h5.2 V26"/></svg></button>
     <div class="dd" id="ddOpt">
       <button class="ddbtn" type="button" aria-label="Options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.0 4.8 L13.1 2.5 L16.1 3.3 L15.8 5.9 L17.1 6.9 L19.5 6.0 L21.0 8.8 L19.0 10.4 L19.2 12.0 L21.5 13.1 L20.7 16.1 L18.1 15.8 L17.1 17.1 L18.0 19.5 L15.2 21.0 L13.6 19.0 L12.0 19.2 L10.9 21.5 L7.9 20.7 L8.2 18.1 L6.9 17.1 L4.5 18.0 L3.0 15.2 L5.0 13.6 L4.8 12.0 L2.5 10.9 L3.3 7.9 L5.9 8.2 L6.9 6.9 L6.0 4.5 L8.8 3.0 L10.4 5.0 Z"/><circle cx="12" cy="12" r="3.2"/></svg></button>
       <div class="ddpanel">
@@ -1003,13 +992,6 @@ function setView(v){
 $("vList").addEventListener("click",()=>setView("list"));
 $("vBinder").addEventListener("click",()=>setView("binder"));
 $("vPocket").addEventListener("click",()=>setView("pocket"));
-function applyTheme(){
-  const dark=prefs.theme==="dark";
-  document.documentElement.dataset.theme=dark?"dark":"light";
-  document.querySelector('meta[name="theme-color"]').setAttribute("content",dark?"#262320":"#f1efe7");
-}
-$("vTheme").addEventListener("click",()=>{prefs.theme=prefs.theme==="dark"?"light":"dark";store.save("dex-il-ui",prefs);applyTheme()});
-applyTheme();
 // binder size: hover-to-preview grid picker, up to 6x6
 const gpBtn=$("gpBtn"),gpPop=$("gpPop"),gpGrid=$("gpGrid"),gpLbl=$("gpLbl");
 for(let r=1;r<=6;r++)for(let cc=1;cc<=6;cc++){
