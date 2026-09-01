@@ -54,7 +54,7 @@
   @media(min-width:768px){main{max-width:640px}#binder{max-width:640px}}
   @media(hover:hover){.row:hover{border-color:#3a3744}.card:hover{border-color:#3a3744}}
   .ddbtn:disabled{opacity:.4;cursor:default}
-  .row{display:flex;align-items:center;gap:10px;padding:8px 10px;margin:6px 0;min-height:66px;background:var(--card);border:1px solid var(--line);cursor:pointer;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  .row{display:flex;align-items:center;gap:10px;padding:8px 10px;margin:6px 0;background:var(--card);border:1px solid var(--line);cursor:pointer;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .row .spr img{opacity:.28;filter:grayscale(1)}
   .row.done .spr img{opacity:1;filter:none}
   .row.pend .spr img{opacity:.85;filter:none}
@@ -97,7 +97,7 @@
   .chip{font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:1.5px 6px;background:#26232d;color:var(--ink-dim)}
   .chip.f{color:#b9b4c4}
 
-  .slot{flex:none;width:26px;height:26px;border-radius:50%;border:1.5px solid #4a4756;display:flex;align-items:center;justify-content:center;transition:all .2s;align-self:flex-end}
+  .slot{flex:none;width:26px;height:26px;border-radius:50%;border:1.5px solid #4a4756;display:flex;align-items:center;justify-content:center;transition:all .2s}
   .row.done .slot,.row.pend .slot{border:0;background:var(--ball) center/26px no-repeat;image-rendering:pixelated}
   .row.pend .slot{transform:rotate(22deg)}
   .row.pend::before{opacity:1;background:linear-gradient(180deg,#e0b84f,#9a7c26 50%,#e0b84f)}
@@ -179,7 +179,8 @@
   #jumps *{touch-action:none}
   .jp.f{color:#a08434}
 
-  .cardbtn{position:absolute;top:4px;right:5px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;color:var(--ink-dim);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .cardbtn{flex:none;width:26px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;color:var(--ink-dim);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .row .cardbtn{margin-right:-4px}
   .cardbtn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
   .cardbtn:active,.cardbtn:hover{color:var(--ink)}
   .card .cardbtn{top:2px;right:auto;left:2px;width:18px;height:18px}
@@ -331,15 +332,14 @@ DEX.forEach(([n,id,name,region,gen,form,sref])=>{
   row.className="row"+(owned[id]===true?" done":owned[id]==="p"?" pend":"")+(region==="Hisui"?" hs":"")+(form?" frm ft-"+form:"");
   row.dataset.id=id;row.dataset.n=n;
   row.innerHTML=
-    `<span class="lz"><span class="no">#${String(n).padStart(4,"0")}</span>${form?"":`<span class="exp" hidden></span>`}</span>`+
+    `<button class="cardbtn" type="button" aria-label="Cards"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="2.5" width="14" height="19"/><circle cx="14.5" cy="15" r="4.2"/><line x1="17.6" y1="18.1" x2="21" y2="21.5"/></svg></button><span class="lz"><span class="no">#${String(n).padStart(4,"0")}</span>${form?"":`<span class="exp" hidden></span>`}</span>`+
     `<span class="spr">${SPR[sid]?`<img loading="lazy" src="data:image/png;base64,${SPR[sid]}" alt="">`:`<span class="fb">#${n}</span>`}</span>`+
     `<span class="who"><span class="name">${name}</span><div class="chips">${form?`<span class="chip f">${form==="Other"?"Form":form}</span>`:""}<span class="chip">Gen ${gen}</span><span class="chip r ${region}">${region}</span></div></span>`+
-    `<span class="slot"></span>`+
-    `<button class="cardbtn" type="button" aria-label="Cards"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="2.5" width="14" height="19"/><circle cx="14.5" cy="15" r="4.2"/><line x1="17.6" y1="18.1" x2="21" y2="21.5"/></svg></button>`;
-  row.addEventListener("click",ev=>{
+    `<span class="slot"></span>`;
+row.addEventListener("click",ev=>{
     const exp=row.querySelector(".exp");
     if(ev.target.closest(".cardbtn")){openCards(rowEntry(row));return}
-    if(exp&&!exp.hidden&&ev.clientX-row.getBoundingClientRect().left<64){toggleExpand(n);return}
+    if(exp&&!exp.hidden&&ev.clientX-row.getBoundingClientRect().left<96){toggleExpand(n);return}
     handleTap(id);
   });
   rowMap.set(id,row);
@@ -384,7 +384,10 @@ async function tget(path){
   const key="tcg:"+path;
   try{const c=JSON.parse(localStorage.getItem(key)||"null");if(c&&Date.now()-c.t<6048e5)return c.d}catch(e){}
   let r;
-  try{r=await fetch(TCG+path,{mode:"cors"})}catch(e){throw new Error("network: "+e.message)}
+  const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),12000);
+  try{r=await fetch(TCG+path,{mode:"cors",signal:ac.signal})}
+  catch(e){throw new Error(e.name==="AbortError"?"timed out":"network: "+e.message)}
+  finally{clearTimeout(tm)}
   if(!r.ok)throw new Error("HTTP "+r.status+" on "+path);
   const d=await r.json();
   try{localStorage.setItem(key,JSON.stringify({t:Date.now(),d}))}
@@ -402,10 +405,13 @@ const REGPRE=/^(Alolan|Galarian|Hisuian|Paldean) /;
 async function cardsFor(e){
   const species=DEX.find(x=>x[0]===e[0]&&x[5]==="")[2];
   let all;
-  try{all=await tget(`cards?dexId=${e[0]}&category=Pokemon`)}
+  try{const d=await tget(`dex-ids/${e[0]}`);all=Array.isArray(d)?d:(d.cards||[])}
   catch(err){
-    const species=DEX.find(x=>x[0]===e[0]&&x[5]==="")[2];
-    all=await tget(`cards?name=${encodeURIComponent(species)}`);
+    try{all=await tget(`cards?dexId=${e[0]}&category=Pokemon`)}
+    catch(err2){
+      const species=DEX.find(x=>x[0]===e[0]&&x[5]==="")[2];
+      all=await tget(`cards?name=${encodeURIComponent(species)}`);
+    }
   }
   if(!all.length)all=await tget(`cards?name=${encodeURIComponent(species)}&category=Pokemon`);
   const nm=c=>c.name;
