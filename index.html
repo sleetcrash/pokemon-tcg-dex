@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>National Card Dex</title>
+<link rel="preconnect" href="https://assets.tcgdex.net" crossorigin>
+<link rel="preconnect" href="https://images.pokemontcg.io" crossorigin>
 <link rel="apple-touch-icon" href="/icon-180.png">
 <link rel="icon" type="image/png" href="/icon-192.png">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -206,7 +208,8 @@
   @media(min-width:520px){.cgrid{grid-template-columns:repeat(4,1fr)}}
   .ccard{background:var(--card);border:1px solid var(--line);padding:0;cursor:pointer;text-align:left;display:flex;flex-direction:column;-webkit-tap-highlight-color:transparent}
   .ccard.sel{border-color:#4fae74}
-  .ccard img{width:100%;aspect-ratio:63/88;object-fit:contain;background:#141318;display:block}
+  .ccard img{width:100%;aspect-ratio:63/88;object-fit:contain;background:#141318;display:block;opacity:0;transition:opacity .18s ease}
+  .ccard img.ld{opacity:1}
   .ccard .cm{font-size:10px;color:var(--ink-dim);padding:5px 6px;line-height:1.3}
   .ccard .cm b{display:block;color:var(--ink);font-weight:650;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .cdetail{display:flex;flex-direction:column;gap:10px;align-items:center}
@@ -470,7 +473,8 @@ async function openCards(e){
   cards.forEach(c=>{
     const b=document.createElement("button");b.type="button";b.className="ccard"+(CARDART[e[1]]===c.image?" sel":"");
     const cu=cimg(c.image,"low");
-    if(cu){const im=document.createElement("img");im.loading="lazy";im.src=cu;im.alt="";b.appendChild(im)}
+    if(cu){const im=document.createElement("img");im.loading="lazy";im.decoding="async";im.alt="";
+      im.onload=()=>im.classList.add("ld");im.src=cu;if(im.complete)im.classList.add("ld");b.appendChild(im)}
     const m=document.createElement("span");m.className="cm";
     const t=document.createElement("b");t.textContent=c.name;m.appendChild(t);
     m.appendChild(document.createTextNode((SETS[c.id.slice(0,c.id.lastIndexOf("-"))]||"")+" #"+c.localId));
