@@ -397,7 +397,8 @@ async function tget(path){
   let r=null,lastErr=null;
   for(const u of urls){
     const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),12000);
-    try{r=await fetch(u,{signal:ac.signal});if(r.ok)break;lastErr=new Error("HTTP "+r.status+" on "+path);r=null}
+    try{r=await fetch(u,{signal:ac.signal});if(r.ok)break;lastErr=new Error("HTTP "+r.status+" on "+path);r=null;
+      if(u.startsWith("/api/"))break}
     catch(e){lastErr=new Error(e.name==="AbortError"?"timed out":"network: "+e.message)}
     finally{clearTimeout(tm)}
   }
