@@ -83,8 +83,9 @@ async function pget(url, deadline) {
 async function ptcgList(query, deadline) {
   const cards = [];
   for (let page = 1; page <= 4; page++) {
+    // No orderBy: their sort adds 1.5-3s per query; sort here from releaseDate instead.
     const r = await pget(
-      `${PTCG}cards?q=${encodeURIComponent(query)}&orderBy=set.releaseDate,number&pageSize=250&page=${page}&select=id,name,number,rarity,subtypes,set,images`,
+      `${PTCG}cards?q=${encodeURIComponent(query)}&pageSize=250&page=${page}&select=id,name,number,rarity,subtypes,set,images`,
       deadline
     );
     if (!r.ok) return { status: 502, body: { error: "fallback HTTP " + r.status } };
@@ -92,6 +93,11 @@ async function ptcgList(query, deadline) {
     cards.push(...(j.data || []).map(brief));
     if (cards.length >= (j.totalCount || 0) || Date.now() > deadline) break;
   }
+  cards.sort(
+    (a, b) =>
+      ((a.set && a.set.releaseDate) || "").localeCompare((b.set && b.set.releaseDate) || "") ||
+      String(a.localId).localeCompare(String(b.localId), undefined, { numeric: true })
+  );
   return { status: 200, body: cards };
 }
 
