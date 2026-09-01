@@ -9,8 +9,7 @@ Single-file web app (`index.html`) tracking a Pokemon TCG National Card Dex: 1,6
 ## Repo state at handoff
 
 - `main`: last known-good build before Dynamax/Tera and the card lookup.
-- `MAX-forms` branch (open pull request): adds Gigantamax, Dynamax, Tera, Surfing/Flying Pikachu, and the card lookup sheet. Card lookup on this branch fails in iPhone Safari ("Load failed").
-- Latest local build (not committed): everything on `MAX-forms` plus the proxy function, proxy-first fetch with direct-API fallback, the `dex-ids/{n}` endpoint, 12s request timeouts, card icon moved to the far left of each row, and list performance fixes (no per-sprite grayscale filter, one shared CSS icon instead of inline SVGs). Bring this in first.
+- `MAX-forms` branch (open pull request): adds Gigantamax, Dynamax, Tera, Surfing/Flying Pikachu, the card lookup sheet, the same-origin proxy (`api/tcg.js`), and a pokemontcg.io fallback provider (see below). Everything is committed; nothing lives only in a local build.
 
 ## Architecture (as built)
 
@@ -35,10 +34,14 @@ Single-file web app (`index.html`) tracking a Pokemon TCG National Card Dex: 1,6
 - PokeAPI CSVs (species, pokemon, pokemon_forms, version_groups, pokedexes, pokemon_dex_numbers) and PokeAPI sprites repo (form sprites at `{dexNo}-{form}.png`).
 - Card lists for Dynamax (VMAX cards without Gigantamax) and Tera (52 Tera Pokemon ex) were taken from Bulbapedia card categories; these need refreshing as new sets release. Tera cards are matched by set name + card number.
 - TCGdex API (`api.tcgdex.net/v2/en/`), `dex-ids/{n}` for all cards of a Pokemon, `cards/{id}` for details (G-Max attack detection), `sets` for names.
+- Fallback: when TCGdex times out or errors, `api/tcg.js` queries pokemontcg.io (`/v2/cards?q=nationalPokedexNumbers:{n}`, `/v2/cards/{id}`, `/v2/sets`) and maps responses to the TCGdex shape (id, localId, name, image base, rarity, stage/subtypes, set name and release date; attacks and TCGplayer pricing on details). Responses carry `X-Card-Source`. Card images then come from `images.pokemontcg.io` (`{base}.png` / `{base}_hires.png`); the client's `cimg()` helper handles both hosts. `POKEMONTCG_API_KEY` (optional, raises rate limits) comes from an env var; see `.env.example` and set it in Vercel project env vars.
+- `node scripts/check-providers.mjs [proxy-base-url]` reports reachability of both providers in one command, to tell an outage from a bug.
 
 ## Known issues / open threads
 
-- Card lookup failing on iPhone Safari on `MAX-forms`: cross-origin fetch to TCGdex returns "Load failed". The proxy in the latest build should resolve it; verify with Safari Web Inspector attached to a device.
+- 2026-09-01: TCGdex API down (host answers ping, ports 80/443 time out). pokemontcg.io is up but degraded (intermittent gateway 5xx; the proxy retries up to 3 times and CDN-caches successes for an hour). Card sheet verified end to end on the Vercel preview through the fallback: base/Mega/Gmax/Tera filtering, detail view with pricing, binder art. Primary-path (TCGdex) live verification still pending its recovery; the pass-through code is unchanged from the build that worked before the outage.
+- A failed detail fetch during Gmax/Dynamax classification silently drops the card into the wrong bucket for that load (client treats missing detail as non-Gmax). Successes cache client-side for 7 days, so this self-heals; only matters while a provider is flaky.
+- Card lookup failing on iPhone Safari on `MAX-forms`: cross-origin fetch to TCGdex returns "Load failed". The proxy should resolve it; verify with Safari Web Inspector attached to a device once TCGdex is back.
 - Build process is string-patching a 2 MB file. Convert to a build script: data JSON (entries, card lists, regional keys) + sprite pipeline + template, emitting `index.html`. Keep entry ids stable.
 - Vercel preview URLs require Vercel login (deployment protection on).
 - The chat-preview 2 MB limit is no longer a constraint; do not degrade sprites for it.
