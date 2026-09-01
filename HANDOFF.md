@@ -50,6 +50,12 @@ Single-file web app (`index.html`) tracking a Pokemon TCG National Card Dex: 1,6
 
 Replace runtime card-list fetching with build-time static data, modeled on pkmnbindr.com (which bundles its whole card DB as static JSON from its own domain and is outage-proof as a result). Chosen granularity: one JSON per Pokemon (`/data/cards/{dexNo}.json`, ~1025 small files) plus a shared `sets.json`, because the app's only question is "all cards for dex N" at sheet-open. Bake form classification (Gmax/Dynamax/Tera/Mega/regional buckets) into each file at build time, which removes the runtime detail fan-out. Prices stay live through the proxy. Artist browsing (pokemontcg.io `artist` field) is DEFERRED until everything else is done; it becomes trivial once the static data exists. This supersedes most of the proxy fallback machinery for lists.
 
+## 2026-09-01 UI wave (shipped on MAX-forms)
+
+Warm-graphite OKLCH palette replaces the purple darks (accent red reserved for interactive/active); compact content-width header; form-type visibility is sprite icon toggles beside the view switcher ("Other forms" renamed Base Variations; old Form dropdown is now Order); pocket view = third view, all tiles in one vertical scroll with a 2-6 column control; binder sprite slots use the card-search icon; final binder page pads with blank slots; size picker is a hover grid behind a four-square icon; Tera matching expanded (subtype + set/name alt-art expansion; Tera Charizard now 4 printings). Touch long-press still toggles pending (only mobile path); mouse long-press retired in favor of right-click; a future meaning for touch long-press is Evan's open call.
+
+DEFERRED: global rarity filter (mark rarities you collect; card sheets show only those). Blocked on rarity data: TCGdex list responses carry no rarity and per-card detail fetches would be 90 requests a sheet. It is the first feature of the build-time card-data pipeline below, where rarity is baked into each file.
+
 ## Roadmap (from README)
 
 Male/female variants; per-game regional dex with native numbering; card-as-binder-image polish; account-free encrypted sync (pairing key + Vercel KV); PWA (manifest + service worker) for installable offline use; GitHub Releases for a downloadable copy; camera/photo card lookup.
