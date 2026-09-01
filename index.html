@@ -504,10 +504,11 @@ function chunkLoad(grid){
   const sent=document.createElement("div");
   sent.style.height="1px";
   grid.after(sent);
-  chunkIO=new IntersectionObserver(es=>{
+  chunkIO=new IntersectionObserver((es,io)=>{
     if(!es.some(x=>x.isIntersecting))return;
     next();
-    if(!pend.length){chunkIO.disconnect();chunkIO=null;sent.remove()}
+    if(!pend.length){io.disconnect();if(chunkIO===io)chunkIO=null;sent.remove();return}
+    io.unobserve(sent);io.observe(sent);
   },{root:cbody,rootMargin:"1200px"});
   chunkIO.observe(sent);
 }
