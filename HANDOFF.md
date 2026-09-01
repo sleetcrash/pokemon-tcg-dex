@@ -24,8 +24,8 @@ Single-file web app (`index.html`) tracking a Pokemon TCG National Card Dex: 1,6
 
 ## Interaction model
 
-- Tap row: register / unregister. Long press (or right click): toggle Pending. Card icon (far left of row, top-left of binder card): open card sheet.
-- Form menu: entry mode (Separate / Collapsible), placement (National / Regional / Grouped), type checkboxes (Base, Megas, Gigantamax, Dynamax, Tera, Regionals on; Other forms off).
+- Tap row or tile: register / unregister. Long press: toggle Pending (right click is a reserved no-op). Card icon (far left of row, lower-left of binder tile): open card sheet.
+- Forms menu: type checkboxes only, Base checked by default. Entry mode (Separate / Collapsible) and placement (National / Regional / Grouped) live under the gear menu with Manage lists.
 - Collapsible mode: `+n` chip on bases with forms; chip color reflects form completion only; drawers are the same row elements, so no state sync is needed.
 - Right-edge checkpoint strip: tap to jump, hold and slide to scrub (coarse across regions, fine within one); highlight follows scroll position.
 
@@ -52,7 +52,9 @@ Replace runtime card-list fetching with build-time static data, modeled on pkmnb
 
 ## 2026-09-01 UI wave (shipped on MAX-forms)
 
-Warm-graphite OKLCH palette replaces the purple darks (accent red reserved for interactive/active); compact content-width header; form-type visibility is sprite icon toggles beside the view switcher ("Other forms" renamed Base Variations; old Form dropdown is now Order); pocket view = third view, all tiles in one vertical scroll with a 2-6 column control; binder sprite slots use the card-search icon; final binder page pads with blank slots; size picker is a hover grid behind a four-square icon; Tera matching expanded (subtype + set/name alt-art expansion; Tera Charizard now 4 printings). Touch long-press still toggles pending (only mobile path); mouse long-press retired in favor of right-click; a future meaning for touch long-press is Evan's open call.
+Game Boy Pokedex LIGHT scheme (warm paper ground, black ink, perforated header divider, red accent only on interactive/active; sprites, card art, and region chips keep their colors as content). Compact content-width header; the filter row is filters only (Gen / Region / Forms / Status). Forms = checkboxes ordered Base, Base Variations, Regionals, Megas, Dynamax, Gigantamax, Tera; DEFAULT SHOWS BASE ONLY; entry-mode and placement radios live under the gear with Manage lists. Binder sprite slots mimic a card face: name and dex number header, framed sprite art box, tags directly beneath, a non-interactive Pokeball status in the middle (outline missing, ball collected, tilted pulse pending), card-search icon in the lower-left corner; slots with chosen art show a TCGplayer market-price badge, and list rows show the same price in their empty middle. Final binder page pads with blank slots; binder size = hover grid behind a four-square icon. Pocket view = third view, all tiles in one vertical scroll, columns 2-6 via a one-row picker, touch pinch, or ctrl+wheel trackpad pinch. Tera matching expanded (subtype + set/name alt-art expansion; Tera Charizard = 4 printings). Long-press = Pending on every input; right-click is a reserved no-op.
+
+END-OF-SESSION STATE: a final round (dark mode toggle, redrawn pocket icon, ball resize, pocket/binder style parity) was REVERTED at the owner's call (commits 2816605, b644abb undo 14b6d5f); the app has not had a hands-on walk since the Game Boy scheme landed. Before any further visual work: walk the preview, then re-approach the reverted asks one change at a time. Also open: merge to main (proposal stands, owner gates), POKEMONTCG_API_KEY not yet set in Vercel env, pk-tile region chip truncates at 4+ binder columns, pocket view lacks the checkpoint strip, iPhone Safari on-device lookup check still owed.
 
 DEFERRED: global rarity filter (mark rarities you collect; card sheets show only those). Blocked on rarity data: TCGdex list responses carry no rarity and per-card detail fetches would be 90 requests a sheet. It is the first feature of the build-time card-data pipeline below, where rarity is baked into each file.
 
