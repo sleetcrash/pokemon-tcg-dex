@@ -382,11 +382,12 @@ function setState(id,st){
   else if(prefs.entries==="col")refreshChip(Number(rowMap.get(id).dataset.n));
 }
 // card lookup via TCGdex (online): every card for an entry, narrowed by form type
-const TCG="https://api.tcgdex.net/v2/en/",ASSETS="https://assets.tcgdex.net/";
+const TCG="https://api.tcgdex.net/v2/en/",ASSETS="https://assets.tcgdex.net/",PIMG="https://images.pokemontcg.io/";
+const cimg=(u,s)=>!u?null:u.startsWith(ASSETS)?u+"/"+s+".webp":u.startsWith(PIMG)?u+(s==="high"?"_hires":"")+".png":null;
 const byId=new Map(DEX.map(e=>[e[1],e]));
 const rowEntry=row=>byId.get(Number(row.dataset.id));
 let CARDART=store.load("dex-il-cards");
-const cardArt=id=>{const u=CARDART[id];return u&&u.startsWith(ASSETS)?u:null};
+const cardArt=id=>{const u=CARDART[id];return u&&(u.startsWith(ASSETS)||u.startsWith(PIMG))?u:null};
 async function tget(path){
   const key="tcg:"+path;
   try{const c=JSON.parse(localStorage.getItem(key)||"null");if(c&&Date.now()-c.t<6048e5)return c.d}catch(e){}
@@ -464,7 +465,8 @@ async function openCards(e){
   const grid=document.createElement("div");grid.className="cgrid";
   cards.forEach(c=>{
     const b=document.createElement("button");b.type="button";b.className="ccard"+(CARDART[e[1]]===c.image?" sel":"");
-    if(c.image&&c.image.startsWith(ASSETS)){const im=document.createElement("img");im.loading="lazy";im.src=c.image+"/low.webp";im.alt="";b.appendChild(im)}
+    const cu=cimg(c.image,"low");
+    if(cu){const im=document.createElement("img");im.loading="lazy";im.src=cu;im.alt="";b.appendChild(im)}
     const m=document.createElement("span");m.className="cm";
     const t=document.createElement("b");t.textContent=c.name;m.appendChild(t);
     m.appendChild(document.createTextNode((SETS[c.id.slice(0,c.id.lastIndexOf("-"))]||"")+" #"+c.localId));
@@ -479,7 +481,8 @@ async function showCard(c){
   let d=null;try{d=await tget("cards/"+c.id)}catch(err){}
   cbody.innerHTML="";
   const box=document.createElement("div");box.className="cdetail";
-  if(c.image&&c.image.startsWith(ASSETS)){const im=document.createElement("img");im.src=c.image+"/high.webp";im.alt="";box.appendChild(im)}
+  const hu=cimg(c.image,"high");
+  if(hu){const im=document.createElement("img");im.src=hu;im.alt="";box.appendChild(im)}
   const info=document.createElement("div");info.className="cinfo";
   const add=(k,v)=>{if(!v)return;const l=document.createElement("div");const b=document.createElement("b");b.textContent=k+": ";l.appendChild(b);l.appendChild(document.createTextNode(v));info.appendChild(l)};
   add("Card",c.name);add("Set",(d&&d.set&&d.set.name)||SETS[c.id.slice(0,c.id.lastIndexOf("-"))]);add("Number",String(c.localId));
@@ -746,7 +749,7 @@ function renderBinder(){
     c.className="card"+(owned[id]===true?" own":owned[id]==="p"?" pend":"")+(region==="Hisui"?" hs":"")+(form?" ft-"+form:"");
     c.dataset.id=id;
     const art=cardArt(id);
-    c.innerHTML=`<span class="cnum">#${String(n).padStart(4,"0")}</span>${art?`<img class="cardart" src="${art}/low.webp" alt="">`:SPR[sid]?`<img src="data:image/png;base64,${SPR[sid]}" alt="">`:`<span class="fbc">#${n}</span>`}<span class="cname">${name}</span>`+
+    c.innerHTML=`<span class="cnum">#${String(n).padStart(4,"0")}</span>${art?`<img class="cardart" src="${cimg(art,"low")}" alt="">`:SPR[sid]?`<img src="data:image/png;base64,${SPR[sid]}" alt="">`:`<span class="fbc">#${n}</span>`}<span class="cname">${name}</span>`+
       `<button class="cardbtn" type="button" aria-label="Cards"></button>`;
     c.addEventListener("click",ev=>{if(ev.target.closest(".cardbtn")){openCards(DEX.find(e=>e[1]===id));return}handleTap(id)});
     bgrid.appendChild(c);
