@@ -410,8 +410,8 @@ async function tget(path){
   catch(e){Object.keys(localStorage).filter(k=>k.startsWith("tcg:")).forEach(k=>localStorage.removeItem(k))}
   return d;
 }
-let SETS=null;
-async function ensureSets(){if(!SETS){SETS={};(await tget("sets")).forEach(s=>SETS[s.id]=s.name)}}
+let SETS=null,SETSP=null;
+function ensureSets(){return SETSP||(SETSP=tget("sets").then(l=>{SETS={};l.forEach(s=>SETS[s.id]=s.name)},e=>{SETSP=null;throw e}))}
 const setIdOf=cardId=>cardId.slice(0,cardId.lastIndexOf("-"));
 async function setName(cardId){await ensureSets();return SETS[setIdOf(cardId)]||""}
 const TERA_KEYS=new Set(["Surging Sparks|133","Scarlet & Violet|32","Surging Sparks|36","Obsidian Flames|125","Stellar Crown|28","Twilight Masquerade|112","Surging Sparks|159","Paldea Evolved|93","Twilight Masquerade|130","Obsidian Flames|159","Prismatic Evolutions|75","Obsidian Flames|42","Paldean Fates|6","Prismatic Evolutions|34","Temporal Forces|108","Prismatic Evolutions|14","Surging Sparks|106","Paldea Evolved|5","Paradox Rift|3","Stellar Crown|51","Paradox Rift|38","Prismatic Evolutions|26","Obsidian Flames|179","Twilight Masquerade|106","Scarlet & Violet|45","Twilight Masquerade|40","Paradox Rift|98","Surging Sparks|119","Prismatic Evolutions|30","Ascended Heroes|121","Stellar Crown|32","Prismatic Evolutions|6","Twilight Masquerade|29","Paradox Rift|58","Ascended Heroes|73","Surging Sparks|91","Surging Sparks|57","Shrouded Fable|15","Paradox Rift|137","Paldea Evolved|86","Surging Sparks|86","Surging Sparks|142","Twilight Masquerade|25","Stellar Crown|128","Paradox Rift|100","Paradox Rift|46","Obsidian Flames|66","Prismatic Evolutions|60","Prismatic Evolutions|23","Obsidian Flames|96","Twilight Masquerade|64","Temporal Forces|60"]);
@@ -419,6 +419,7 @@ const isTera=c=>TERA_KEYS.has((SETS[setIdOf(c.id)]||"")+"|"+c.localId);
 function baseName(e){return byId.get(e[6]||e[1])[2].replace(/\s*\(.*\)$/,"").replace(/^(Alolan|Galarian|Hisuian|Paldean) /,"")}
 const REGPRE=/^(Alolan|Galarian|Hisuian|Paldean) /;
 async function cardsFor(e){
+  const setsReady=ensureSets();setsReady.catch(()=>{});
   const species=DEX.find(x=>x[0]===e[0]&&x[5]==="")[2];
   let all;
   try{const d=await tget(`dex-ids/${e[0]}`);all=Array.isArray(d)?d:(d.cards||[])}
@@ -432,7 +433,7 @@ async function cardsFor(e){
   if(!all.length)all=await tget(`cards?name=${encodeURIComponent(species)}&category=Pokemon`);
   const nm=c=>c.name;
   const isVmax=c=>/ VMAX$/.test(nm(c)),isMega=c=>/^M [A-Z].*-EX$|^Mega /.test(nm(c)),isReg=c=>REGPRE.test(nm(c));
-  await ensureSets();
+  await setsReady;
   switch(e[5]){
     case "":return all.filter(c=>!isVmax(c)&&!isMega(c)&&!isReg(c)&&!isTera(c));
     case "Regional":{const pre=e[2].split(" ")[0];return all.filter(c=>nm(c).startsWith(pre+" "))}
@@ -479,19 +480,15 @@ async function openCards(e){
   });
   cbody.appendChild(grid);
 }
-async function showCard(c){
-  cback.hidden=false;cmsg("Loading card...");
-  let d=null;try{d=await tget("cards/"+c.id)}catch(err){}
-  cbody.innerHTML="";
+function showCard(c){
+  cback.hidden=false;cbody.innerHTML="";
   const box=document.createElement("div");box.className="cdetail";
-  const hu=cimg(c.image,"high");
-  if(hu){const im=document.createElement("img");im.src=hu;im.alt="";box.appendChild(im)}
+  const lo=cimg(c.image,"low"),hi=cimg(c.image,"high");
+  if(hi){const im=document.createElement("img");im.src=lo||hi;im.alt="";box.appendChild(im);
+    if(lo&&lo!==hi){const pre=new Image();pre.onload=()=>{im.src=hi};pre.src=hi}}
   const info=document.createElement("div");info.className="cinfo";
   const add=(k,v)=>{if(!v)return;const l=document.createElement("div");const b=document.createElement("b");b.textContent=k+": ";l.appendChild(b);l.appendChild(document.createTextNode(v));info.appendChild(l)};
-  add("Card",c.name);add("Set",(d&&d.set&&d.set.name)||SETS[c.id.slice(0,c.id.lastIndexOf("-"))]);add("Number",String(c.localId));
-  if(d){add("Rarity",d.rarity);add("Illustrator",d.illustrator);
-    const tp=d.pricing&&d.pricing.tcgplayer;const mk=tp&&(tp.holofoil||tp.normal||tp["reverse-holofoil"]);
-    if(mk&&mk.marketPrice!=null)add("Market",`$${mk.marketPrice.toFixed(2)} (TCGplayer)`)}
+  add("Card",c.name);add("Set",SETS[setIdOf(c.id)]);add("Number",String(c.localId));add("Rarity",c.rarity);
   box.appendChild(info);
   const row=document.createElement("div");row.className="crow";
   const use=document.createElement("button");use.type="button";use.className="pri";
@@ -505,6 +502,14 @@ async function showCard(c){
   });
   row.appendChild(use);box.appendChild(row);
   cbody.appendChild(box);
+  tget("cards/"+c.id).then(d=>{
+    if(!d||!box.isConnected)return;
+    if(!SETS[setIdOf(c.id)]&&d.set&&d.set.name)add("Set",d.set.name);
+    if(!c.rarity)add("Rarity",d.rarity);
+    add("Illustrator",d.illustrator);
+    const tp=d.pricing&&d.pricing.tcgplayer;const mk=tp&&(tp.holofoil||tp.normal||tp["reverse-holofoil"]);
+    if(mk&&mk.marketPrice!=null)add("Market",`$${mk.marketPrice.toFixed(2)} (TCGplayer)`)
+  }).catch(()=>{});
 }
 cback.addEventListener("click",()=>openCards(cEntry));
 $("cclose").addEventListener("click",()=>{csheet.hidden=true});
