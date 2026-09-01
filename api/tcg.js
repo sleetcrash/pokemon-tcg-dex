@@ -6,6 +6,11 @@ const TCGDEX = "https://api.tcgdex.net/v2/en/";
 const PTCG = "https://api.pokemontcg.io/v2/";
 const UA = { "User-Agent": "national-card-dex/1.0", Accept: "application/json" };
 
+// Circuit breaker: after TCGdex times out or 5xxes, warm invocations skip the
+// dead probe and go straight to the fallback instead of paying it per request.
+let tcgdexDownUntil = 0;
+const cooldown = () => Number(process.env.TCGDEX_COOLDOWN_MS ?? 60000);
+
 async function get(url, ms, headers) {
   const ac = new AbortController();
   const t = setTimeout(() => ac.abort(), ms);
@@ -128,15 +133,20 @@ export default async function handler(req, res) {
   const deadline = Date.now() + 9000;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   let primary = null;
-  try {
-    const r = await get(TCGDEX + path, 4000, UA);
-    if (r.ok) {
-      res.setHeader("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=604800");
-      res.setHeader("X-Card-Source", "tcgdex");
-      return res.status(r.status).send(await r.text());
+  if (Date.now() >= tcgdexDownUntil) {
+    try {
+      const r = await get(TCGDEX + path, 3000, UA);
+      if (r.ok) {
+        res.setHeader("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=604800");
+        res.setHeader("X-Card-Source", "tcgdex");
+        return res.status(r.status).send(await r.text());
+      }
+      primary = { status: r.status, body: await r.text() };
+      if (r.status >= 500) tcgdexDownUntil = Date.now() + cooldown();
+    } catch (e) {
+      tcgdexDownUntil = Date.now() + cooldown();
     }
-    primary = { status: r.status, body: await r.text() };
-  } catch (e) {}
+  }
   try {
     const fb = await fallback(path, deadline);
     if (fb) {
