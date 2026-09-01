@@ -283,12 +283,12 @@
     <div class="dd" id="ddRegion"><button class="ddbtn" type="button">Region</button><div class="ddpanel"><label><input type="checkbox" value="Kanto">Kanto</label><label><input type="checkbox" value="Johto">Johto</label><label><input type="checkbox" value="Hoenn">Hoenn</label><label><input type="checkbox" value="Sinnoh">Sinnoh</label><label><input type="checkbox" value="Unova">Unova</label><label><input type="checkbox" value="Kalos">Kalos</label><label><input type="checkbox" value="Alola">Alola</label><label><input type="checkbox" value="Galar">Galar</label><label><input type="checkbox" value="Hisui">Hisui</label><label><input type="checkbox" value="Paldea">Paldea</label><label><input type="checkbox" value="POGO">POGO</label></div></div>
     <div class="dd" id="ddForm"><button class="ddbtn" type="button">Forms</button><div class="ddpanel">
       <label><input type="checkbox" value="" checked>Base</label>
-      <label><input type="checkbox" value="Mega" checked>Megas</label>
-      <label><input type="checkbox" value="Gmax" checked>Gigantamax</label>
-      <label><input type="checkbox" value="Dynamax" checked>Dynamax</label>
-      <label><input type="checkbox" value="Tera" checked>Tera</label>
-      <label><input type="checkbox" value="Regional" checked>Regionals</label>
       <label><input type="checkbox" value="Other">Base Variations</label>
+      <label><input type="checkbox" value="Regional">Regionals</label>
+      <label><input type="checkbox" value="Mega">Megas</label>
+      <label><input type="checkbox" value="Dynamax">Dynamax</label>
+      <label><input type="checkbox" value="Gmax">Gigantamax</label>
+      <label><input type="checkbox" value="Tera">Tera</label>
     </div></div>
     <div class="dd" id="ddStatus"><button class="ddbtn" type="button">Status</button><div class="ddpanel"><label><input type="checkbox" value="Registered">Registered</label><label><input type="checkbox" value="Pending">Pending</label><label><input type="checkbox" value="Missing">Missing</label></div></div>
   </div>
@@ -773,7 +773,7 @@ formBtn.addEventListener("click",e=>{
   ddFormEl.classList.toggle("open");
 });
 function formShown(){return new Set(formBoxes.filter(b=>b.checked).map(b=>b.value))}
-const FORM_DEFAULT=new Set(["","Mega","Gmax","Dynamax","Tera","Regional"]);
+const FORM_DEFAULT=new Set([""]);
 function updateFormBtn(){
   const on=formBoxes.filter(b=>b.checked),set=new Set(on.map(b=>b.value));
   const isDefault=set.size===FORM_DEFAULT.size&&[...FORM_DEFAULT].every(v=>set.has(v));
