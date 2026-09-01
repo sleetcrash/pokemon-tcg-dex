@@ -46,6 +46,10 @@ Single-file web app (`index.html`) tracking a Pokemon TCG National Card Dex: 1,6
 - Vercel preview URLs require Vercel login (deployment protection on).
 - The chat-preview 2 MB limit is no longer a constraint; do not degrade sprites for it.
 
+## Next: build-time card data (decided 2026-09-01)
+
+Replace runtime card-list fetching with build-time static data, modeled on pkmnbindr.com (which bundles its whole card DB as static JSON from its own domain and is outage-proof as a result). Chosen granularity: one JSON per Pokemon (`/data/cards/{dexNo}.json`, ~1025 small files) plus a shared `sets.json`, because the app's only question is "all cards for dex N" at sheet-open. Bake form classification (Gmax/Dynamax/Tera/Mega/regional buckets) into each file at build time, which removes the runtime detail fan-out. Prices stay live through the proxy. Artist browsing (pokemontcg.io `artist` field) is DEFERRED until everything else is done; it becomes trivial once the static data exists. This supersedes most of the proxy fallback machinery for lists.
+
 ## Roadmap (from README)
 
 Male/female variants; per-game regional dex with native numbering; card-as-binder-image polish; account-free encrypted sync (pairing key + Vercel KV); PWA (manifest + service worker) for installable offline use; GitHub Releases for a downloadable copy; camera/photo card lookup.
