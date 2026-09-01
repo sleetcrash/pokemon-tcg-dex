@@ -473,8 +473,7 @@ async function openCards(e){
   cards.forEach(c=>{
     const b=document.createElement("button");b.type="button";b.className="ccard"+(CARDART[e[1]]===c.image?" sel":"");
     const cu=cimg(c.image,"low");
-    if(cu){const im=document.createElement("img");im.loading="lazy";im.decoding="async";im.alt="";
-      im.onload=()=>im.classList.add("ld");im.src=cu;if(im.complete)im.classList.add("ld");b.appendChild(im)}
+    if(cu){const im=document.createElement("img");im.decoding="async";im.alt="";im.dataset.src=cu;b.appendChild(im)}
     const m=document.createElement("span");m.className="cm";
     const t=document.createElement("b");t.textContent=c.name;m.appendChild(t);
     m.appendChild(document.createTextNode((SETS[c.id.slice(0,c.id.lastIndexOf("-"))]||"")+" #"+c.localId));
@@ -483,6 +482,34 @@ async function openCards(e){
     grid.appendChild(b);
   });
   cbody.appendChild(grid);
+  chunkLoad(grid);
+}
+// thumbnails load 12 at a time and reveal per batch (all ready, or 700ms cap), so
+// rows snap in together instead of rolling top-down; chunks ahead load on scroll
+let chunkIO=null;
+function chunkLoad(grid){
+  if(chunkIO){chunkIO.disconnect();chunkIO=null}
+  const pend=[...grid.querySelectorAll("img[data-src]")];
+  if(!pend.length)return;
+  const next=()=>{
+    const batch=pend.splice(0,12);
+    if(!batch.length)return;
+    let done=0;
+    const reveal=()=>batch.forEach(im=>im.classList.add("ld"));
+    const cap=setTimeout(reveal,700);
+    const fin=()=>{if(++done===batch.length){clearTimeout(cap);reveal()}};
+    batch.forEach(im=>{im.onload=fin;im.onerror=fin;im.src=im.dataset.src;im.removeAttribute("data-src")});
+  };
+  next();
+  const sent=document.createElement("div");
+  sent.style.height="1px";
+  grid.after(sent);
+  chunkIO=new IntersectionObserver(es=>{
+    if(!es.some(x=>x.isIntersecting))return;
+    next();
+    if(!pend.length){chunkIO.disconnect();chunkIO=null;sent.remove()}
+  },{root:cbody,rootMargin:"1200px"});
+  chunkIO.observe(sent);
 }
 function showCard(c){
   cback.hidden=false;cbody.innerHTML="";
