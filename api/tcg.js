@@ -138,6 +138,18 @@ export default async function handler(req, res) {
   }
   const deadline = Date.now() + 9000;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
+  // A flapping provider can 200 a truncated list; small lists are cross-checked
+  // against the other provider and never cached long.
+  const listShaped = /^dex-ids\//.test(path) || /^cards\?/.test(path);
+  const listLen = (b) => {
+    try {
+      const j = typeof b === "string" ? JSON.parse(b) : b;
+      const a = Array.isArray(j) ? j : j.cards || [];
+      return a.length;
+    } catch (e) {
+      return -1;
+    }
+  };
   // Hedge: if TCGdex hasn't answered in 800ms, start the fallback in parallel
   // so a dead probe costs max(probe, fallback) instead of their sum.
   let fbPromise = null;
@@ -150,31 +162,44 @@ export default async function handler(req, res) {
     try {
       const r = await get(TCGDEX + path, 2500, UA);
       if (r.ok) {
-        res.setHeader("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=604800");
-        res.setHeader("X-Card-Source", "tcgdex");
-        return res.status(r.status).send(await r.text());
+        const body = await r.text();
+        const n = listShaped ? listLen(body) : Number.MAX_SAFE_INTEGER;
+        if (n >= 5) {
+          res.setHeader("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=604800");
+          res.setHeader("X-Card-Source", "tcgdex");
+          return res.status(200).send(body);
+        }
+        primary = { status: 200, body, ok: true, n };
+      } else {
+        primary = { status: r.status, body: await r.text() };
+        if (r.status >= 500) tcgdexDownUntil = Date.now() + cooldown();
       }
-      primary = { status: r.status, body: await r.text() };
-      if (r.status >= 500) tcgdexDownUntil = Date.now() + cooldown();
     } catch (e) {
       tcgdexDownUntil = Date.now() + cooldown();
     } finally {
       clearTimeout(hedge);
     }
   }
+  let fb = null;
   try {
     const settled = await startFb();
     if (settled.e) throw settled.e;
-    const fb = settled.v;
-    if (fb) {
-      if (fb.status === 200) res.setHeader("Cache-Control", "public, s-maxage=3600");
-      res.setHeader("X-Card-Source", "pokemontcg.io");
-      return res.status(fb.status).json(fb.body);
-    }
+    fb = settled.v;
   } catch (e) {}
+  if (fb && fb.status === 200 && (!primary || !primary.ok || listLen(fb.body) > primary.n)) {
+    const small = listShaped && listLen(fb.body) < 5;
+    res.setHeader("Cache-Control", small ? "public, s-maxage=300" : "public, s-maxage=3600");
+    res.setHeader("X-Card-Source", "pokemontcg.io");
+    return res.status(200).json(fb.body);
+  }
   if (primary) {
+    if (primary.ok) res.setHeader("Cache-Control", "public, s-maxage=300");
     res.setHeader("X-Card-Source", "tcgdex");
     return res.status(primary.status).send(primary.body);
+  }
+  if (fb) {
+    res.setHeader("X-Card-Source", "pokemontcg.io");
+    return res.status(fb.status).json(fb.body);
   }
   return res.status(502).json({ error: "both providers unreachable" });
 }
