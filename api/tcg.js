@@ -56,6 +56,7 @@ function detail(c) {
   if (prices.reverseHolofoil) tcgplayer["reverse-holofoil"] = { marketPrice: prices.reverseHolofoil.market };
   return {
     ...brief(c),
+    tcgUrl: (c.tcgplayer && c.tcgplayer.url) || undefined,
     illustrator: c.artist,
     attacks: (c.attacks || []).map((a) => ({ name: a.name, damage: a.damage, text: a.text })),
     pricing: Object.keys(tcgplayer).length ? { tcgplayer } : undefined,
