@@ -24,7 +24,7 @@ Single-file web app (`index.html`) tracking a Pokemon TCG National Card Dex: 1,6
 
 ## Interaction model
 
-- Tap row or tile: register / unregister. Long press: toggle Pending (right click is a reserved no-op). Card icon (far left of row, lower-left of binder tile): open card sheet.
+- Tap row or tile: register / unregister. Long press: toggle Pending (right click is a reserved no-op). Card icon (far left of row, footer of binder tile): open card sheet. Tiles with chosen art keep the same footer, so tap-to-register, the card icon, and Remove from binder (in the card detail) all stay reachable with art in the slot.
 - Forms menu: type checkboxes only, Base checked by default. Entry mode (Separate / Collapsible) and placement (National / Regional / Grouped) live under the gear menu with Manage lists.
 - Collapsible mode: `+n` chip on bases with forms; chip color reflects form completion only; drawers are the same row elements, so no state sync is needed.
 - Right-edge checkpoint strip: tap to jump, hold and slide to scrub (coarse across regions, fine within one); highlight follows scroll position.
@@ -54,7 +54,21 @@ Replace runtime card-list fetching with build-time static data, modeled on pkmnb
 
 Game Boy Pokedex LIGHT scheme (warm paper ground, black ink, perforated header divider, red accent only on interactive/active; sprites, card art, and region chips keep their colors as content). Compact content-width header; the filter row is filters only (Gen / Region / Forms / Status). Forms = checkboxes ordered Base, Base Variations, Regionals, Megas, Dynamax, Gigantamax, Tera; DEFAULT SHOWS BASE ONLY; entry-mode and placement radios live under the gear with Manage lists. Binder sprite slots mimic a card face: name and dex number header, framed sprite art box, tags directly beneath, a non-interactive Pokeball status in the middle (outline missing, ball collected, tilted pulse pending), card-search icon in the lower-left corner; slots with chosen art show a TCGplayer market-price badge, and list rows show the same price in their empty middle. Final binder page pads with blank slots; binder size = hover grid behind a four-square icon. Pocket view = third view, all tiles in one vertical scroll, columns 2-6 via a one-row picker, touch pinch, or ctrl+wheel trackpad pinch. Tera matching expanded (subtype + set/name alt-art expansion; Tera Charizard = 4 printings). Long-press = Pending on every input; right-click is a reserved no-op.
 
-END-OF-SESSION STATE: a final round (dark mode toggle, redrawn pocket icon, ball resize, pocket/binder style parity) was REVERTED at the owner's call (commits 2816605, b644abb undo 14b6d5f); the app has not had a hands-on walk since the Game Boy scheme landed. Before any further visual work: walk the preview, then re-approach the reverted asks one change at a time. Also open: merge to main (proposal stands, owner gates), POKEMONTCG_API_KEY not yet set in Vercel env, pk-tile region chip truncates at 4+ binder columns, pocket view lacks the checkpoint strip, iPhone Safari on-device lookup check still owed.
+END-OF-SESSION STATE: a final round (dark mode toggle, redrawn pocket icon, ball resize, pocket/binder style parity) was REVERTED at the owner's call (commits 2816605, b644abb undo 14b6d5f). Also open: merge to main (proposal stands, owner gates), POKEMONTCG_API_KEY not yet set in Vercel env, pocket view lacks the checkpoint strip, iPhone Safari on-device lookup check still owed.
+
+## 2026-09-01 tile polish pass (owner walk feedback, shipped on MAX-forms)
+
+Owner walked the preview and directed a polish pass; this supersedes the tile details in the UI wave block above.
+
+- Binder/pocket tiles are container queries now (`container-type:inline-size` on `.card`): all internal sizing in cqw against the tile, so faces keep real-card proportions at every column count. Tile aspect is 63/88 (true card ratio) with a 5px corner radius. GOTCHA baked into the CSS: cq units on the container's OWN padding resolve against the viewport, not itself, so `.card` padding uses percentages (which resolve against the grid track) while descendants use cqw.
+- Sprite tiles read as a card face: name + dex number header, framed 10/7 art window, caption strip (form/gen/region, transparent chips, attached under the art frame), Pokeball status centered in the body, hairline footer with the card-search icon. Small tiles shed chrome instead of overflowing: content-box under 80px drops the caption strip, under 62px also drops footer + name (number, art, ball remain).
+- Chosen-art tiles no longer paint the scan over the whole face: the scan sits contained above the same footer (search icon left, status ball center, TCGplayer price right), so nothing is covered and the slot stays fully interactive. The old cnum/cname/pbadge overlays are gone.
+- Pokeball/circle parity fixed at the root: the ball sprite only draws the middle 60% of its PNG (62.5% for the Hisui ball), so it renders via `::after` at 166.8%/160% of the box and the visible ball now equals the empty circle everywhere (tiles and list rows). Pending pulse moved onto the slot element itself.
+- Header perforation strip removed (clean 3px ink rule). View/gear icons redrawn (the old pocket icon drew outside its viewBox); columns icon now three tall bars.
+- Menus: dropdown panels and popovers get a soft light-theme shadow (the old popover shadows were dark-theme leftovers), and the card-detail primary button was ink-on-ink (unreadable), now ink on paper.
+- New: Options (gear) > Clear binder cards, two-tap confirm (arms to "Tap again to clear all", disarms on any click elsewhere); wipes `dex-il-cards` only, registration state untouched.
+- The 4+ column region-chip truncation flag is resolved by the compact tiers (the caption strip hides before it can truncate).
+- Verified via Playwright at 390/768/1440, binder 2/3/6 columns, pocket 4 columns, list view, last-page blank slots, card sheet open from an art tile, register toggle through art, and the clear-cards flow end to end.
 
 DEFERRED: global rarity filter (mark rarities you collect; card sheets show only those). Blocked on rarity data: TCGdex list responses carry no rarity and per-card detail fetches would be 90 requests a sheet. It is the first feature of the build-time card-data pipeline below, where rarity is baked into each file.
 
