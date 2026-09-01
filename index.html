@@ -392,9 +392,8 @@ const rowEntry=row=>byId.get(Number(row.dataset.id));
 let CARDART=store.load("dex-il-cards");
 const cardArt=id=>{const u=CARDART[id];return u&&(u.startsWith(ASSETS)||u.startsWith(PIMG))?u:null};
 let FB_UNTIL=0;
-async function tget(path){
-  const key="tcg:"+path;
-  try{const c=JSON.parse(localStorage.getItem(key)||"null");if(c&&Date.now()-c.t<6048e5)return c.d}catch(e){}
+Object.keys(localStorage).filter(k=>k.startsWith("tcg:")).forEach(k=>localStorage.removeItem(k));
+async function tnet(path,key){
   const urls=[];
   if(/^https?:$/.test(location.protocol)&&!/github\.io$/.test(location.hostname))urls.push("/api/tcg?path="+encodeURIComponent(path)+(Date.now()<FB_UNTIL?"&fb=1":""));
   urls.push(TCG+path);
@@ -410,8 +409,17 @@ async function tget(path){
   if(r.headers.get("X-Card-Source")==="pokemontcg.io")FB_UNTIL=Date.now()+60000;
   const d=await r.json();
   try{localStorage.setItem(key,JSON.stringify({t:Date.now(),d}))}
-  catch(e){Object.keys(localStorage).filter(k=>k.startsWith("tcg:")).forEach(k=>localStorage.removeItem(k))}
+  catch(e){Object.keys(localStorage).filter(k=>k.startsWith("tcg2:")).forEach(k=>localStorage.removeItem(k))}
   return d;
+}
+async function tget(path){
+  const key="tcg2:"+path;
+  try{const c=JSON.parse(localStorage.getItem(key)||"null");
+    if(c&&Date.now()-c.t<6048e5){
+      if(Date.now()-c.t>36e5)tnet(path,key).catch(()=>{});
+      return c.d;
+    }}catch(e){}
+  return tnet(path,key);
 }
 let SETS=null,SETSP=null;
 function ensureSets(){return SETSP||(SETSP=tget("sets").then(l=>{SETS={};l.forEach(s=>SETS[s.id]=s.name)},e=>{SETSP=null;throw e}))}
