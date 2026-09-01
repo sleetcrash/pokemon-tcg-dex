@@ -106,6 +106,9 @@
   .chip{font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:1.5px 6px;background:#26232d;color:var(--ink-dim)}
   .chip.f{color:#b9b4c4}
 
+  .rp{flex:none;font-family:ui-monospace,Menlo,monospace;font-size:11px;margin-right:8px}
+  .rp a{color:var(--ink-dim);text-decoration:none;border-bottom:1px dotted #4a4756;padding:4px 0}
+  .rp a:hover{color:var(--ink)}
   .slot{flex:none;width:26px;height:26px;border-radius:50%;border:1.5px solid #4a4756;display:flex;align-items:center;justify-content:center;transition:all .2s}
   .row.done .slot,.row.pend .slot{border:0;background:var(--ball) center/26px no-repeat;image-rendering:pixelated}
   .row.pend .slot{transform:rotate(22deg)}
@@ -127,12 +130,16 @@
   .views>button.on,.views .dd.has .ddbtn,.views .dd.open .ddbtn{color:var(--ink)}
   .views svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .bsize{display:flex;gap:6px;justify-content:flex-end;margin-bottom:8px}
-  .bsize button{padding:6px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink-dim);font-size:12px;font-weight:650;cursor:pointer;-webkit-tap-highlight-color:transparent}
-  .bsize button.on{background:var(--ink);color:#111;border-color:var(--ink)}
+  .gpick{position:relative}
+  #gpBtn{padding:6px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:12px;font-weight:650;cursor:pointer;font-family:ui-monospace,Menlo,monospace;-webkit-tap-highlight-color:transparent}
+  #gpPop{position:absolute;right:0;top:calc(100% + 6px);z-index:40;background:var(--page);border:1px solid var(--line);padding:10px;box-shadow:0 10px 28px rgba(0,0,0,.55)}
+  #gpGrid{display:grid;grid-template-columns:repeat(6,22px);grid-auto-rows:22px;gap:4px}
+  #gpGrid button{border:1px solid var(--line);background:var(--card);padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  #gpGrid button.hi{background:var(--ink);border-color:var(--ink)}
+  #gpLbl{margin-top:8px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink)}
 
   #binder{padding:10px 10px 60px;max-width:560px;margin:0 auto}
   .bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:#17161b;border:1px solid var(--line);padding:10px}
-  .bgrid.four{grid-template-columns:repeat(4,1fr);gap:6px}
   .card{aspect-ratio:5/7;background:var(--card);border:1px solid var(--line);position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .card img{width:72%;image-rendering:pixelated;opacity:.28;filter:grayscale(1);transition:opacity .2s,filter .2s}
   .card.own{border-color:#4a4756;background:var(--card-hi)}
@@ -148,6 +155,22 @@
   .card.hs.pend::after{animation:none;box-shadow:none}
   .card .fbc{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-dim)}
   .card.flash{animation:flash 1.6s ease}
+  .blankc{aspect-ratio:5/7;border:1px dashed var(--line);background:#141318;opacity:.5}
+  .card.pk{flex-direction:column;align-items:stretch;justify-content:flex-start;padding:4px 5px 3px;gap:3px}
+  .card.pk .ph{display:flex;justify-content:space-between;align-items:baseline;gap:4px;padding-left:15px;min-height:11px}
+  .card.pk .pname{font-size:9px;font-weight:700;color:var(--ink-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card.pk.own .pname{color:var(--ink)}
+  .card.pk .pno{flex:none;font-family:ui-monospace,Menlo,monospace;font-size:8px;color:var(--ink-dim)}
+  .card.pk .part{flex:none;height:46%;border:1px solid var(--line);background:#141318;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .card.pk .part img{width:62%}
+  .card.pk .ppr{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .card.pk .setc{border:0;background:none;padding:2px 4px;font-size:7.5px;letter-spacing:.05em;text-transform:uppercase;color:#4a4756;cursor:pointer;border-bottom:1px dotted #38353f;-webkit-tap-highlight-color:transparent}
+  .card.pk.own .setc,.card.pk.pend .setc{color:var(--ink-dim)}
+  .card.pk .ptag{display:flex;gap:2px;flex-wrap:wrap;overflow:hidden;max-height:12px;padding:2px 16px 0 0;border-top:1px solid var(--line)}
+  .card.pk .ptag .chip{font-size:6px;padding:0.5px 3px;letter-spacing:.02em}
+  .card.pk .cardbtn{position:absolute;top:2px;left:3px;width:14px;height:14px}
+  .card.pk.own::after,.card.pk.pend::after{top:auto;bottom:2px;right:2px;width:13px;height:13px;background-size:13px}
+  .card .pbadge{position:absolute;left:3px;bottom:3px;background:rgba(10,10,14,.85);border:1px solid var(--line);color:var(--ink);font-family:ui-monospace,Menlo,monospace;font-size:8px;padding:1.5px 5px;text-decoration:none}
   .pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px}
   .pager button{padding:8px 0;width:44px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;font-weight:650;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .pager button:disabled{opacity:.35}
@@ -272,8 +295,10 @@
 <main id="list"></main>
 <section id="binder" hidden>
   <div class="bsize">
-    <button id="s9" class="on" type="button">3x3</button>
-    <button id="s16" type="button">4x4</button>
+    <div class="gpick">
+      <button id="gpBtn" type="button">3&#215;3</button>
+      <div id="gpPop" hidden><div id="gpGrid"></div><div id="gpLbl">3 &#215; 3</div></div>
+    </div>
   </div>
   <div class="bgrid" id="bgrid"></div>
   <div class="pager">
@@ -324,6 +349,8 @@ const store={
 };
 let owned=store.load("dex-il");
 let prefs=Object.assign({view:"list",per:9,placement:"dex",entries:"sep"},store.load("dex-il-ui"));
+if(!prefs.bcols){prefs.bcols=prefs.per===16?4:3;prefs.brows=prefs.bcols}
+const perNow=()=>prefs.bcols*prefs.brows;
 if(prefs.entries!=="col")prefs.entries="sep";
 if(!["group","regional"].includes(prefs.placement))prefs.placement="dex";
 delete prefs.sort;delete prefs.sortBy;delete prefs.group;delete prefs.incBase;
@@ -335,6 +362,15 @@ const pFirst=$("pFirst"),pPrev=$("pPrev"),pNext=$("pNext"),pLast=$("pLast"),pIn=
 
 // list view: built once
 const rowMap=new Map();
+// market price of the chosen binder card, filled into the row's empty middle when visible
+function fillRowPrice(row){
+  const el=row.querySelector(".rp");if(!el)return;
+  priceInfo(Number(row.dataset.id)).then(p=>{
+    if(!p){el.textContent="";return}
+    el.innerHTML=`<a href="${p.url}" target="_blank" rel="noopener">$${p.rows[0][1].toFixed(2)}</a>`;
+  });
+}
+const rpIO=new IntersectionObserver(es=>{es.forEach(x=>{if(!x.isIntersecting)return;rpIO.unobserve(x.target);fillRowPrice(x.target)})},{rootMargin:"300px"});
 const frag=document.createDocumentFragment();
 DEX.forEach(([n,id,name,region,gen,form,sref])=>{
   const sid=sref||id;
@@ -345,14 +381,16 @@ DEX.forEach(([n,id,name,region,gen,form,sref])=>{
     `<button class="cardbtn" type="button" aria-label="Cards"></button><span class="lz"><span class="no">#${String(n).padStart(4,"0")}</span>${form?"":`<span class="exp" hidden></span>`}</span>`+
     `<span class="spr">${SPR[sid]?`<img loading="lazy" src="data:image/png;base64,${SPR[sid]}" alt="">`:`<span class="fb">#${n}</span>`}</span>`+
     `<span class="who"><span class="name">${name}</span><div class="chips">${form?`<span class="chip f">${form==="Other"?"Form":form}</span>`:""}<span class="chip">Gen ${gen}</span><span class="chip r ${region}">${region}</span></div></span>`+
-    `<span class="slot"></span>`;
+    `<span class="rp"></span><span class="slot"></span>`;
 row.addEventListener("click",ev=>{
     const exp=row.querySelector(".exp");
+    if(ev.target.closest("a"))return;
     if(ev.target.closest(".cardbtn")){openCards(rowEntry(row));return}
     if(exp&&!exp.hidden&&ev.clientX-row.getBoundingClientRect().left<96){toggleExpand(n);return}
     handleTap(id);
   });
   rowMap.set(id,row);
+  rpIO.observe(row);
   frag.appendChild(row);
 });
 list.appendChild(frag);
@@ -391,6 +429,26 @@ const byId=new Map(DEX.map(e=>[e[1],e]));
 const rowEntry=row=>byId.get(Number(row.dataset.id));
 let CARDART=store.load("dex-il-cards");
 const cardArt=id=>{const u=CARDART[id];return u&&(u.startsWith(ASSETS)||u.startsWith(PIMG))?u:null};
+// the chosen art's base URL encodes the card id on both providers
+const cardIdFromArt=u=>{
+  if(u.startsWith(ASSETS)){const p=u.slice(ASSETS.length).split("/");return p.length>=4?p[2]+"-"+p[3]:null}
+  if(u.startsWith(PIMG)){const p=u.slice(PIMG.length).split("/");return p.length>=2?p[0]+"-"+p[1]:null}
+  return null;
+};
+const PRICES=new Map();
+function priceInfo(id){
+  const art=cardArt(id);if(!art)return Promise.resolve(null);
+  const cid=cardIdFromArt(art);if(!cid)return Promise.resolve(null);
+  if(!PRICES.has(cid))PRICES.set(cid,tget("cards/"+cid).then(d=>{
+    const tp=d&&d.pricing&&d.pricing.tcgplayer;
+    const rows=[];
+    if(tp)for(const[k,l]of[["normal","Normal"],["holofoil","Holo"],["reverse-holofoil","Reverse"]])
+      if(tp[k]&&tp[k].marketPrice!=null)rows.push([l,tp[k].marketPrice]);
+    const url=(d&&d.tcgUrl)||"https://www.tcgplayer.com/search/pokemon/product?productLineName=pokemon&q="+encodeURIComponent((d&&d.name)||"");
+    return rows.length?{rows,url}:null;
+  }).catch(()=>{PRICES.delete(cid);return null}));
+  return PRICES.get(cid);
+}
 let FB_UNTIL=0;
 Object.keys(localStorage).filter(k=>k.startsWith("tcg:")).forEach(k=>localStorage.removeItem(k));
 async function tnet(path,key){
@@ -538,6 +596,7 @@ function showCard(c){
     if(isSet)delete CARDART[cEntry[1]];else if(c.image)CARDART[cEntry[1]]=c.image;
     store.save("dex-il-cards",CARDART);
     if(prefs.view==="binder")renderBinder();
+    const rw=rowMap.get(cEntry[1]);if(rw)fillRowPrice(rw);
     openCards(cEntry);
   });
   row.appendChild(use);box.appendChild(row);
@@ -783,32 +842,54 @@ ddOpt.querySelector(".ddbtn").addEventListener("click",e=>{
 });
 
 
-// binder view: paginated pocket pages
+// binder view: paginated pocket pages; sprite slots mimic a card face
+// (name / dex number header, framed art box, price area, tag bar)
 function renderBinder(){
-  const per=prefs.per;
-  bgrid.classList.toggle("four",per===16);
+  const per=perNow(),cols=prefs.bcols;
+  bgrid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
+  bgrid.style.gap=cols>=5?"4px":cols===4?"6px":"8px";
   const pages=Math.max(1,Math.ceil(visArr.length/per));
   if(page>=pages)page=pages-1;
   if(page<0)page=0;
   bgrid.innerHTML="";
-  visArr.slice(page*per,page*per+per).forEach(([n,id,name,region,,form,sref])=>{
+  const slice=visArr.slice(page*per,page*per+per);
+  slice.forEach(([n,id,name,region,gen,form,sref])=>{
     const sid=sref||id;
     const c=document.createElement("div");
-    c.className="card"+(owned[id]===true?" own":owned[id]==="p"?" pend":"")+(region==="Hisui"?" hs":"")+(form?" ft-"+form:"");
-    c.dataset.id=id;
     const art=cardArt(id);
-    c.innerHTML=`<span class="cnum">#${String(n).padStart(4,"0")}</span>${art?`<img class="cardart" src="${cimg(art,"low")}" alt="">`:SPR[sid]?`<img src="data:image/png;base64,${SPR[sid]}" alt="">`:`<span class="fbc">#${n}</span>`}<span class="cname">${name}</span>`+
-      `<button class="cardbtn" type="button" aria-label="Cards"></button>`;
-    c.addEventListener("click",ev=>{if(ev.target.closest(".cardbtn")){openCards(DEX.find(e=>e[1]===id));return}handleTap(id)});
+    c.className="card"+(art?"":" pk")+(owned[id]===true?" own":owned[id]==="p"?" pend":"")+(region==="Hisui"?" hs":"")+(form?" ft-"+form:"");
+    c.dataset.id=id;
+    if(art){
+      c.innerHTML=`<span class="cnum">#${String(n).padStart(4,"0")}</span><img class="cardart" src="${cimg(art,"low")}" alt=""><span class="cname">${name}</span>`+
+        `<button class="cardbtn" type="button" aria-label="Cards"></button>`;
+      priceInfo(id).then(p=>{
+        if(!p||!c.isConnected)return;
+        const a=document.createElement("a");a.className="pbadge";a.href=p.url;a.target="_blank";a.rel="noopener";
+        a.textContent="$"+p.rows[0][1].toFixed(2);
+        c.appendChild(a);
+      });
+    }else{
+      c.innerHTML=`<button class="cardbtn" type="button" aria-label="Cards"></button>`+
+        `<div class="ph"><span class="pname">${name}</span><span class="pno">#${String(n).padStart(4,"0")}</span></div>`+
+        `<div class="part">${SPR[sid]?`<img src="data:image/png;base64,${SPR[sid]}" alt="">`:`<span class="fbc">#${n}</span>`}</div>`+
+        `<div class="ppr"><button class="setc" type="button">Set card</button></div>`+
+        `<div class="ptag">${form?`<span class="chip f">${form==="Other"?"Form":form}</span>`:""}<span class="chip">Gen ${gen}</span><span class="chip r ${region}">${region}</span></div>`;
+    }
+    c.addEventListener("click",ev=>{
+      if(ev.target.closest("a"))return;
+      if(ev.target.closest(".cardbtn")||ev.target.closest(".setc")){openCards(DEX.find(e=>e[1]===id));return}
+      handleTap(id);
+    });
     bgrid.appendChild(c);
   });
+  for(let i=slice.length;i<per;i++){const b=document.createElement("div");b.className="blankc";bgrid.appendChild(b)}
   pIn.value=page+1;
   pIn.max=pages;
   pTot.textContent=`/ ${pages}`;
   pFirst.disabled=pPrev.disabled=page===0;
   pNext.disabled=pLast.disabled=page>=pages-1;
 }
-function pageCount(){return Math.max(1,Math.ceil(visArr.length/prefs.per))}
+function pageCount(){return Math.max(1,Math.ceil(visArr.length/perNow()))}
 function goTo(n){page=Math.min(Math.max(0,n),pageCount()-1);renderBinder();binder.scrollIntoView()}
 pFirst.addEventListener("click",()=>goTo(0));
 pPrev.addEventListener("click",()=>goTo(page-1));
@@ -826,16 +907,28 @@ function setView(v){
   if(v==="binder")renderBinder();
   renderJumps();
 }
-function setPer(n){
-  prefs.per=n;store.save("dex-il-ui",prefs);
-  $("s9").classList.toggle("on",n===9);
-  $("s16").classList.toggle("on",n===16);
-  page=0;renderBinder();
-}
 $("vList").addEventListener("click",()=>setView("list"));
 $("vBinder").addEventListener("click",()=>setView("binder"));
-$("s9").addEventListener("click",()=>setPer(9));
-$("s16").addEventListener("click",()=>setPer(16));
+// binder size: hover-to-preview grid picker, up to 6x6
+const gpBtn=$("gpBtn"),gpPop=$("gpPop"),gpGrid=$("gpGrid"),gpLbl=$("gpLbl");
+for(let r=1;r<=6;r++)for(let cc=1;cc<=6;cc++){
+  const b=document.createElement("button");b.type="button";b.dataset.c=cc;b.dataset.r=r;
+  b.addEventListener("mouseenter",()=>gpHi(cc,r));
+  b.addEventListener("click",()=>{setGrid(cc,r);gpPop.hidden=true});
+  gpGrid.appendChild(b);
+}
+function gpHi(c,r){
+  [...gpGrid.children].forEach(el=>el.classList.toggle("hi",+el.dataset.c<=c&&+el.dataset.r<=r));
+  gpLbl.textContent=`${c} × ${r}`;
+}
+function setGrid(c,r){
+  prefs.bcols=c;prefs.brows=r;store.save("dex-il-ui",prefs);
+  gpBtn.textContent=`${c}×${r}`;
+  page=0;renderBinder();
+}
+gpBtn.textContent=`${prefs.bcols}×${prefs.brows}`;
+gpBtn.addEventListener("click",()=>{gpPop.hidden=!gpPop.hidden;if(!gpPop.hidden)gpHi(prefs.bcols,prefs.brows)});
+document.addEventListener("click",ev=>{if(!ev.target.closest(".gpick"))gpPop.hidden=true});
 
 // search: jump to the entry in whichever view is active
 const q=$("q"),sugg=$("sugg");
@@ -882,7 +975,7 @@ function jumpToEntry(entry){
     window.scrollTo({top:row.offsetTop-document.querySelector("header").offsetHeight-6,behavior:"instant"});
     row.classList.remove("flash");void row.offsetWidth;row.classList.add("flash");
   }else{
-    page=Math.floor(visArr.findIndex(e=>e[1]===id)/prefs.per);
+    page=Math.floor(visArr.findIndex(e=>e[1]===id)/perNow());
     renderBinder();
     binder.scrollIntoView();
     const card=bgrid.querySelector(`[data-id="${id}"]`);
@@ -1101,7 +1194,6 @@ toTop.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
 entryRadios.forEach(r=>r.checked=r.value===prefs.entries);
 placeRadios.forEach(r=>{if(r.value!=="dex")r.disabled=prefs.entries==="col"});
 setPlacement(prefs.placement);
-if(prefs.per===16){$("s9").classList.remove("on");$("s16").classList.add("on")}
 setView(prefs.view);
 </script>
 </body>
