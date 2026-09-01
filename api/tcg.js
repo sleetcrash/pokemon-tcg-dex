@@ -132,10 +132,17 @@ export default async function handler(req, res) {
   }
   const deadline = Date.now() + 9000;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
+  // Hedge: if TCGdex hasn't answered in 800ms, start the fallback in parallel
+  // so a dead probe costs max(probe, fallback) instead of their sum.
+  let fbPromise = null;
+  const startFb = () => (fbPromise ||= fallback(path, deadline).then((v) => ({ v }), (e) => ({ e })));
   let primary = null;
-  if (Date.now() >= tcgdexDownUntil) {
+  // fb=1: the client saw a fallback-served response in the last minute; skip the probe
+  // (the instance-local breaker can't cover cold starts, the client hint can).
+  if (req.query.fb !== "1" && Date.now() >= tcgdexDownUntil) {
+    const hedge = setTimeout(startFb, 800);
     try {
-      const r = await get(TCGDEX + path, 3000, UA);
+      const r = await get(TCGDEX + path, 2500, UA);
       if (r.ok) {
         res.setHeader("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=604800");
         res.setHeader("X-Card-Source", "tcgdex");
@@ -145,10 +152,14 @@ export default async function handler(req, res) {
       if (r.status >= 500) tcgdexDownUntil = Date.now() + cooldown();
     } catch (e) {
       tcgdexDownUntil = Date.now() + cooldown();
+    } finally {
+      clearTimeout(hedge);
     }
   }
   try {
-    const fb = await fallback(path, deadline);
+    const settled = await startFb();
+    if (settled.e) throw settled.e;
+    const fb = settled.v;
     if (fb) {
       if (fb.status === 200) res.setHeader("Cache-Control", "public, s-maxage=3600");
       res.setHeader("X-Card-Source", "pokemontcg.io");
