@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>National Card Dex</title>
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Card Dex">
+<meta name="theme-color" content="#111014">
 <style>
   :root{
     --page:#111014; --card:#1a191f; --card-hi:#221f28;
@@ -55,9 +62,9 @@
   @media(hover:hover){.row:hover{border-color:#3a3744}.card:hover{border-color:#3a3744}}
   .ddbtn:disabled{opacity:.4;cursor:default}
   .row{display:flex;align-items:center;gap:10px;padding:8px 10px;margin:6px 0;background:var(--card);border:1px solid var(--line);cursor:pointer;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-  .row .spr img{opacity:.28;filter:grayscale(1)}
-  .row.done .spr img{opacity:1;filter:none}
-  .row.pend .spr img{opacity:.85;filter:none}
+  .row .spr img{opacity:.3}
+  .row.done .spr img{opacity:1}
+  .row.pend .spr img{opacity:.85}
   .row.done.ft-Dynamax .spr img,.row.pend.ft-Dynamax .spr img,.card.own.ft-Dynamax img,.card.pend.ft-Dynamax img{filter:drop-shadow(0 0 5px rgba(255,64,48,.95))}
   .row.done.ft-Tera .spr img,.row.pend.ft-Tera .spr img,.card.own.ft-Tera img,.card.pend.ft-Tera img{filter:drop-shadow(0 0 5px rgba(120,220,255,.95)) saturate(1.3) brightness(1.1)}
   .row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#e8eaee,#a7adb6 50%,#e8eaee);opacity:0;transition:opacity .25s}
@@ -179,12 +186,12 @@
   #jumps *{touch-action:none}
   .jp.f{color:#a08434}
 
-  .cardbtn{flex:none;width:26px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;color:var(--ink-dim);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .cardbtn{flex:none;width:26px;height:44px;background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;position:relative}
+  .cardbtn::before{content:"";position:absolute;inset:0;margin:auto;width:20px;height:20px;background:var(--ink-dim);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%222.5%22 width=%2214%22 height=%2219%22/%3E%3Ccircle cx=%2214.5%22 cy=%2215%22 r=%224.2%22/%3E%3Cline x1=%2217.6%22 y1=%2218.1%22 x2=%2221%22 y2=%2221.5%22/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%222.5%22 width=%2214%22 height=%2219%22/%3E%3Ccircle cx=%2214.5%22 cy=%2215%22 r=%224.2%22/%3E%3Cline x1=%2217.6%22 y1=%2218.1%22 x2=%2221%22 y2=%2221.5%22/%3E%3C/svg%3E") center/contain no-repeat}
+  .row.done .cardbtn::before{background:var(--ink)}
   .row .cardbtn{margin-right:-4px}
-  .cardbtn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
   .cardbtn:active,.cardbtn:hover{color:var(--ink)}
   .card .cardbtn{top:2px;right:auto;left:2px;width:18px;height:18px}
-  .card .cardbtn svg{width:13px;height:13px}
   .card img.cardart{width:100%;height:100%;object-fit:contain;opacity:1;filter:none;image-rendering:auto}
 
   #csheet{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:55;display:flex;align-items:flex-end;justify-content:center}
@@ -332,7 +339,7 @@ DEX.forEach(([n,id,name,region,gen,form,sref])=>{
   row.className="row"+(owned[id]===true?" done":owned[id]==="p"?" pend":"")+(region==="Hisui"?" hs":"")+(form?" frm ft-"+form:"");
   row.dataset.id=id;row.dataset.n=n;
   row.innerHTML=
-    `<button class="cardbtn" type="button" aria-label="Cards"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="2.5" width="14" height="19"/><circle cx="14.5" cy="15" r="4.2"/><line x1="17.6" y1="18.1" x2="21" y2="21.5"/></svg></button><span class="lz"><span class="no">#${String(n).padStart(4,"0")}</span>${form?"":`<span class="exp" hidden></span>`}</span>`+
+    `<button class="cardbtn" type="button" aria-label="Cards"></button><span class="lz"><span class="no">#${String(n).padStart(4,"0")}</span>${form?"":`<span class="exp" hidden></span>`}</span>`+
     `<span class="spr">${SPR[sid]?`<img loading="lazy" src="data:image/png;base64,${SPR[sid]}" alt="">`:`<span class="fb">#${n}</span>`}</span>`+
     `<span class="who"><span class="name">${name}</span><div class="chips">${form?`<span class="chip f">${form==="Other"?"Form":form}</span>`:""}<span class="chip">Gen ${gen}</span><span class="chip r ${region}">${region}</span></div></span>`+
     `<span class="slot"></span>`;
@@ -383,12 +390,17 @@ const cardArt=id=>{const u=CARDART[id];return u&&u.startsWith(ASSETS)?u:null};
 async function tget(path){
   const key="tcg:"+path;
   try{const c=JSON.parse(localStorage.getItem(key)||"null");if(c&&Date.now()-c.t<6048e5)return c.d}catch(e){}
-  let r;
-  const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),12000);
-  try{r=await fetch(TCG+path,{mode:"cors",signal:ac.signal})}
-  catch(e){throw new Error(e.name==="AbortError"?"timed out":"network: "+e.message)}
-  finally{clearTimeout(tm)}
-  if(!r.ok)throw new Error("HTTP "+r.status+" on "+path);
+  const urls=[];
+  if(/^https?:$/.test(location.protocol)&&!/github\.io$/.test(location.hostname))urls.push("/api/tcg?path="+encodeURIComponent(path));
+  urls.push(TCG+path);
+  let r=null,lastErr=null;
+  for(const u of urls){
+    const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),12000);
+    try{r=await fetch(u,{signal:ac.signal});if(r.ok)break;lastErr=new Error("HTTP "+r.status+" on "+path);r=null}
+    catch(e){lastErr=new Error(e.name==="AbortError"?"timed out":"network: "+e.message)}
+    finally{clearTimeout(tm)}
+  }
+  if(!r)throw lastErr;
   const d=await r.json();
   try{localStorage.setItem(key,JSON.stringify({t:Date.now(),d}))}
   catch(e){Object.keys(localStorage).filter(k=>k.startsWith("tcg:")).forEach(k=>localStorage.removeItem(k))}
@@ -735,7 +747,7 @@ function renderBinder(){
     c.dataset.id=id;
     const art=cardArt(id);
     c.innerHTML=`<span class="cnum">#${String(n).padStart(4,"0")}</span>${art?`<img class="cardart" src="${art}/low.webp" alt="">`:SPR[sid]?`<img src="data:image/png;base64,${SPR[sid]}" alt="">`:`<span class="fbc">#${n}</span>`}<span class="cname">${name}</span>`+
-      `<button class="cardbtn" type="button" aria-label="Cards"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="2.5" width="14" height="19"/><circle cx="14.5" cy="15" r="4.2"/><line x1="17.6" y1="18.1" x2="21" y2="21.5"/></svg></button>`;
+      `<button class="cardbtn" type="button" aria-label="Cards"></button>`;
     c.addEventListener("click",ev=>{if(ev.target.closest(".cardbtn")){openCards(DEX.find(e=>e[1]===id));return}handleTap(id)});
     bgrid.appendChild(c);
   });
