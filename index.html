@@ -288,7 +288,7 @@
  <div class="hwrap">
   <div class="brand">
     <h1>National Card Dex</h1>
-    <div class="count"><b id="have">0</b><span id="pend"></span> / <span id="total">0</span></div>
+    <div class="count"><b id="have">0</b><span id="pend"></span> / <span id="total">0</span> <span class="pct" id="pct"></span></div>
   </div>
   <div class="bar"><i id="fill"></i></div>
   <div class="search">
@@ -404,10 +404,13 @@ delete prefs.sort;delete prefs.sortBy;delete prefs.group;delete prefs.incBase;
 
 const $=id=>document.getElementById(id);
 const list=$("list"),binder=$("binder"),bgrid=$("bgrid"),pocketEl=$("pocket"),pgrid=$("pgrid");
+const headerEl=document.querySelector("header");
+let headH=headerEl.offsetHeight;
+let CARDART=store.load("dex-il-cards");
 const pFirst=$("pFirst"),pPrev=$("pPrev"),pNext=$("pNext"),pLast=$("pLast"),pIn=$("pIn"),pTot=$("pTot");
 
-// list view: built once
-const rowMap=new Map();
+// list view: built once. rowMap: id -> row; expMap: dex number -> the base row's +n chip
+const rowMap=new Map(),expMap=new Map();
 // market price of the chosen binder card, filled into the row's empty middle when visible
 function priceLink(p){
   const a=document.createElement("a");
@@ -438,44 +441,52 @@ row.addEventListener("click",ev=>{
     handleTap(id);
   });
   rowMap.set(id,row);
-  rpIO.observe(row);
+  if(!form)expMap.set(n,row.querySelector(".exp"));
+  if(CARDART[id])rpIO.observe(row);
   frag.appendChild(row);
 });
 list.appendChild(frag);
 $("total").textContent=DEX.length;
 
 // states: undefined = missing, true = registered, "p" = pending (bought, not arrived)
+const bTiles=new Map(),pTiles=new Map();
 function syncEntryUI(id){
   const row=rowMap.get(id);
   row.classList.toggle("done",owned[id]===true);
   row.classList.toggle("pend",owned[id]==="p");
-  [bgrid,pgrid].forEach(g=>{const card=g.querySelector(`[data-id="${id}"]`);
-  if(card){card.classList.toggle("own",owned[id]===true);card.classList.toggle("pend",owned[id]==="p")}});
+  [bTiles.get(id),pTiles.get(id)].forEach(card=>{
+    if(card){card.classList.toggle("own",owned[id]===true);card.classList.toggle("pend",owned[id]==="p")}});
+}
+function paintChip(exp,reg,cnt){
+  exp.classList.toggle("r",reg===0);
+  exp.classList.toggle("y",reg>0&&reg<cnt);
+  exp.classList.toggle("g",reg===cnt&&cnt>0);
 }
 function refreshChip(n){
-  const base=rowMap.get(n);
-  if(!base)return;
-  const exp=base.querySelector(".exp");
+  const exp=expMap.get(n);
   if(!exp||exp.hidden)return;
   const forms=visArr.filter(e=>e[0]===n&&e[5]);
-  const reg=forms.filter(e=>owned[e[1]]===true).length;
-  exp.classList.toggle("r",reg===0);
-  exp.classList.toggle("y",reg>0&&reg<forms.length);
-  exp.classList.toggle("g",reg===forms.length&&forms.length>0);
+  paintChip(exp,forms.filter(e=>owned[e[1]]===true).length,forms.length);
 }
+// under a Status filter an entry that stops matching leaves in place; nothing else re-renders
 function setState(id,st){
   if(st===undefined)delete owned[id];else owned[id]=st;
   store.save("dex-il",owned);
   syncEntryUI(id);tally();
-  if(ddStatus.selected().size)applyFilters();
-  else if(prefs.entries==="col")refreshChip(Number(rowMap.get(id).dataset.n));
+  const e=byId.get(id);
+  if(prefs.entries==="col")refreshChip(e[0]);
+  if(!ddStatus.selected().size||pred(e))return;
+  visArr=visArr.filter(x=>x!==e);dispArr=dispArr.filter(x=>x!==e);
+  rowMap.get(id).style.display="none";
+  if(prefs.view==="binder")renderBinder();
+  else if(prefs.view==="pocket"){const t=pTiles.get(id);if(t){t.remove();pTiles.delete(id)}}
+  renderJumps();
 }
 // card lookup via TCGdex (online): every card for an entry, narrowed by form type
 const TCG="https://api.tcgdex.net/v2/en/",ASSETS="https://assets.tcgdex.net/",PIMG="https://images.pokemontcg.io/";
 const cimg=(u,s)=>!u?null:u.startsWith(ASSETS)?u+"/"+s+".webp":u.startsWith(PIMG)?u+(s==="high"?"_hires":"")+".png":null;
 const byId=new Map(DEX.map(e=>[e[1],e]));
 const rowEntry=row=>byId.get(Number(row.dataset.id));
-let CARDART=store.load("dex-il-cards");
 const cardArt=id=>{const u=CARDART[id];return u&&(u.startsWith(ASSETS)||u.startsWith(PIMG))?u:null};
 // the chosen art's base URL encodes the card id on both providers
 const cardIdFromArt=u=>{
@@ -533,6 +544,7 @@ async function tnet(path,key){
   cachePut(key,d);
   return d;
 }
+const INFLIGHT=new Map();
 async function tget(path){
   const key="tcg2:"+path;
   try{const c=JSON.parse(localStorage.getItem(key)||"null");
@@ -540,7 +552,8 @@ async function tget(path){
       if(Date.now()-c.t>36e5)tnet(path,key).catch(()=>{});
       return c.d;
     }}catch(e){}
-  return tnet(path,key);
+  if(!INFLIGHT.has(path))INFLIGHT.set(path,tnet(path,key).finally(()=>INFLIGHT.delete(path)));
+  return INFLIGHT.get(path);
 }
 let SETS={},SETSP=null;
 function ensureSets(){
@@ -582,9 +595,12 @@ async function cardsFor(e){
       return all.filter(c=>isMega(c)&&(!xy||nm(c).includes(" "+xy[1]+" ")||nm(c).endsWith(" "+xy[1])||/^M /.test(nm(c))));
     }
     case "Gmax":case "Dynamax":{
-      const vm=all.filter(isVmax);
-      const det=await Promise.all(vm.map(c=>tget("cards/"+c.id).catch(()=>null)));
-      return vm.filter((c,i)=>{const g=det[i]&&(det[i].attacks||[]).some(a=>/^G-Max/i.test(a.name||""));return e[5]==="Gmax"?g:!g});
+      const vm=all.filter(isVmax),det=[];
+      for(let i=0;i<vm.length;i+=4)det.push(...await Promise.all(vm.slice(i,i+4).map(c=>tget("cards/"+c.id).catch(()=>null))));
+      const out=vm.filter((c,i)=>{const g=det[i]&&(det[i].attacks||[]).some(a=>/^G-Max/i.test(a.name||""));return e[5]==="Gmax"?g:!g});
+      const lost=det.filter(d=>!d).length;
+      if(lost)out.note=`${lost} card${lost>1?"s":""} could not be checked for G-Max and may be missing here.`;
+      return out;
     }
     case "Tera":{const t=all.filter(c=>tset.has(c.id));return t.length?t:all.filter(c=>/ ex$/.test(nm(c))&&!isReg(c)&&!isMega(c))}
     case "Other":{
@@ -608,6 +624,7 @@ async function openCards(e){
   if(my!==cSeq)return;
   if(!cards.length){cmsg("No cards found for this entry yet.");return}
   cbody.innerHTML="";
+  if(cards.note){const p=document.createElement("p");p.className="cmsg";p.textContent=cards.note;cbody.appendChild(p)}
   const grid=document.createElement("div");grid.className="cgrid";
   cards.forEach(c=>{
     const b=document.createElement("button");b.type="button";b.className="ccard"+(CARDART[e[1]]===c.image?" sel":"");
@@ -704,9 +721,7 @@ function burst(x,y){
   }
 }
 function burstAt(id){
-  const el=prefs.view==="binder"?bgrid.querySelector(`[data-id="${id}"]`)
-    :prefs.view==="pocket"?pgrid.querySelector(`[data-id="${id}"]`)
-    :rowMap.get(id).querySelector(".slot");
+  const el=prefs.view==="binder"?bTiles.get(id):prefs.view==="pocket"?pTiles.get(id):rowMap.get(id).querySelector(".slot");
   if(!el)return;
   const r=el.getBoundingClientRect();
   burst(r.left+r.width/2,r.top+r.height/2);
@@ -751,7 +766,9 @@ function tally(){
   const reg=vals.filter(v=>v===true).length,pen=vals.filter(v=>v==="p").length;
   $("have").textContent=reg;
   $("pend").textContent=pen?` +${pen}`:"";
-  $("fill").style.width=(reg/DEX.length*100)+"%";
+  const pct=reg/DEX.length*100;
+  $("pct").textContent=pct.toFixed(pct&&pct<10?1:0)+"%";
+  $("fill").style.width=pct+"%";
 }
 tally();
 
@@ -779,13 +796,21 @@ function computeOrder(){
 
 // filters: checkbox dropdowns; within a category checks OR together, categories AND
 let visArr=DEX,dispArr=DEX,page=0;
-function ddInit(id,noun,allLabel){
-  const dd=$(id),btn=dd.querySelector(".ddbtn"),boxes=[...dd.querySelectorAll('input[type="checkbox"]')];
+function closeMenus(except){
+  document.querySelectorAll(".dd.open").forEach(x=>{if(x!==except){x.classList.remove("open");x.querySelector(".ddbtn").setAttribute("aria-expanded","false")}});
+}
+function wireDropdown(dd){
+  const btn=dd.querySelector(".ddbtn");
+  btn.setAttribute("aria-haspopup","true");btn.setAttribute("aria-expanded","false");
   btn.addEventListener("click",e=>{
     e.stopPropagation();
-    document.querySelectorAll(".dd.open").forEach(x=>{if(x!==dd)x.classList.remove("open")});
-    dd.classList.toggle("open");
+    closeMenus(dd);
+    btn.setAttribute("aria-expanded",dd.classList.toggle("open"));
   });
+}
+function ddInit(id,noun,allLabel){
+  const dd=$(id),btn=dd.querySelector(".ddbtn"),boxes=[...dd.querySelectorAll('input[type="checkbox"]')];
+  wireDropdown(dd);
   function update(){
     const on=boxes.filter(b=>b.checked);
     btn.textContent=on.length===0?allLabel:on.length===1?on[0].parentElement.textContent.trim():`${on.length} ${noun}`;
@@ -804,11 +829,7 @@ const ddGen=ddInit("ddGen","gens","Gen"),
 // Forms menu: shown-type checkboxes (checked = shown); display prefs live under the gear
 const ddFormEl=$("ddForm"),formBtn=ddFormEl.querySelector(".ddbtn"),
       formBoxes=[...ddFormEl.querySelectorAll('input[type="checkbox"]')];
-formBtn.addEventListener("click",e=>{
-  e.stopPropagation();
-  document.querySelectorAll(".dd.open").forEach(x=>{if(x!==ddFormEl)x.classList.remove("open")});
-  ddFormEl.classList.toggle("open");
-});
+wireDropdown(ddFormEl);
 function formShown(){return new Set(formBoxes.filter(b=>b.checked).map(b=>b.value))}
 const FORM_DEFAULT=new Set([""]);
 function updateFormBtn(){
@@ -850,24 +871,18 @@ function refreshDisplay(){
     counts.set(e[0],(counts.get(e[0])||0)+1);
     if(owned[e[1]]===true)regs.set(e[0],(regs.get(e[0])||0)+1);
   }});
-  rowMap.forEach((row,id)=>{
-    const elig=set.has(id);
-    const isForm=row.classList.contains("frm");
-    const n=Number(row.dataset.n);
-    row.style.display=elig&&(!col||!isForm||expanded.has(n))?"":"none";
-    const exp=row.querySelector(".exp");
-    if(exp){
-      const cnt=col?(counts.get(n)||0):0;
-      exp.hidden=!cnt;
-      if(cnt){
-        exp.innerHTML="+"+cnt+'<span class="car">&#8250;</span>';
-        exp.classList.toggle("on",expanded.has(n));
-        const reg=regs.get(n)||0;
-        exp.classList.toggle("r",reg===0);
-        exp.classList.toggle("y",reg>0&&reg<cnt);
-        exp.classList.toggle("g",reg===cnt);
-      }
-    }
+  DEX.forEach(e=>{
+    const row=rowMap.get(e[1]);
+    const d=set.has(e[1])&&(!col||!e[5]||expanded.has(e[0]))?"":"none";
+    if(row.style.display!==d)row.style.display=d;
+  });
+  expMap.forEach((exp,n)=>{
+    const cnt=col?(counts.get(n)||0):0;
+    exp.hidden=!cnt;
+    if(!cnt)return;
+    exp.innerHTML="+"+cnt+'<span class="car">&#8250;</span>';
+    exp.classList.toggle("on",expanded.has(n));
+    paintChip(exp,regs.get(n)||0,cnt);
   });
 }
 function applyFilters(){
@@ -878,11 +893,13 @@ function applyFilters(){
 }
 function clearFilters(){ddGen.clear();ddRegion.clear();ddStatus.clear();formBoxes.forEach(b=>b.checked=true);updateFormBtn();applyFilters()}
 function resort(){
-  store.save("dex-il-ui",prefs);
-  ORDERED=computeOrder();
-  const f=document.createDocumentFragment();
-  ORDERED.forEach(e=>f.appendChild(rowMap.get(e[1])));
-  list.appendChild(f);
+  const next=computeOrder();
+  if(next!==ORDERED){
+    ORDERED=next;
+    const f=document.createDocumentFragment();
+    ORDERED.forEach(e=>f.appendChild(rowMap.get(e[1])));
+    list.appendChild(f);
+  }
   page=0;applyFilters();
 }
 const placeRadios=[...document.querySelectorAll('input[name="placement"]')];
@@ -896,39 +913,35 @@ function setEntries(v){
 }
 entryRadios.forEach(r=>r.addEventListener("change",()=>{if(r.checked)setEntries(r.value)}));
 function setPlacement(v){
-  prefs.placement=v;
+  prefs.placement=v;store.save("dex-il-ui",prefs);
   placeRadios.forEach(r=>r.checked=r.value===v);
   updateFormBtn();
   resort();
 }
 placeRadios.forEach(r=>r.addEventListener("change",()=>{if(r.checked)setPlacement(r.value)}));
 const ddOpt=$("ddOpt");
-ddOpt.querySelector(".ddbtn").addEventListener("click",e=>{
-  e.stopPropagation();
-  document.querySelectorAll(".dd.open").forEach(x=>{if(x!==ddOpt)x.classList.remove("open")});
-  ddOpt.classList.toggle("open");
-});
+wireDropdown(ddOpt);
 // clearing every chosen binder card is destructive: first tap arms, second wipes
 const optClear=$("optClearCards");
 function disarmClear(){optClear.textContent="Clear binder cards";optClear.classList.remove("danger")}
 optClear.addEventListener("click",()=>{
   if(!optClear.classList.contains("danger")){optClear.textContent="Tap again to clear all";optClear.classList.add("danger");return}
+  Object.keys(CARDART).forEach(id=>{rowMap.get(Number(id)).querySelector(".rp").textContent=""});
   CARDART={};store.save("dex-il-cards",CARDART);
   disarmClear();
-  ddOpt.classList.remove("open");
+  closeMenus();
   if(prefs.view==="binder")renderBinder();else if(prefs.view==="pocket")renderPocket();
-  document.querySelectorAll("#list .rp").forEach(el=>el.textContent="");
 });
-document.addEventListener("click",e=>{if(!optClear.contains(e.target))disarmClear()});
 
 
 // one binder tile. Every slot shares one format: visual area on top (framed
 // sprite window with header + tag strip, or the chosen card scan), then the
 // same footer (search button left, status ball center, price right), so the
 // slot stays fully interactive whether or not a physical card fills it.
-function binderTile([n,id,name,region,gen,form,sref]){
+function binderTile([n,id,name,region,gen,form,sref],map){
   const sid=sref||id;
   const c=document.createElement("div");
+  map.set(id,c);
   const art=cardArt(id);
   const foot=extra=>`<div class="pfoot"><button class="setc" type="button" aria-label="Cards" title="Find cards"></button>${extra}</div>`;
   c.className="card"+(art?" scan":" pk")+(owned[id]===true?" own":owned[id]==="p"?" pend":"")+(region==="Hisui"?" hs":"")+(form?" ft-"+form:"");
@@ -942,7 +955,7 @@ function binderTile([n,id,name,region,gen,form,sref]){
     });
   }else{
     c.innerHTML=`<div class="ph"><span class="pname">${name}</span><span class="pno">#${String(n).padStart(4,"0")}</span></div>`+
-      `<div class="part">${SPR[sid]?`<img src="data:image/png;base64,${SPR[sid]}" alt="">`:`<span class="fbc">#${n}</span>`}</div>`+
+      `<div class="part">${SPR[sid]?`<img loading="lazy" decoding="async" src="data:image/png;base64,${SPR[sid]}" alt="">`:`<span class="fbc">#${n}</span>`}</div>`+
       `<div class="ptag">${form?`<span class="chip f">${form==="Other"?"Form":form}</span>`:""}<span class="chip">Gen ${gen}</span><span class="chip r ${region}">${region}</span></div>`+
       foot(`<span class="pball"></span><span class="pprice"></span>`);
   }
@@ -954,7 +967,7 @@ function binderTile([n,id,name,region,gen,form,sref]){
   return c;
 }
 function refreshTile(id){
-  [bgrid,pgrid].forEach(g=>{const old=g.querySelector(`[data-id="${id}"]`);if(old)old.replaceWith(binderTile(byId.get(id)))});
+  [bTiles,pTiles].forEach(map=>{const old=map.get(id);if(old)old.replaceWith(binderTile(byId.get(id),map))});
 }
 // binder view: paginated pocket pages
 function renderBinder(){
@@ -965,9 +978,9 @@ function renderBinder(){
   const pages=Math.max(1,Math.ceil(visArr.length/per));
   if(page>=pages)page=pages-1;
   if(page<0)page=0;
-  bgrid.innerHTML="";
+  bgrid.innerHTML="";bTiles.clear();
   const slice=visArr.slice(page*per,page*per+per);
-  slice.forEach(e=>bgrid.appendChild(binderTile(e)));
+  slice.forEach(e=>bgrid.appendChild(binderTile(e,bTiles)));
   for(let i=slice.length;i<per;i++){const b=document.createElement("div");b.className="blankc";bgrid.appendChild(b)}
   pIn.value=page+1;
   pIn.max=pages;
@@ -1021,9 +1034,9 @@ function layoutPocket(){
 }
 function renderPocket(){
   layoutPocket();
-  pgrid.innerHTML="";
+  pgrid.innerHTML="";pTiles.clear();
   const frag=document.createDocumentFragment();
-  visArr.forEach(e=>frag.appendChild(binderTile(e)));
+  visArr.forEach(e=>frag.appendChild(binderTile(e,pTiles)));
   pgrid.appendChild(frag);
 }
 function pageCount(){return Math.max(1,Math.ceil(visArr.length/perNow()))}
@@ -1069,21 +1082,24 @@ function setGrid(c,r){
 }
 gpBtn.title=`${prefs.bcols}×${prefs.brows}`;
 gpBtn.addEventListener("click",()=>{gpPop.hidden=!gpPop.hidden;if(!gpPop.hidden)gpHi(prefs.bcols,prefs.brows)});
-document.addEventListener("click",ev=>{if(!ev.target.closest(".gpick")){gpPop.hidden=true;ppPop.hidden=true}});
 
 // search: jump to the entry in whichever view is active
 const q=$("q"),sugg=$("sugg");
 const norm=s=>s.toLowerCase().replace(/[^a-z0-9]/g,"");
 const NORMS=DEX.map(e=>norm(e[2]));
+const LB=[new Array(64),new Array(64)];
 function lev(a,b){
-  const m=a.length,n=b.length;let prev=Array.from({length:n+1},(_,j)=>j),cur=new Array(n+1);
+  const m=a.length,n=b.length;let prev=LB[0],cur=LB[1];
+  for(let j=0;j<=n;j++)prev[j]=j;
   for(let i=1;i<=m;i++){cur[0]=i;for(let j=1;j<=n;j++){cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1))}[prev,cur]=[cur,prev]}
   return prev[n];
 }
 // rank: prefix matches, then substring, then close misspellings
+let lastQ="",lastHits=[];
 function searchHits(raw){
   const t=norm(raw);
   if(t.length<2)return [];
+  if(t===lastQ)return lastHits;
   const pre=[],sub=[];
   DEX.forEach((e,i)=>{
     if(String(e[0])===raw.trim()){pre.push(e);return}
@@ -1104,7 +1120,8 @@ function searchHits(raw){
     fuzzy.sort((a,b)=>a[0]-b[0]);
     hits=hits.concat(fuzzy.map(f=>f[1]));
   }
-  return hits.slice(0,8);
+  lastQ=t;lastHits=hits.slice(0,8);
+  return lastHits;
 }
 function jumpToEntry(entry){
   const id=entry[1];
@@ -1113,19 +1130,19 @@ function jumpToEntry(entry){
   if(prefs.entries==="col"&&entry[5]&&!expanded.has(entry[0])){expanded.add(entry[0]);refreshDisplay()}
   if(prefs.view==="list"){
     const row=rowMap.get(id);
-    window.scrollTo({top:row.offsetTop-document.querySelector("header").offsetHeight-6,behavior:"instant"});
+    window.scrollTo({top:row.offsetTop-headH-6,behavior:"instant"});
     row.classList.remove("flash");void row.offsetWidth;row.classList.add("flash");
   }else if(prefs.view==="pocket"){
-    const card=pgrid.querySelector(`[data-id="${id}"]`);
+    const card=pTiles.get(id);
     if(card){
-      window.scrollTo({top:card.getBoundingClientRect().top+window.scrollY-document.querySelector("header").offsetHeight-6,behavior:"instant"});
+      window.scrollTo({top:card.getBoundingClientRect().top+window.scrollY-headH-6,behavior:"instant"});
       card.classList.remove("flash");void card.offsetWidth;card.classList.add("flash");
     }
   }else{
     page=Math.floor(visArr.findIndex(e=>e[1]===id)/perNow());
     renderBinder();
     binder.scrollIntoView();
-    const card=bgrid.querySelector(`[data-id="${id}"]`);
+    const card=bTiles.get(id);
     card.classList.remove("flash");void card.offsetWidth;card.classList.add("flash");
   }
 }
@@ -1149,8 +1166,10 @@ q.addEventListener("keydown",ev=>{
   if(hits.length)jumpToEntry(hits[0]);
 });
 document.addEventListener("click",e=>{
+  if(!e.target.closest(".gpick")){gpPop.hidden=true;ppPop.hidden=true}
   if(!e.target.closest(".search"))sugg.style.display="none";
-  if(!e.target.closest(".dd"))document.querySelectorAll(".dd.open").forEach(x=>x.classList.remove("open"));
+  if(!e.target.closest(".dd"))closeMenus();
+  if(optClear.classList.contains("danger")&&!optClear.contains(e.target))disarmClear();
 });
 
 // named lists + sync code: collection state as a bitmap over DEX order
@@ -1219,7 +1238,7 @@ function renderLists(){
   });
 }
 function openModal(){mMsg.textContent="";mCode.value=encodeOwned();renderLists();modal.hidden=false}
-$("optLists").addEventListener("click",()=>{ddOpt.classList.remove("open");openModal()});
+$("optLists").addEventListener("click",()=>{closeMenus();openModal()});
 $("mClose").addEventListener("click",()=>{modal.hidden=true});
 modal.addEventListener("click",e=>{if(e.target===modal)modal.hidden=true});
 $("mSave").addEventListener("click",()=>{
@@ -1250,7 +1269,8 @@ function bandOf(e){
 }
 const ABBR={Kanto:"KAN",Johto:"JOH",Hoenn:"HOE",Sinnoh:"SIN",Unova:"UNO",Kalos:"KAL",Alola:"ALO",POGO:"GO",Galar:"GAL",Hisui:"HIS",Paldea:"PAL",Forms:"FRM",Mega:"MEG",Gmax:"GMX",Dynamax:"DMX",Tera:"TER"};
 function placeJumps(){
-  jumps.style.top=document.querySelector("header").offsetHeight+"px";
+  headH=headerEl.offsetHeight;
+  jumps.style.top=headH+"px";
 }
 function renderJumps(){
   if(prefs.view!=="list"||!dispArr.length){jumps.hidden=true;return}
@@ -1277,7 +1297,7 @@ let cjRaf=false,cjLast=-1,cjTops=[],cjDirty=true;
 function updateCurrentJump(force){
   if(jumps.hidden||!jRuns.length)return;
   if(cjDirty){cjTops=jRuns.map(r=>rowMap.get(dispArr[r.start][1]).offsetTop);cjDirty=false}
-  const line=window.scrollY+document.querySelector("header").offsetHeight;
+  const line=window.scrollY+headH;
   let cur=0;
   for(let i=0;i<cjTops.length;i++){if(cjTops[i]<=line)cur=i;else break}
   if(cur===cjLast&&!force)return;
@@ -1309,7 +1329,7 @@ function scrubAt(y,btnHint){
   const e=dispArr[r.start+Math.min(r.n-1,Math.floor(frac*r.n))];
   jLastId=e[1];
   const row=rowMap.get(e[1]);
-  queueScroll(row.offsetTop-document.querySelector("header").offsetHeight-6);
+  queueScroll(row.offsetTop-headH-6);
 }
 jumps.addEventListener("touchmove",ev=>ev.preventDefault(),{passive:false});
 jumps.addEventListener("pointerdown",ev=>{
