@@ -70,6 +70,12 @@ Owner walked the preview and directed a polish pass; this supersedes the tile de
 - The 4+ column region-chip truncation flag is resolved by the compact tiers (the caption strip hides before it can truncate).
 - Verified via Playwright at 390/768/1440, binder 2/3/6 columns, pocket 4 columns, list view, last-page blank slots, card sheet open from an art tile, register toggle through art, and the clear-cards flow end to end.
 
+Second owner round, same day:
+
+- ONE tile format for every slot, art or not (owner rule: whatever works for the physical-card tile structures all tiles in binder and pocket). Both types end in the same footer: search icon left, status ball center, price right. The ball left the sprite tile's body; the art window now flex-grows (much larger art), with the caption strip reading as the frame's bottom band. Chosen-art tiles are slim-bezel (2% padding, rounded scan corners) per the owner's mock. Tiny tiles (content under 62px) hide search + price but keep the ball, so status survives at 6 columns.
+- Options menu no longer renders under the checkpoint strip: header z-index was 10 (a stacking context capping every child below the strip's 25), now 40. Panels got min-width 184px + nowrap labels so entries stop wrapping.
+- Binder view icon is a ring binder (rounded cover, spine line, three spine rings); pocket view icon matches the owner's mock (three columns of filled tiles cropped top and bottom, tall middle row, reads as a scrolling card grid).
+
 DEFERRED: global rarity filter (mark rarities you collect; card sheets show only those). Blocked on rarity data: TCGdex list responses carry no rarity and per-card detail fetches would be 90 requests a sheet. It is the first feature of the build-time card-data pipeline below, where rarity is baked into each file.
 
 ## Roadmap (from README)
