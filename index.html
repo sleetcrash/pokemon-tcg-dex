@@ -766,15 +766,15 @@ function handleTap(id){
   setState(id,next);
 }
 function armLongPress(container,sel){
-  let t=null,sx=0,sy=0,tid=null;
+  let t=null,sx=0,sy=0,tid=null,held=null;
   container.addEventListener("pointerdown",ev=>{
     const el=ev.target.closest(sel);
     if(!el||ev.button!==0||ev.target.closest(".cardbtn,.setc,a"))return;
     sx=ev.clientX;sy=ev.clientY;tid=Number(el.dataset.id);
-    el.classList.add("hold");
-    t=setTimeout(()=>{togglePending(tid);t=null;el.classList.remove("hold")},450);
+    held=el;el.classList.add("hold");
+    t=setTimeout(()=>{togglePending(tid);t=null;drop()},450);
   });
-  const drop=()=>{if(t){clearTimeout(t);t=null}container.querySelectorAll(".hold").forEach(x=>x.classList.remove("hold"))};
+  const drop=()=>{if(t){clearTimeout(t);t=null}if(held){held.classList.remove("hold");held=null}};
   container.addEventListener("pointermove",ev=>{
     if(t&&Math.hypot(ev.clientX-sx,ev.clientY-sy)>8)drop();
   });
@@ -913,7 +913,7 @@ function refreshDisplay(){
     if(owned[e[1]]===true)regs.set(e[0],(regs.get(e[0])||0)+1);
   }});
   let first=null;
-  DEX.forEach(e=>{
+  ORDERED.forEach(e=>{
     const row=rowMap.get(e[1]);
     const d=set.has(e[1])&&(!col||!e[5]||expanded.has(e[0]))?"":"none";
     if(row.style.display!==d)row.style.display=d;
@@ -1096,7 +1096,8 @@ pIn.addEventListener("keydown",e=>{if(e.key==="Enter")pIn.blur()});
 
 const scrollMem={list:0,binder:0,pocket:0};
 function setView(v){
-  scrollMem[prefs.view]=window.scrollY;
+  const prev=prefs.view;
+  scrollMem[prev]=window.scrollY;
   prefs.view=v;store.save("dex-il-ui",prefs);
   $("vList").classList.toggle("on",v==="list");
   $("vBinder").classList.toggle("on",v==="binder");
@@ -1107,7 +1108,7 @@ function setView(v){
   if(v==="binder")renderBinder();
   if(v==="pocket")renderPocket();
   renderJumps();
-  requestAnimationFrame(()=>window.scrollTo({top:scrollMem[v],behavior:"instant"}));
+  if(prev!==v)requestAnimationFrame(()=>window.scrollTo({top:scrollMem[v],behavior:"instant"}));
 }
 $("vList").addEventListener("click",()=>setView("list"));
 $("vBinder").addEventListener("click",()=>setView("binder"));
