@@ -23,6 +23,7 @@
     --accent:oklch(0.55 0.19 25);
     --pend:oklch(0.55 0.12 85); --pend-deep:oklch(0.42 0.1 85); --pend-lite:oklch(0.82 0.13 88);
     --ok:oklch(0.5 0.13 150); --glow:oklch(0.62 0.22 28); --shadow:0 8px 24px oklch(0.25 0.02 95 / .16);
+    --icon-search:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%222.5%22 width=%2214%22 height=%2219%22/%3E%3Ccircle cx=%2214.5%22 cy=%2215%22 r=%224.2%22/%3E%3Cline x1=%2217.6%22 y1=%2218.1%22 x2=%2221%22 y2=%2221.5%22/%3E%3C/svg%3E");
     --holo:linear-gradient(120deg,#5dd4e8 0%,#c86fd4 38%,#f2c46b 72%,#5dd4e8 100%);
     --ball:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeBAMAAADJHrORAAAAA3NCSVQFBQUYJt5DAAAAIVBMVEX///8xMTH/lDqcSjr/1jr////eWjpKUlKlpcV7e4TezvdcMgHRAAAAAXRSTlMAQObYZgAAAH5JREFUGNNjYKALEBQUROEqKSkhCTACuUpqAnC+kAtIIBEurRLqBOSnCeDgCymB1aclwvlg83DyhcH8tDRDKF/cSL0cyE0uhPHLKyLK0szLYXzG6aWh5eXllXD7l86IAHJXwB0sFTlz1apVjQj/dAG5HQJI/u3o6BDEEx60AwCJgyJdBXcpkgAAAABJRU5ErkJggg==);
     --hball:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADXklEQVRYw+2WTWyTdRzHm43QrRvpCntxWzTqQROjJpDpXlu2vq1P15d1LXAwEi/YzXUoZaPdnm5zslVwToUwHCgXISQcPAw5kEwSEBOoGVJ6AJxuevC2CxdPmnz89WlCIjEatrJTv8k3z5MneZ7vy+/5P/9HpyuggALWDozVRmqfrqB4s46NlRbBpQd/0RXqpivgZOFuBl3JBpgoL9ZRXF9Dar+D07EBvv7lD8YuX2d2IsaXe9vYVP8UL5Q9OSNcv3IJpvyQDDHjbWJOHeTTSZVznlfgsxAc62H40CD1+vybgFQA5pvgkgUWFDiyW9iT4/Qe+HCXGBPOBPj1gJW6fI1ki9T+fTb5fCMP8Y1ZmhCxI48wa+LjIJlwC+NqjBfL82Gipho+6s6J/p8BGQ2fhFjsNbPS306RvBPrEzca4KTUm5T6F1y5+rURyPnkv6SXsaTCraT7LSyGrfz+noOirWXrMLFti8x0T05g6hH+I/muXEvZ9PvaSPfuJN1nYSnSTlldJWtdc3z74x1J5hNBaeCovHSTcn40KKLC6Wzq0MPkWfHU25K+16KJ35bjSl8z0fEEJaaSxzexrc7E1UyGl1/fwU/zZ/gz8hrJKzcZGIwSHRnhJcUDs2FpKKjVfmufWRNe7LNyt6+d5SE3rb4A7yfiVD1T/fgGsq7D8UOsXjxFc8sOjl37ge/On8Rm3Y7D0cDxgTd4tcvHSqSV+xEL90T83jtmlvs7aHPasPm7Sb7VjT/ox1BpWNsYisqK+GBsHK/HTjx2EGvHdi6m7wjTOOwNjI6qON0WXIqFTu9OjU63mXgiwWF1mJ4eD3qTfn0rYWtNKX6vi2F5oNfTQnwwrtHraWVErnmUFk1wRI2TGEvg81hw2pvw+1xU1Zav/ztgMumYmDhIcv+b+PxuzURW3C9Cw6qK3WbGbjfjVjpQXO0oTY08SJ9CVQ+QvTcvX8NS2WDmp+N0dlolpcqoJFWUNizmBpZvnODn1OecjQb5Srh6a44zUxFK870plRh0TB6O4e9sxmZr5MLQbu6LeObacU6Hu1i5eoLVG3NEhwYoNTyhHbHCKD8hzz/H5Ym9LEvSpZuznH83wG+3v+DcTAR9xeb81f5fKJYlaqqv0lj5bK123GTUb/BfUQEFFJAn/A3xe2oF2MNqqgAAAABJRU5ErkJggg==);
@@ -142,23 +143,19 @@
   .views svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .bsize{display:flex;gap:6px;justify-content:flex-end;margin-bottom:8px}
   .gpick{position:relative}
-  #gpBtn{padding:6px 9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:flex;align-items:center;-webkit-tap-highlight-color:transparent}
-  #gpBtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6}
-  #gpPop{position:absolute;right:0;top:calc(100% + 6px);z-index:40;background:var(--page);border:1px solid var(--line);padding:10px;box-shadow:var(--shadow)}
-  #gpGrid{display:grid;grid-template-columns:repeat(6,22px);grid-auto-rows:22px;gap:4px}
-  #gpGrid button{border:1px solid var(--line);background:var(--card);padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
-  #gpGrid button.hi{background:var(--ink);border-color:var(--ink)}
-  #gpLbl{margin-top:8px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink)}
+  .gpick>button{padding:6px 9px;min-height:36px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:flex;align-items:center;-webkit-tap-highlight-color:transparent}
+  .gpick>button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6}
+  .gpick .pop{position:absolute;right:0;top:calc(100% + 6px);z-index:40;background:var(--page);border:1px solid var(--line);padding:10px;box-shadow:var(--shadow)}
+  .gpick .pop[hidden]{display:none}
+  .gpick .pop>div:first-child{display:grid;gap:4px}
+  #gpGrid{grid-template-columns:repeat(6,22px);grid-auto-rows:22px}
+  #ppGrid{grid-template-columns:repeat(5,22px);grid-auto-rows:30px}
+  .gpick .pop button{border:1px solid var(--line);background:var(--card);padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .gpick .pop button.hi{background:var(--ink);border-color:var(--ink)}
+  .gpick .lbl{margin-top:8px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink)}
 
   #binder,#pocket{--cols:3;padding:10px var(--gutter) 60px;max-width:min(100%,max(var(--col),calc(var(--cols) * 132px)));margin:0 auto}
   .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  #ppBtn{padding:6px 9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:flex;align-items:center;-webkit-tap-highlight-color:transparent}
-  #ppBtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6}
-  #ppPop{position:absolute;right:0;top:calc(100% + 6px);z-index:40;background:var(--page);border:1px solid var(--line);padding:10px;box-shadow:var(--shadow)}
-  #ppGrid{display:grid;grid-template-columns:repeat(5,22px);grid-auto-rows:30px;gap:4px}
-  #ppGrid button{border:1px solid var(--line);background:var(--card);padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
-  #ppGrid button.hi{background:var(--ink);border-color:var(--ink)}
-  #ppLbl{margin-top:8px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink)}
   .bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:var(--well);border:1px solid var(--line);padding:10px}
   .card{aspect-ratio:63/88;container-type:inline-size;background:var(--card);border:1px solid var(--line);border-radius:5px;position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .card.own{border-color:var(--line-hi);background:var(--card-hi)}
@@ -192,7 +189,7 @@
   .card .pfoot .pprice a{font-family:ui-monospace,Menlo,monospace;font-size:clamp(9px,6.5cqw,13px);color:var(--ink-dim);text-decoration:none;border-bottom:1px dotted var(--line-hi);white-space:nowrap}
   .card .pfoot .pprice a:hover{color:var(--ink)}
   /* small tiles shed chrome instead of overflowing: caption first, then footer + name */
-  @container (max-width:104px){
+  @container (max-width:88px){
     .card.pk .ptag{display:none}
     .card.pk .part{border-bottom:1px solid var(--line)}
   }
@@ -212,7 +209,7 @@
   .card.scan .aw{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
   .card.scan .aw img{max-width:100%;max-height:100%;object-fit:contain;display:block;border-radius:4px}
   .card .setc{justify-self:start;flex:none;width:clamp(18px,16cqw,30px);height:clamp(16px,14cqw,26px);border:0;background:none;padding:0;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
-  .card .setc::before{content:"";position:absolute;inset:0;margin:auto;width:clamp(14px,12cqw,22px);height:clamp(14px,12cqw,22px);background:var(--ink-dim);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%222.5%22 width=%2214%22 height=%2219%22/%3E%3Ccircle cx=%2214.5%22 cy=%2215%22 r=%224.2%22/%3E%3Cline x1=%2217.6%22 y1=%2218.1%22 x2=%2221%22 y2=%2221.5%22/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%222.5%22 width=%2214%22 height=%2219%22/%3E%3Ccircle cx=%2214.5%22 cy=%2215%22 r=%224.2%22/%3E%3Cline x1=%2217.6%22 y1=%2218.1%22 x2=%2221%22 y2=%2221.5%22/%3E%3C/svg%3E") center/contain no-repeat}
+  .card .setc::before{content:"";position:absolute;inset:0;margin:auto;width:clamp(14px,12cqw,22px);height:clamp(14px,12cqw,22px);background:var(--ink-dim);-webkit-mask:var(--icon-search) center/contain no-repeat;mask:var(--icon-search) center/contain no-repeat}
   .card.own .setc::before,.card.pend .setc::before{background:var(--ink)}
   .pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px}
   .pager button{padding:0;width:44px;height:44px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;font-weight:650;cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -247,19 +244,17 @@
   #toTop.show{opacity:1;pointer-events:auto}
   #toTop svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-  #jumps{position:fixed;right:0;bottom:0;width:40px;z-index:25;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:6px 3px}
+  #jumps{position:fixed;right:0;bottom:0;width:40px;z-index:25;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:6px 3px;touch-action:none}
   #jumps[hidden]{display:none}
   .jp{flex:1;max-height:52px;min-height:26px;display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,monospace;font-size:9px;font-weight:700;letter-spacing:.05em;color:var(--ink-dim);border:0;background:none;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
   .jp.cur{color:var(--ink);background:var(--card-hi)}
-  #jumps{touch-action:none}
   #jumps *{touch-action:none}
   .jp.f{color:var(--pend)}
 
   .cardbtn{flex:none;width:26px;height:44px;background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;position:relative}
-  .cardbtn::before{content:"";position:absolute;inset:0;margin:auto;width:20px;height:20px;background:var(--ink-dim);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%222.5%22 width=%2214%22 height=%2219%22/%3E%3Ccircle cx=%2214.5%22 cy=%2215%22 r=%224.2%22/%3E%3Cline x1=%2217.6%22 y1=%2218.1%22 x2=%2221%22 y2=%2221.5%22/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%222.5%22 width=%2214%22 height=%2219%22/%3E%3Ccircle cx=%2214.5%22 cy=%2215%22 r=%224.2%22/%3E%3Cline x1=%2217.6%22 y1=%2218.1%22 x2=%2221%22 y2=%2221.5%22/%3E%3C/svg%3E") center/contain no-repeat}
+  .cardbtn::before{content:"";position:absolute;inset:0;margin:auto;width:20px;height:20px;background:var(--ink-dim);-webkit-mask:var(--icon-search) center/contain no-repeat;mask:var(--icon-search) center/contain no-repeat}
   .row.done .cardbtn::before{background:var(--ink)}
   .row .cardbtn{margin-right:-4px}
-  .cardbtn:active,.cardbtn:hover{color:var(--ink)}
 
   #csheet{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:55;display:flex;align-items:flex-end;justify-content:center}
   #csheet[hidden]{display:none}
@@ -341,7 +336,7 @@
   <div class="bsize">
     <div class="gpick">
       <button id="ppBtn" type="button" aria-label="Columns"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="5.4" height="14" fill="currentColor" stroke="none"/><rect x="9.3" y="5" width="5.4" height="14"/><rect x="16.1" y="5" width="5.4" height="14"/></svg></button>
-      <div id="ppPop" hidden><div id="ppGrid"></div><div id="ppLbl">3 columns</div></div>
+      <div id="ppPop" class="pop" hidden><div id="ppGrid"></div><div id="ppLbl" class="lbl">3 columns</div></div>
     </div>
   </div>
   <div class="pgrid" id="pgrid"></div>
@@ -350,7 +345,7 @@
   <div class="bsize">
     <div class="gpick">
       <button id="gpBtn" type="button" aria-label="Binder size"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7.5" height="7.5" fill="currentColor" stroke="none"/><rect x="13" y="3.5" width="7.5" height="7.5"/><rect x="3.5" y="13" width="7.5" height="7.5"/><rect x="13" y="13" width="7.5" height="7.5"/></svg></button>
-      <div id="gpPop" hidden><div id="gpGrid"></div><div id="gpLbl">3 &#215; 3</div></div>
+      <div id="gpPop" class="pop" hidden><div id="gpGrid"></div><div id="gpLbl" class="lbl">3 &#215; 3</div></div>
     </div>
   </div>
   <div class="bgrid" id="bgrid"></div>
