@@ -156,9 +156,10 @@ export default async function handler(req, res) {
   let fbPromise = null;
   const startFb = () => (fbPromise ||= fallback(path, deadline).then((v) => ({ v }), (e) => ({ e })));
   let primary = null;
-  // fb=1: the client saw a fallback-served response in the last minute; skip the probe
-  // (the instance-local breaker can't cover cold starts, the client hint can).
-  if (req.query.fb !== "1" && Date.now() >= tcgdexDownUntil) {
+  // X-Card-Fb: the client saw a fresh fallback-served response in the last minute; skip the probe
+  // (the instance-local breaker can't cover cold starts, the client hint can). A header keeps
+  // the hint out of the CDN cache key.
+  if (req.headers["x-card-fb"] !== "1" && Date.now() >= tcgdexDownUntil) {
     const hedge = setTimeout(startFb, 800);
     try {
       const r = await get(TCGDEX + path, 2500, UA);
