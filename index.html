@@ -131,7 +131,8 @@
   .row.done .slot::after,.row.pend .slot::after{content:"";position:absolute;inset:-33.4%;background:var(--ball) center/contain no-repeat;image-rendering:pixelated}
   .row.hs.done .slot::after,.row.hs.pend .slot::after{background-image:var(--hball);inset:-30%}
   .row.pend .slot{transform:rotate(22deg)}
-  .row.pend .slot::before,.card.pend .pball::before{content:"";position:absolute;inset:-4px;border-radius:50%;box-shadow:0 0 10px 4px var(--glow);animation:catchpulse 1.1s ease-in-out infinite}
+  .row.pend .slot::before,.card.pend .pball::before{content:"";position:absolute;inset:-33.4%;background:var(--ball) center/contain no-repeat;filter:drop-shadow(0 0 2px var(--glow)) drop-shadow(0 0 5px var(--glow));animation:catchpulse 1.1s ease-in-out infinite}
+  .row.hs.pend .slot::before,.card.hs.pend .pball::before{background-image:var(--hball);inset:-30%}
   .row.pend::before{opacity:1;background:linear-gradient(180deg,var(--pend-lite),var(--pend-deep) 50%,var(--pend-lite))}
   .star{position:fixed;width:10px;height:10px;pointer-events:none;z-index:60;background:var(--pend-lite);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:starfly .6s ease-out forwards;opacity:0}
   .star.w{background:#f4f2ec;width:7px;height:7px}
@@ -154,13 +155,14 @@
   .gpick .pop[hidden]{display:none}
   .gpick .pop>div:first-child{display:grid;gap:4px}
   #gpGrid{grid-template-columns:repeat(6,22px);grid-auto-rows:22px}
-  #ppGrid{grid-template-columns:repeat(5,22px);grid-auto-rows:30px}
+  #ppGrid{grid-template-columns:repeat(6,22px);grid-auto-rows:30px}
   .gpick .pop button{border:1px solid var(--line);background:var(--card);padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .gpick .pop button.hi{background:var(--ink);border-color:var(--ink)}
   .gpick .lbl{margin-top:8px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink)}
 
   #binder,#pocket{--cols:3;padding:10px var(--gutter) 60px;max-width:min(100%,max(var(--col),calc(var(--cols) * 132px)));margin:0 auto}
   .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  #pgrid .card{content-visibility:auto;contain-intrinsic-size:auto 100px 140px}
   .bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:var(--well);border:1px solid var(--line);padding:10px}
   .card{aspect-ratio:63/88;container-type:inline-size;background:var(--card);border:1px solid var(--line);border-radius:5px;position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .card.own{border-color:var(--line-hi);background:var(--card-hi)}
@@ -170,7 +172,7 @@
   .blankc{aspect-ratio:63/88;border:1px dashed var(--line);border-radius:5px;background:var(--well);opacity:.5}
   .card.pk{padding:4.5% 4.5% 3%}
   .card.pk .ph{display:flex;justify-content:space-between;align-items:baseline;gap:3cqw;margin-bottom:2.5cqw}
-  .card.pk .pname{font-size:clamp(10px,7.5cqw,17px);font-weight:700;color:var(--ink-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card.pk .pname{font-size:clamp(8px,min(7.5cqw,calc(140cqw / var(--nl,9))),17px);font-weight:700;color:var(--ink-dim);line-height:1.1;min-width:0}
   .card.pk.own .pname{color:var(--ink)}
   .card .pno{flex:none;font-family:ui-monospace,Menlo,monospace;font-size:clamp(9px,6cqw,14px);color:var(--ink-dim)}
   .card.pk .part{flex:1;min-height:0;width:100%;border:1px solid var(--line);background:var(--well);display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -332,7 +334,8 @@
         <label><input type="radio" name="placement" value="group">Grouped at end</label>
         <div class="pdiv"></div>
         <button id="optLists" class="plabel" type="button">Manage lists</button>
-        <button id="optClearCards" class="plabel" type="button">Clear binder cards</button>
+        <button id="optClearCards" class="plabel" type="button">Clear all cards</button>
+        <button id="optReset" class="plabel" type="button">Reset list</button>
       </div>
     </div>
   </div>
@@ -369,7 +372,7 @@
 <div id="jumps" hidden></div>
 <dialog id="csheet" aria-labelledby="ctitle">
   <div class="cbox">
-    <div class="chead"><b id="ctitle"></b><button id="cback" type="button" hidden>Back</button><button id="cclose" type="button">Close</button></div>
+    <div class="chead"><b id="ctitle"></b><button id="cremove" type="button" hidden>Remove card</button><button id="cback" type="button" hidden>Back</button><button id="cclose" type="button">Close</button></div>
     <div class="cbody" id="cbody"></div>
   </div>
 </dialog>
@@ -648,7 +651,7 @@ function skeleton(){
 }
 async function openCards(e){
   const my=++cSeq;
-  cEntry=e;ctitle.textContent=e[2];cback.hidden=true;openDialog(csheet);
+  cEntry=e;ctitle.textContent=e[2];cback.hidden=true;cremove.hidden=!CARDART[e[1]];openDialog(csheet);
   skeleton();
   let cards;
   try{cards=await cardsFor(e)}catch(err){if(my===cSeq)cmsg(navigator.onLine?"Couldn't reach the card database.":"Card lookup needs a connection.",err.message,true);return}
@@ -733,6 +736,13 @@ function showCard(c){
   }).catch(()=>{});
 }
 cback.addEventListener("click",()=>openCards(cEntry));
+const cremove=$("cremove");
+cremove.addEventListener("click",()=>{
+  const id=cEntry[1];
+  delete CARDART[id];store.save("dex-il-cards",CARDART);
+  refreshTile(id);fillRowPrice(rowMap.get(id));
+  openCards(cEntry);
+});
 $("cclose").addEventListener("click",closeSheet);
 csheet.addEventListener("click",ev=>{if(ev.target===csheet)closeSheet()});
 
@@ -970,17 +980,26 @@ function setPlacement(v){
 placeRadios.forEach(r=>r.addEventListener("change",()=>{if(r.checked)setPlacement(r.value)}));
 const ddOpt=$("ddOpt");
 wireDropdown(ddOpt);
-// clearing every chosen binder card is destructive: first tap arms, second wipes
-const optClear=$("optClearCards");
-function disarmClear(){optClear.textContent="Clear binder cards";optClear.classList.remove("danger")}
-optClear.addEventListener("click",()=>{
-  if(!optClear.classList.contains("danger")){optClear.textContent="Tap again to clear all";optClear.classList.add("danger");return}
+// destructive options arm on the first tap and act on the second; any other click disarms
+const confirms=[];
+function armConfirm(btn,armedLabel,action){
+  const label=btn.textContent;
+  confirms.push(btn);
+  btn.addEventListener("click",()=>{
+    if(!btn.classList.contains("danger")){disarmClear();btn.textContent=armedLabel;btn.classList.add("danger");return}
+    action();disarmClear();closeMenus();
+  });
+  btn.dataset.label=label;
+}
+function disarmClear(){confirms.forEach(b=>{b.textContent=b.dataset.label;b.classList.remove("danger")})}
+function clearCards(){
   Object.keys(CARDART).forEach(id=>{rowMap.get(Number(id)).querySelector(".rp").textContent=""});
   CARDART={};store.save("dex-il-cards",CARDART);
-  disarmClear();
-  closeMenus();
   if(prefs.view==="binder")renderBinder();else if(prefs.view==="pocket")renderPocket();
-});
+}
+const optClear=$("optClearCards");
+armConfirm(optClear,"Tap again to clear all cards",clearCards);
+armConfirm($("optReset"),"Tap again to reset everything",()=>{clearCards();applyOwned({})});
 
 
 // one binder tile. Every slot shares one format: visual area on top (framed
@@ -1003,7 +1022,8 @@ function binderTile([n,id,name,region,gen,form,sref],map){
       c.querySelector(".pprice").replaceChildren(priceLink(p));
     });
   }else{
-    c.innerHTML=`<div class="ph"><span class="pname">${name}</span><span class="pno">#${String(n).padStart(4,"0")}</span></div>`+
+    const dn=name.replace(/^Gigantamax /,"G-Max ");
+    c.innerHTML=`<div class="ph"><span class="pname" style="--nl:${dn.length}">${dn}</span><span class="pno">#${String(n).padStart(4,"0")}</span></div>`+
       `<div class="part">${SPR[sid]?`<img loading="lazy" decoding="async" src="data:image/png;base64,${SPR[sid]}" alt="">`:`<span class="fbc">#${n}</span>`}</div>`+
       `<div class="ptag">${form?`<span class="chip f">${form==="Other"?"Form":form}</span>`:""}<span class="chip">Gen ${gen}</span><span class="chip r ${region}">${region}</span></div>`+
       foot("");
@@ -1041,15 +1061,15 @@ function renderBinder(){
 // pocket view: one continuous vertical run of binder tiles, column count selectable
 // via a one-row picker (mouse) or pinch (touch, and ctrl+wheel trackpad pinch)
 const ppBtn=$("ppBtn"),ppPop=$("ppPop"),ppGrid=$("ppGrid"),ppLbl=$("ppLbl");
-for(let cc=2;cc<=6;cc++){
+for(let cc=1;cc<=6;cc++){
   const b=document.createElement("button");b.type="button";b.dataset.c=cc;
   b.addEventListener("mouseenter",()=>ppHi(cc));
   b.addEventListener("click",()=>{setPCols(cc);ppPop.hidden=true});
   ppGrid.appendChild(b);
 }
-function ppHi(c){[...ppGrid.children].forEach(el=>el.classList.toggle("hi",+el.dataset.c<=c));ppLbl.textContent=`${c} columns`}
+function ppHi(c){[...ppGrid.children].forEach(el=>el.classList.toggle("hi",+el.dataset.c<=c));ppLbl.textContent=c===1?"1 column":`${c} columns`}
 function setPCols(c){
-  c=Math.min(6,Math.max(2,c));
+  c=Math.min(6,Math.max(1,c));
   if(c===prefs.pcols)return;
   prefs.pcols=c;store.save("dex-il-ui",prefs);
   ppBtn.title=`${c} columns`;
@@ -1243,7 +1263,7 @@ document.addEventListener("click",e=>{
   if(!e.target.closest(".gpick")){gpPop.hidden=true;ppPop.hidden=true}
   if(!e.target.closest(".search"))sugg.style.display="none";
   if(!e.target.closest(".dd"))closeMenus();
-  if(optClear.classList.contains("danger")&&!optClear.contains(e.target))disarmClear();
+  if(!e.target.closest(".plabel.danger"))disarmClear();
 });
 
 // named lists + sync code: collection state as a bitmap over DEX order
