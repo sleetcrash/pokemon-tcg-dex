@@ -164,12 +164,12 @@
   .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   #pgrid .card{content-visibility:auto;contain-intrinsic-size:auto 100px 140px}
   .bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:var(--well);border:1px solid var(--line);padding:10px}
-  .card{aspect-ratio:63/88;container-type:inline-size;background:var(--card);border:1px solid var(--line);border-radius:5px;position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  .card{aspect-ratio:63/88;container-type:inline-size;background:var(--card);border:1px solid var(--line);position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .card.own{border-color:var(--line-hi);background:var(--card-hi)}
   .card.pend{border-color:var(--pend)}
   .card .fbc{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-dim)}
   .card.flash{animation:flash 1.6s ease}
-  .blankc{aspect-ratio:63/88;border:1px dashed var(--line);border-radius:5px;background:var(--well);opacity:.5}
+  .blankc{aspect-ratio:63/88;border:1px dashed var(--line);background:var(--well);opacity:.5}
   .card.pk{padding:4.5% 4.5% 3%}
   .card.pk .ph{display:flex;justify-content:space-between;align-items:baseline;gap:3cqw;margin-bottom:2.5cqw}
   .card.pk .pname{font-size:clamp(8px,min(7.5cqw,calc(140cqw / var(--nl,9))),17px);font-weight:700;color:var(--ink-dim);line-height:1.1;min-width:0}
@@ -211,7 +211,7 @@
   }
   .card.scan{padding:2% 2% 1.5%}
   .card.scan .aw{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
-  .card.scan .aw img{max-width:100%;max-height:100%;object-fit:contain;display:block;border-radius:4px}
+  .card.scan .aw img{max-width:100%;max-height:100%;object-fit:contain;display:block}
   .card .setc{flex:none;width:clamp(18px,16cqw,30px);height:clamp(16px,14cqw,26px);border:0;background:none;padding:0;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
   .card .setc::before{content:"";position:absolute;inset:0;margin:auto;width:clamp(14px,12cqw,22px);height:clamp(14px,12cqw,22px);background:var(--ink-dim);-webkit-mask:var(--icon-search) center/contain no-repeat;mask:var(--icon-search) center/contain no-repeat}
   .card.own .setc::before,.card.pend .setc::before{background:var(--ink)}
