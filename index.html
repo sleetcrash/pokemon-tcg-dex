@@ -272,8 +272,8 @@
   .ccard.sk{pointer-events:none}
   .ccard.sk i{display:block;aspect-ratio:63/88;background:var(--well)}
   .ccard.sk b{display:block;height:10px;margin:7px 6px 9px;background:var(--well)}
-  .cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  @media(min-width:520px){.cgrid{grid-template-columns:repeat(4,1fr)}}
+  .cgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  @media(min-width:520px){.cgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
   .ccard{background:var(--card);border:1px solid var(--line);padding:0;cursor:pointer;text-align:left;display:flex;flex-direction:column;-webkit-tap-highlight-color:transparent}
   .ccard.sel{border-color:var(--ok)}
   .ccard img{width:100%;aspect-ratio:63/88;object-fit:contain;background:var(--well);display:block;opacity:0;transition:opacity .18s ease}
