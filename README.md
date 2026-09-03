@@ -57,3 +57,5 @@ I built this for me to use personally, but figured I would keep it available in 
 ## Thanks
 
 This would not be possible without PokeAPI: https://github.com/PokeAPI/pokeapi
+
+Sprites are the official game sprites served by the PokeAPI sprites repository (https://github.com/PokeAPI/sprites): FireRed/LeafGreen for Kanto, HeartGold/SoulSilver for Johto, Emerald for Hoenn, Platinum for Sinnoh, Black/White for Unova, Omega Ruby/Alpha Sapphire for Kalos, Ultra Sun/Ultra Moon for Alola, and Pokemon HOME renders for Galar, Paldea, and everything newer. A HOME-renders-everywhere option lives in the gear menu. No fan-made sprites are used.
