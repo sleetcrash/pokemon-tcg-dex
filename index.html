@@ -147,7 +147,7 @@
   .views .ddbtn{padding-right:0}
   .views>button.on,.views .dd.has .ddbtn,.views .dd.open .ddbtn{color:var(--ink)}
   .views svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-  .bsize{display:flex;gap:6px;justify-content:flex-end;margin-bottom:8px}
+  .bsize{position:sticky;top:calc(var(--hdr,150px) + 4px);z-index:30;display:flex;gap:6px;justify-content:flex-end;margin-bottom:8px}
   .gpick{position:relative}
   .gpick>button{padding:6px 9px;min-height:36px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:flex;align-items:center;-webkit-tap-highlight-color:transparent}
   .gpick>button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6}
@@ -161,17 +161,17 @@
   .gpick .lbl{margin-top:8px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink)}
 
   #binder,#pocket{--cols:3;padding:10px var(--gutter) 60px;max-width:min(100%,max(var(--col),calc(var(--cols) * 132px)));margin:0 auto}
-  .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .pgrid,.bgrid{display:grid;grid-template-columns:repeat(3,1fr);--gap:8px;gap:var(--gap);container-type:inline-size;--r:calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols) * .04)}
   #pgrid .card{content-visibility:auto;contain-intrinsic-size:auto 100px 160px}
-  .bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:var(--well);border:1px solid var(--line);padding:10px}
+  .bgrid{background:var(--well);border:1px solid var(--line);padding:10px}
   /* one slot format: a full-width 63/88 face, then one bezel strip under it (search, tags, ball) */
-  .card{container-type:inline-size;background:var(--card);border:1px solid var(--line);position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  .card{container-type:inline-size;border-radius:var(--r);background:var(--card);border:1px solid var(--line);position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .card.own{border-color:var(--line-hi);background:var(--card-hi)}
   .card.pend{border-color:var(--pend)}
   .card .fbc{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-dim)}
   .card.flash{animation:flash 1.6s ease}
   .card .face{flex:none;width:100%;aspect-ratio:63/88;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--well)}
-  .blankc{container-type:inline-size;display:flex;flex-direction:column;border:1px dashed var(--line);background:var(--well);opacity:.5}
+  .blankc{container-type:inline-size;border-radius:var(--r);display:flex;flex-direction:column;border:1px dashed var(--line);background:var(--well);opacity:.5}
   .blankc::before{content:"";aspect-ratio:63/88}
   .blankc::after{content:"";height:clamp(16px,8cqw,24px)}
   .card.pk .ph{flex:none;display:flex;justify-content:space-between;align-items:baseline;gap:3cqw;padding:2cqw 3cqw 1.5cqw;background:var(--card);border-bottom:1px solid var(--line)}
@@ -182,6 +182,7 @@
   .card.pk .part img{width:64%;max-height:92%;object-fit:contain;image-rendering:pixelated;opacity:.6;filter:grayscale(1);transition:opacity .2s,filter .2s}
   .card.pk.own .part img{opacity:1;filter:none}
   .card.pk.pend .part img{opacity:.85;filter:none}
+  .card.scan .face{background:none}
   .card.scan .face img{width:100%;height:100%;object-fit:cover;display:block}
   .card.scan .rmx{position:absolute;top:2cqw;right:2cqw;width:clamp(18px,10cqw,26px);height:clamp(18px,10cqw,26px);border:0;padding:0;background:var(--ink);color:var(--card);font-size:clamp(12px,7cqw,18px);font-weight:700;line-height:1;cursor:pointer;box-shadow:0 0 0 1px var(--card);opacity:0;pointer-events:none;transition:opacity .15s;-webkit-tap-highlight-color:transparent}
   .card.scan:hover .rmx,.card.scan:focus-within .rmx{opacity:1;pointer-events:auto}
@@ -1040,7 +1041,7 @@ function renderBinder(){
   const per=perNow(),cols=prefs.bcols;
   binder.style.setProperty("--cols",cols);
   bgrid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
-  bgrid.style.gap=cols>=5?"4px":cols===4?"6px":"8px";
+  bgrid.style.setProperty("--gap",cols>=5?"4px":cols===4?"6px":"8px");
   const pages=Math.max(1,Math.ceil(visArr.length/per));
   if(page>=pages)page=pages-1;
   if(page<0)page=0;
@@ -1097,7 +1098,7 @@ pocketEl.addEventListener("wheel",ev=>{
 function layoutPocket(){
   pocketEl.style.setProperty("--cols",prefs.pcols);
   pgrid.style.gridTemplateColumns=`repeat(${prefs.pcols},1fr)`;
-  pgrid.style.gap=prefs.pcols>=5?"4px":prefs.pcols===4?"6px":"8px";
+  pgrid.style.setProperty("--gap",prefs.pcols>=5?"4px":prefs.pcols===4?"6px":"8px");
 }
 function renderPocket(){
   layoutPocket();
