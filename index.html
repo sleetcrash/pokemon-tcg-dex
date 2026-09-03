@@ -162,59 +162,56 @@
 
   #binder,#pocket{--cols:3;padding:10px var(--gutter) 60px;max-width:min(100%,max(var(--col),calc(var(--cols) * 132px)));margin:0 auto}
   .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  #pgrid .card{content-visibility:auto;contain-intrinsic-size:auto 100px 140px}
+  #pgrid .card{content-visibility:auto;contain-intrinsic-size:auto 100px 160px}
   .bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:var(--well);border:1px solid var(--line);padding:10px}
-  .card{aspect-ratio:63/88;container-type:inline-size;background:var(--card);border:1px solid var(--line);position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  /* one slot format: a full-width 63/88 face, then one bezel strip under it (search, tags, ball) */
+  .card{container-type:inline-size;background:var(--card);border:1px solid var(--line);position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .card.own{border-color:var(--line-hi);background:var(--card-hi)}
   .card.pend{border-color:var(--pend)}
   .card .fbc{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-dim)}
   .card.flash{animation:flash 1.6s ease}
-  .blankc{aspect-ratio:63/88;border:1px dashed var(--line);background:var(--well);opacity:.5}
-  .card.pk{padding:4.5% 4.5% 3%}
-  .card.pk .ph{display:flex;justify-content:space-between;align-items:baseline;gap:3cqw;margin-bottom:2.5cqw}
+  .card .face{flex:none;width:100%;aspect-ratio:63/88;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--well)}
+  .blankc{container-type:inline-size;display:flex;flex-direction:column;border:1px dashed var(--line);background:var(--well);opacity:.5}
+  .blankc::before{content:"";aspect-ratio:63/88}
+  .blankc::after{content:"";height:clamp(16px,8cqw,24px)}
+  .card.pk .ph{flex:none;display:flex;justify-content:space-between;align-items:baseline;gap:3cqw;padding:2cqw 3cqw 1.5cqw;background:var(--card);border-bottom:1px solid var(--line)}
   .card.pk .pname{font-size:clamp(8px,min(7.5cqw,calc(140cqw / var(--nl,9))),17px);font-weight:700;color:var(--ink-dim);line-height:1.1;min-width:0}
   .card.pk.own .pname{color:var(--ink)}
   .card .pno{flex:none;font-family:ui-monospace,Menlo,monospace;font-size:clamp(9px,6cqw,14px);color:var(--ink-dim)}
-  .card.pk .part{flex:1;min-height:0;width:100%;border:1px solid var(--line);background:var(--well);display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .card.pk .part{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .card.pk .part img{width:64%;max-height:92%;object-fit:contain;image-rendering:pixelated;opacity:.6;filter:grayscale(1);transition:opacity .2s,filter .2s}
   .card.pk.own .part img{opacity:1;filter:none}
   .card.pk.pend .part img{opacity:.85;filter:none}
-  .card.pk .ptag{display:flex;justify-content:center;align-items:center;gap:2.5cqw;padding:1.5cqw 2cqw;border:1px solid var(--line);border-top:0;overflow:hidden}
-  .card.pk .ptag .chip{flex:none;font-size:clamp(9px,5cqw,11px);padding:0;background:none;white-space:nowrap}
-  .card .pball{position:relative;flex:none;width:clamp(13px,12cqw,24px);height:clamp(13px,12cqw,24px);border-radius:50%;border:max(1.5px,0.8cqw) solid var(--line)}
+  .card.scan .face img{width:100%;height:100%;object-fit:cover;display:block}
+  .card.scan .rmx{position:absolute;top:2cqw;right:2cqw;width:clamp(18px,10cqw,26px);height:clamp(18px,10cqw,26px);border:0;padding:0;background:var(--ink);color:var(--card);font-size:clamp(12px,7cqw,18px);font-weight:700;line-height:1;cursor:pointer;box-shadow:0 0 0 1px var(--card);opacity:0;pointer-events:none;transition:opacity .15s;-webkit-tap-highlight-color:transparent}
+  .card.scan:hover .rmx,.card.scan:focus-within .rmx{opacity:1;pointer-events:auto}
+  .card .pfoot{flex:none;height:clamp(16px,8cqw,24px);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2cqw;padding:0 2.5cqw;border-top:1px solid var(--line)}
+  .card .pfoot .ptag{display:flex;justify-content:center;align-items:center;gap:2.5cqw;min-width:0;overflow:hidden}
+  .card .pfoot .chip{flex:none;font-size:clamp(8px,5cqw,11px);padding:0;background:none;white-space:nowrap}
+  .card .pfoot .pprice a{font-family:ui-monospace,Menlo,monospace;font-size:clamp(8px,5.5cqw,12px);color:var(--ink-dim);text-decoration:none;border-bottom:1px dotted var(--line-hi);white-space:nowrap}
+  .card .pfoot .pprice a:hover{color:var(--ink)}
+  .card .pball{position:relative;flex:none;width:clamp(12px,6.5cqw,18px);height:clamp(12px,6.5cqw,18px);border-radius:50%;border:max(1.5px,0.7cqw) solid var(--line)}
   .card.own .pball,.card.pend .pball{border-color:transparent}
   .card.own .pball::after,.card.pend .pball::after{content:"";position:absolute;inset:-33.4%;background:var(--ball) center/contain no-repeat;image-rendering:pixelated}
   .card.hs.own .pball::after,.card.hs.pend .pball::after{background-image:var(--hball);inset:-30%}
   .card.pend .pball{transform:rotate(22deg)}
-  .card .pfoot{flex:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-top:1.5cqw;padding-top:1.5cqw;border-top:1px solid var(--line)}
-  .card .pfoot .pl{display:flex;align-items:center;gap:1.5cqw;min-width:0}
-  .card .pfoot .pball{grid-column:2}
-  .card .pfoot .pprice{grid-column:3;justify-self:end;min-width:0;overflow:hidden}
-  .card .pfoot .pprice a{font-family:ui-monospace,Menlo,monospace;font-size:clamp(9px,6.5cqw,13px);color:var(--ink-dim);text-decoration:none;border-bottom:1px dotted var(--line-hi);white-space:nowrap}
-  .card .pfoot .pprice a:hover{color:var(--ink)}
-  /* small tiles shed chrome instead of overflowing: caption first, then footer + name */
-  @container (max-width:88px){
-    .card.pk .ptag{display:none}
-    .card.pk .part{border-bottom:1px solid var(--line)}
-  }
+  .card .setc{flex:none;height:100%;width:clamp(18px,9cqw,26px);border:0;background:none;padding:0;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
+  .card .setc::before{content:"";position:absolute;inset:0;margin:auto;width:clamp(13px,6.5cqw,18px);height:clamp(13px,6.5cqw,18px);background:var(--ink-dim);-webkit-mask:var(--icon-search) center/contain no-repeat;mask:var(--icon-search) center/contain no-repeat}
+  .card.own .setc::before,.card.pend .setc::before{background:var(--ink)}
+  /* narrow slots shed bezel content instead of overflowing it */
+  @container (max-width:130px){.card .pfoot .pprice{display:none}}
+  @container (max-width:120px){.card .pfoot .chip.f ~ .chip:not(.r){display:none}}
+  @container (max-width:100px){.card .pfoot .chip:not(.r):not(.f){display:none}}
   @container (max-width:80px){
-    .card.pk{padding:3% 3% 2%}
-    .card.pk .ph{margin-bottom:1cqw}
+    .card .pfoot .ptag{display:none}
     .card.pk .part img{width:78%}
   }
   @container (max-width:62px){
-    .card .pfoot .pprice,.card.scan .pfoot .pno{display:none}
     .card.pk .pname{display:none}
     .card.pk .ph{justify-content:center}
-    .card .setc{width:14px;height:14px}
+    .card .setc{width:14px}
     .card .setc::before{width:12px;height:12px}
   }
-  .card.scan{padding:2% 2% 1.5%}
-  .card.scan .aw{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
-  .card.scan .aw img{max-width:100%;max-height:100%;object-fit:contain;display:block}
-  .card .setc{flex:none;width:clamp(18px,16cqw,30px);height:clamp(16px,14cqw,26px);border:0;background:none;padding:0;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
-  .card .setc::before{content:"";position:absolute;inset:0;margin:auto;width:clamp(14px,12cqw,22px);height:clamp(14px,12cqw,22px);background:var(--ink-dim);-webkit-mask:var(--icon-search) center/contain no-repeat;mask:var(--icon-search) center/contain no-repeat}
-  .card.own .setc::before,.card.pend .setc::before{background:var(--ink)}
   .pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px}
   .pager button{padding:0;width:44px;height:44px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;font-weight:650;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .pager button:disabled{opacity:.35}
@@ -737,12 +734,7 @@ function showCard(c){
 }
 cback.addEventListener("click",()=>openCards(cEntry));
 const cremove=$("cremove");
-cremove.addEventListener("click",()=>{
-  const id=cEntry[1];
-  delete CARDART[id];store.save("dex-il-cards",CARDART);
-  refreshTile(id);fillRowPrice(rowMap.get(id));
-  openCards(cEntry);
-});
+cremove.addEventListener("click",()=>{removeArt(cEntry[1]);openCards(cEntry)});
 $("cclose").addEventListener("click",closeSheet);
 csheet.addEventListener("click",ev=>{if(ev.target===csheet)closeSheet()});
 
@@ -785,7 +777,7 @@ function armLongPress(container,sel){
   container.addEventListener("pointerdown",ev=>{
     if(!ev.isPrimary){drop();return}
     const el=ev.target.closest(sel);
-    if(!el||ev.button!==0||ev.target.closest(".cardbtn,.setc,a"))return;
+    if(!el||ev.button!==0||ev.target.closest(".cardbtn,.setc,.rmx,a"))return;
     sx=ev.clientX;sy=ev.clientY;tid=Number(el.dataset.id);
     held=el;fired=false;el.classList.add("hold");
     t=setTimeout(()=>{t=null;fired=true;el.classList.remove("hold");togglePending(tid)},450);
@@ -1002,41 +994,46 @@ armConfirm(optClear,"Tap again to clear all cards",clearCards);
 armConfirm($("optReset"),"Tap again to reset everything",()=>{clearCards();applyOwned({})});
 
 
-// one binder tile. Every slot shares one format: visual area on top (framed
-// sprite window with header + tag strip, or the chosen card scan), then the
-// same footer (search button left, status ball center, price right), so the
-// slot stays fully interactive whether or not a physical card fills it.
+// one binder tile. Every slot is a full-width 63/88 face (drawn sprite card, or
+// the chosen scan filling it exactly) over one bezel strip: search button left,
+// tags centre (price after them on scan tiles), status ball right. The scan
+// carries a remove button that shows on hover or after a first tap.
 function binderTile([n,id,name,region,gen,form,sref],map){
   const sid=sref||id;
   const c=document.createElement("div");
   map.set(id,c);
   const art=cardArt(id);
-  const foot=left=>`<div class="pfoot"><span class="pl"><button class="setc" type="button" tabindex="-1" aria-label="Cards" title="Find cards"></button>${left}</span><span class="pball"></span><span class="pprice"></span></div>`;
+  const chips=`${form?`<span class="chip f">${form==="Other"?"Form":form}</span>`:""}<span class="chip">Gen ${gen}</span><span class="chip r ${region}">${region}</span>`;
+  const foot=extra=>`<div class="pfoot"><button class="setc" type="button" tabindex="-1" aria-label="Cards" title="Find cards"></button><span class="ptag">${chips}${extra}</span><span class="pball"></span></div>`;
   c.className="card"+(art?" scan":" pk")+(owned[id]===true?" own":owned[id]==="p"?" pend":"")+(region==="Hisui"?" hs":"")+(form?" ft-"+form:"");
   c.dataset.id=id;c.tabIndex=-1;
   if(art){
-    c.innerHTML=`<div class="aw"><img class="cardart" loading="lazy" src="${cimg(art,"low")}" alt="${name}"></div>`+
-      foot(`<span class="pno">#${String(n).padStart(4,"0")}</span>`);
+    c.innerHTML=`<div class="face"><img class="cardart" loading="lazy" src="${cimg(art,"low")}" alt="${name}"><button class="rmx" type="button" tabindex="-1" aria-label="Remove card" title="Remove card">&#215;</button></div>`+
+      foot(`<span class="pprice"></span>`);
     priceInfo(id).then(p=>{
       if(!p||!c.isConnected)return;
       c.querySelector(".pprice").replaceChildren(priceLink(p));
     });
   }else{
     const dn=name.replace(/^Gigantamax /,"G-Max ");
-    c.innerHTML=`<div class="ph"><span class="pname" style="--nl:${dn.length}">${dn}</span><span class="pno">#${String(n).padStart(4,"0")}</span></div>`+
-      `<div class="part">${SPR[sid]?`<img loading="lazy" decoding="async" src="data:image/png;base64,${SPR[sid]}" alt="">`:`<span class="fbc">#${n}</span>`}</div>`+
-      `<div class="ptag">${form?`<span class="chip f">${form==="Other"?"Form":form}</span>`:""}<span class="chip">Gen ${gen}</span><span class="chip r ${region}">${region}</span></div>`+
+    c.innerHTML=`<div class="face"><div class="ph"><span class="pname" style="--nl:${dn.length}">${dn}</span><span class="pno">#${String(n).padStart(4,"0")}</span></div>`+
+      `<div class="part">${SPR[sid]?`<img loading="lazy" decoding="async" src="data:image/png;base64,${SPR[sid]}" alt="">`:`<span class="fbc">#${n}</span>`}</div></div>`+
       foot("");
   }
   c.addEventListener("click",ev=>{
     if(ev.target.closest("a"))return;
     if(ev.target.closest(".setc")){openCards(byId.get(id));return}
+    if(ev.target.closest(".rmx")){removeArt(id);return}
     handleTap(id);
   });
   return c;
 }
 function refreshTile(id){
   [bTiles,pTiles].forEach(map=>{const old=map.get(id);if(old)old.replaceWith(binderTile(byId.get(id),map))});
+}
+function removeArt(id){
+  delete CARDART[id];store.save("dex-il-cards",CARDART);
+  refreshTile(id);fillRowPrice(rowMap.get(id));
 }
 // binder view: paginated pocket pages
 function renderBinder(){
