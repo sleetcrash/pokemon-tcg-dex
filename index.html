@@ -153,7 +153,6 @@
   .gpick{position:relative;margin-left:auto}
   .gpick:not([hidden])~.dd{margin-left:0}
   .gpick>button{padding:4px 8px;border:0;background:none;color:var(--ink-dim);cursor:pointer;display:flex;align-items:center;-webkit-tap-highlight-color:transparent}
-  .gpick>button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8}
   .gpick .pop{position:absolute;right:0;top:calc(100% + 6px);z-index:40;background:var(--page);border:1px solid var(--line);padding:10px;box-shadow:var(--shadow)}
   .gpick .pop[hidden]{display:none}
   .gpick .pop>div:first-child{display:grid;gap:4px}
@@ -163,8 +162,7 @@
   .gpick .pop button.hi{background:var(--ink);border-color:var(--ink)}
   .gpick .lbl{margin-top:8px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink)}
 
-  #binder,#pocket{--cols:3;padding:10px var(--gutter) 60px;max-width:min(100%,max(var(--col),calc(var(--cols) * 132px)));margin:0 auto}
-  @media(max-width:720px){#binder,#pocket{padding-right:calc(var(--gutter) + 40px)}}
+  #binder,#pocket{--cols:3;padding:10px calc(var(--gutter) + 40px) 60px var(--gutter);max-width:min(100%,max(var(--col),calc(var(--cols) * 132px)));margin:0 auto}
   .pgrid,.bgrid{display:grid;grid-template-columns:repeat(3,1fr);--gap:8px;gap:var(--gap);container-type:inline-size;--r:calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols) * .04)}
   #pgrid .card{content-visibility:auto;contain-intrinsic-size:auto 100px auto var(--tileh,160px)}
   .bgrid{background:var(--well);border:1px solid var(--line);padding:10px}
@@ -1232,23 +1230,13 @@ function jumpToEntry(entry){
     applyFilters();
   }
   if(prefs.entries==="col"&&entry[5]&&!expanded.has(entry[0])){expanded.add(entry[0]);refreshDisplay()}
-  if(prefs.view==="list"){
-    const row=rowMap.get(id);
-    window.scrollTo({top:row.offsetTop-headH-6,behavior:"instant"});
-    row.classList.remove("flash");void row.offsetWidth;row.classList.add("flash");
-  }else if(prefs.view==="pocket"){
-    const card=pTiles.get(id);
-    if(card){
-      window.scrollTo({top:card.getBoundingClientRect().top+window.scrollY-headH-6,behavior:"instant"});
-      card.classList.remove("flash");void card.offsetWidth;card.classList.add("flash");
-    }
-  }else{
+  if(prefs.view==="binder"){
     page=Math.floor(visArr.findIndex(e=>e[1]===id)/perNow());
     renderBinder();
     binder.scrollIntoView();
-    const card=bTiles.get(id);
-    card.classList.remove("flash");void card.offsetWidth;card.classList.add("flash");
-  }
+  }else window.scrollTo({top:docTop(jumpEl(id))-headH-6,behavior:"instant"});
+  const el=jumpEl(id);
+  el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");
 }
 let sIdx=0;
 function paintPick(){[...sugg.children].forEach((b,i)=>b.classList.toggle("hi",i===sIdx))}
@@ -1437,17 +1425,23 @@ function updateCurrentJump(force){
 }
 // press jumps into the region; sliding within its checkpoint scrubs that region's Pokemon,
 // crossing checkpoints moves between regions
-let jRuns=[],jLastId=null,jPendTop=null,jRaf=false;
+let jRuns=[],jLastId=null,jPend=null,jPendPage=null,jRaf=false;
 function btnAtY(y){
   const x=jumps.getBoundingClientRect().left+jumps.offsetWidth/2;
   const el=document.elementFromPoint(x,y);
   return el&&el.closest(".jp");
 }
-function queueScroll(top){
-  jPendTop=top;keepHeader();
+// one frame carries the latest target; a binder page turn queued by the scrub renders here too
+function queueScroll(target){
+  jPend=target;keepHeader();
   if(jRaf)return;
   jRaf=true;
-  requestAnimationFrame(()=>{jRaf=false;window.scrollTo({top:jPendTop,behavior:"instant"});updateCurrentJump()});
+  requestAnimationFrame(()=>{
+    jRaf=false;
+    if(jPendPage!==null&&jPendPage!==page){page=jPendPage;renderBinder()}
+    jPendPage=null;
+    window.scrollTo({top:jPend(),behavior:"instant"});updateCurrentJump();
+  });
 }
 function scrubAt(y,btnHint){
   const btn=btnHint||btnAtY(y);
@@ -1457,8 +1451,8 @@ function scrubAt(y,btnHint){
   const frac=rect.height>0?Math.min(1,Math.max(0,(y-rect.top)/rect.height)):0;
   const i=r.start+Math.min(r.n-1,Math.floor(frac*r.n)),e=jumpArr()[i];
   jLastId=e[1];
-  if(prefs.view==="binder"){const p=Math.floor(i/perNow());if(p!==page){page=p;renderBinder()}}
-  queueScroll(docTop(jumpEl(e[1]))-headH-6);
+  if(prefs.view==="binder")jPendPage=Math.floor(i/perNow());
+  queueScroll(()=>docTop(jumpEl(e[1]))-headH-6);
 }
 jumps.addEventListener("touchmove",ev=>ev.preventDefault(),{passive:false});
 jumps.addEventListener("pointerdown",ev=>{
@@ -1478,27 +1472,32 @@ function jRelease(){
 }
 jumps.addEventListener("pointerup",jRelease);
 jumps.addEventListener("pointercancel",jRelease);
-window.addEventListener("resize",()=>{placeJumps();cjDirty=true;if(prefs.view==="pocket")layoutPocket();updateJumpBtns()});
+let rsRaf=false;
+window.addEventListener("resize",()=>{
+  if(rsRaf)return;rsRaf=true;
+  requestAnimationFrame(()=>{rsRaf=false;placeJumps();cjDirty=true;if(prefs.view==="pocket")layoutPocket();updateJumpBtns()});
+});
 
 // the header slides away on a downward scroll and returns on the first upward nudge;
 // it stays put near the top of the page, while it holds focus, hover or an open menu,
 // and for a moment after any jump that lands an entry beneath it
 let lastY=window.scrollY,hdrHold=0;
+const hoverMq=matchMedia("(hover:hover)");
 function keepHeader(){hdrHold=performance.now()+600;headerEl.classList.remove("away")}
 function slideHeader(){
   const y=window.scrollY,dy=y-lastY;lastY=y;
-  if(y<=headH||performance.now()<hdrHold||headerEl.matches(":focus-within,:hover")||headerEl.querySelector(".dd.open")){headerEl.classList.remove("away");return}
+  if(y<=headH||performance.now()<hdrHold||headerEl.matches(":focus-within")||(hoverMq.matches&&headerEl.matches(":hover"))||headerEl.querySelector(".dd.open,.gpick .pop:not([hidden])")){headerEl.classList.remove("away");return}
   if(dy>6)headerEl.classList.add("away");else if(dy<-6)headerEl.classList.remove("away");
 }
-if(matchMedia("(hover:hover)").matches)document.addEventListener("mousemove",ev=>{if(ev.clientY<16)headerEl.classList.remove("away")},{passive:true});
+document.addEventListener("mousemove",ev=>{if(hoverMq.matches&&ev.clientY<16)headerEl.classList.remove("away")},{passive:true});
 // jump to top and to the end, each shown only when there is at least a screen to go
 function updateJumpBtns(){
   const y=window.scrollY,rest=document.documentElement.scrollHeight-window.innerHeight-y;
   toTop.classList.toggle("show",y>500);toEnd.classList.toggle("show",rest>500);
 }
 window.addEventListener("scroll",()=>{
-  slideHeader();updateJumpBtns();
-  if(!cjRaf){cjRaf=true;requestAnimationFrame(()=>{cjRaf=false;updateCurrentJump()})}
+  slideHeader();
+  if(!cjRaf){cjRaf=true;requestAnimationFrame(()=>{cjRaf=false;updateJumpBtns();updateCurrentJump()})}
 },{passive:true});
 toTop.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
 toEnd.addEventListener("click",()=>window.scrollTo({top:document.documentElement.scrollHeight,behavior:"smooth"}));
