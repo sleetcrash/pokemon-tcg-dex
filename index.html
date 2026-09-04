@@ -17,7 +17,7 @@
   :root{
     --col:640px; --gutter:10px;
     --page:oklch(0.955 0.006 95); --card:oklch(0.98 0.004 95); --card-hi:oklch(0.9 0.008 95);
-    --well:oklch(0.885 0.008 95); --art:oklch(0.8 0.01 95);
+    --well:oklch(0.885 0.008 95); --art:oklch(0.74 0.01 95);
     --ink:oklch(0.22 0.012 95); --ink-dim:oklch(0.47 0.012 95);
     --line:oklch(0.6 0.01 95); --line-hi:oklch(0.24 0.012 95);
     --accent:oklch(0.55 0.19 25);
@@ -176,7 +176,7 @@
   .card.own,.row.done{--art:var(--e,oklch(0.3 0.012 95));border-color:var(--line-hi)}
   /* a registered sprite sits on the TCG energy colour of its first type (scripts/build-types.py) */
   .e-G{--e:oklch(0.86 0.08 140)}.e-R{--e:oklch(0.84 0.09 32)}.e-W{--e:oklch(0.84 0.07 245)}.e-L{--e:oklch(0.92 0.09 95)}.e-P{--e:oklch(0.85 0.08 315)}
-  .e-F{--e:oklch(0.84 0.07 50)}.e-D{--e:oklch(0.72 0.03 260)}.e-M{--e:oklch(0.86 0.015 250)}.e-N{--e:oklch(0.86 0.07 80)}.e-C{--e:oklch(0.92 0.008 95)}
+  .e-F{--e:oklch(0.84 0.07 50)}.e-D{--e:oklch(0.72 0.03 260)}.e-M{--e:oklch(0.86 0.015 250)}.e-N{--e:oklch(0.86 0.07 80)}.e-C{--e:oklch(0.97 0.004 95)}
   .card.own{background:var(--card-hi)}
   .card.pend,.row.pend{--art:var(--pend-lite);border-color:var(--pend)}
   .card.pend{animation:pendborder 1.1s ease-in-out infinite}
@@ -199,7 +199,7 @@
   .card.scan .face img{width:100%;height:100%;object-fit:cover;display:block}
   .card.scan .rmx{position:absolute;top:2cqw;right:2cqw;width:max(18px,10cqw);height:max(18px,10cqw);border:0;padding:0;background:var(--ink);color:var(--card);font-size:max(12px,7cqw);font-weight:700;line-height:1;cursor:pointer;box-shadow:0 0 0 1px var(--card);opacity:0;pointer-events:none;transition:opacity .15s;-webkit-tap-highlight-color:transparent}
   .card.scan:hover .rmx,.card.scan:focus-within .rmx{opacity:1;pointer-events:auto}
-  .card .pfoot{flex:none;height:var(--bz);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2cqw;padding:0 2.5cqw}
+  .card .pfoot{flex:none;height:var(--bz);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2cqw;padding:0 2.5cqw;background:var(--card)}
   .card .pfoot .ptag{display:flex;justify-content:center;align-items:center;gap:2.5cqw;min-width:0;overflow:hidden}
   .card .pfoot .chip{flex:none;font-size:max(8px,5cqw);padding:0;background:none;white-space:nowrap}
   .card .pprice{position:absolute;right:2cqw;bottom:2cqw;z-index:1;display:flex}
