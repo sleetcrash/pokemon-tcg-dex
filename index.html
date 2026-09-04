@@ -166,7 +166,8 @@
   .pgrid,.bgrid{display:grid;grid-template-columns:repeat(3,1fr);--gap:8px;gap:var(--gap);container-type:inline-size;--r:calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols) * .04)}
   #pgrid .card{content-visibility:auto;contain-intrinsic-size:auto 100px auto var(--tileh,160px)}
   .bgrid{background:var(--well);border:1px solid var(--line);padding:10px}
-  /* one slot format: a full-width 63/88 face with card-radius bottom corners and its own hairline, then one bezel strip under it (search, tags, ball) */
+  /* one slot format: a full-width 63/88 face with card-radius bottom corners and its own hairline, then one bezel strip under it (search, tags, ball).
+     Every part is sized in slot units with a legibility floor and no ceiling, so a tile is the same drawing at any column count */
   .card{container-type:inline-size;border-radius:var(--r);background:var(--card);border:1px solid var(--line);position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .card.own{border-color:var(--line-hi);background:var(--card-hi)}
   .card.pend{border-color:var(--pend)}
@@ -175,31 +176,31 @@
   .card .face{flex:none;width:100%;aspect-ratio:63/88;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--well);border-radius:0 0 4cqw 4cqw;box-shadow:0 0 0 1px var(--line)}
   .blankc{container-type:inline-size;border-radius:var(--r);display:flex;flex-direction:column;border:1px dashed var(--line);background:var(--well);opacity:.5}
   .blankc::before{content:"";aspect-ratio:63/88}
-  .blankc::after{content:"";height:clamp(16px,8cqw,24px)}
+  .blankc::after{content:"";height:max(16px,8cqw)}
   .card.pk .ph{flex:none;display:flex;justify-content:space-between;align-items:baseline;gap:3cqw;padding:2cqw 3cqw 1.5cqw;background:var(--card);border-bottom:1px solid var(--line)}
-  .card.pk .pname{font-size:clamp(8px,min(7.5cqw,calc(140cqw / var(--nl,9))),17px);font-weight:700;color:var(--ink-dim);line-height:1.1;min-width:0}
+  .card.pk .pname{font-size:max(8px,min(7.5cqw,calc(140cqw / var(--nl,9))));font-weight:700;color:var(--ink-dim);line-height:1.1;min-width:0}
   .card.pk.own .pname{color:var(--ink)}
-  .card .pno{flex:none;font-family:ui-monospace,Menlo,monospace;font-size:clamp(9px,6cqw,14px);color:var(--ink-dim)}
+  .card .pno{flex:none;font-family:ui-monospace,Menlo,monospace;font-size:max(9px,6cqw);color:var(--ink-dim)}
   .card.pk .part{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .card.pk .part img{width:64%;max-height:92%;object-fit:contain;image-rendering:pixelated;opacity:.6;filter:grayscale(1);transition:opacity .2s,filter .2s}
   .card.pk.own .part img{opacity:1;filter:none}
   .card.pk.pend .part img{opacity:.85;filter:none}
   .card.scan .face{background:none}
   .card.scan .face img{width:100%;height:100%;object-fit:cover;display:block}
-  .card.scan .rmx{position:absolute;top:2cqw;right:2cqw;width:clamp(18px,10cqw,26px);height:clamp(18px,10cqw,26px);border:0;padding:0;background:var(--ink);color:var(--card);font-size:clamp(12px,7cqw,18px);font-weight:700;line-height:1;cursor:pointer;box-shadow:0 0 0 1px var(--card);opacity:0;pointer-events:none;transition:opacity .15s;-webkit-tap-highlight-color:transparent}
+  .card.scan .rmx{position:absolute;top:2cqw;right:2cqw;width:max(18px,10cqw);height:max(18px,10cqw);border:0;padding:0;background:var(--ink);color:var(--card);font-size:max(12px,7cqw);font-weight:700;line-height:1;cursor:pointer;box-shadow:0 0 0 1px var(--card);opacity:0;pointer-events:none;transition:opacity .15s;-webkit-tap-highlight-color:transparent}
   .card.scan:hover .rmx,.card.scan:focus-within .rmx{opacity:1;pointer-events:auto}
-  .card .pfoot{flex:none;height:clamp(16px,8cqw,24px);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2cqw;padding:0 2.5cqw}
+  .card .pfoot{flex:none;height:max(16px,8cqw);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2cqw;padding:0 2.5cqw}
   .card .pfoot .ptag{display:flex;justify-content:center;align-items:center;gap:2.5cqw;min-width:0;overflow:hidden}
-  .card .pfoot .chip{flex:none;font-size:clamp(8px,5cqw,11px);padding:0;background:none;white-space:nowrap}
+  .card .pfoot .chip{flex:none;font-size:max(8px,5cqw);padding:0;background:none;white-space:nowrap}
   .card .pprice{position:absolute;right:2cqw;bottom:2cqw;z-index:1;display:flex}
-  .card .pprice a{font-family:ui-monospace,Menlo,monospace;font-size:clamp(8px,5.5cqw,12px);font-weight:700;line-height:1;padding:1.2cqw 1.8cqw;background:var(--ink);color:var(--card);text-decoration:none;white-space:nowrap;box-shadow:0 0 0 1px var(--card)}
-  .card .pball{position:relative;flex:none;width:clamp(12px,6.5cqw,18px);height:clamp(12px,6.5cqw,18px);border-radius:50%;border:max(1.5px,0.7cqw) solid var(--line)}
+  .card .pprice a{font-family:ui-monospace,Menlo,monospace;font-size:max(8px,5.5cqw);font-weight:700;line-height:1;padding:1.2cqw 1.8cqw;background:var(--ink);color:var(--card);text-decoration:none;white-space:nowrap;box-shadow:0 0 0 1px var(--card)}
+  .card .pball{position:relative;flex:none;width:max(12px,6.5cqw);height:max(12px,6.5cqw);border-radius:50%;border:max(1.5px,0.7cqw) solid var(--line)}
   .card.own .pball,.card.pend .pball{border-color:transparent}
   .card.own .pball::after,.card.pend .pball::after{content:"";position:absolute;inset:-33.4%;background:var(--ball) center/contain no-repeat;image-rendering:pixelated}
   .card.hs.own .pball::after,.card.hs.pend .pball::after{background-image:var(--hball);inset:-30%}
   .card.pend .pball{transform:rotate(22deg)}
-  .card .setc{flex:none;height:100%;width:clamp(18px,9cqw,26px);border:0;background:none;padding:0;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
-  .card .setc::before{content:"";position:absolute;inset:0;margin:auto;width:clamp(13px,6.5cqw,18px);height:clamp(13px,6.5cqw,18px);background:var(--ink-dim);-webkit-mask:var(--icon-search) center/contain no-repeat;mask:var(--icon-search) center/contain no-repeat}
+  .card .setc{flex:none;height:100%;width:max(18px,9cqw);border:0;background:none;padding:0;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
+  .card .setc::before{content:"";position:absolute;inset:0;margin:auto;width:max(13px,6.5cqw);height:max(13px,6.5cqw);background:var(--ink-dim);-webkit-mask:var(--icon-search) center/contain no-repeat;mask:var(--icon-search) center/contain no-repeat}
   .card.own .setc::before,.card.pend .setc::before{background:var(--ink)}
   /* narrow slots shed bezel content instead of overflowing it */
   @container (max-width:120px){.card .pfoot .chip.f ~ .chip:not(.r){display:none}}
@@ -1118,7 +1119,7 @@ function layoutPocket(){
   pgrid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
   pgrid.style.setProperty("--gap",gap+"px");
   const w=(pgrid.clientWidth-(cols-1)*gap)/cols-2;
-  if(w>0)pgrid.style.setProperty("--tileh",(w*88/63+Math.min(24,Math.max(16,w*.08))).toFixed(2)+"px");
+  if(w>0)pgrid.style.setProperty("--tileh",(w*88/63+Math.max(16,w*.08)).toFixed(2)+"px");
   cjDirty=true;
 }
 function renderPocket(){
