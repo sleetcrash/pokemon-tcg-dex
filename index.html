@@ -246,9 +246,11 @@
   .lrow button{padding:8px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:12px;cursor:pointer}
   .pdiv{border-top:1px solid var(--line);margin:4px 0}
 
-  #toTop{position:fixed;right:48px;bottom:20px;width:44px;height:44px;border:1px solid var(--line);background:oklch(0.93 0.008 95 / .95);color:var(--ink);display:flex;align-items:center;justify-content:center;z-index:20;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s;-webkit-tap-highlight-color:transparent}
-  #toTop.show{opacity:1;pointer-events:auto}
-  #toTop svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  #toTop,#toEnd{position:fixed;right:48px;width:44px;height:44px;border:1px solid var(--line);background:oklch(0.93 0.008 95 / .95);color:var(--ink);display:flex;align-items:center;justify-content:center;z-index:20;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s;-webkit-tap-highlight-color:transparent}
+  #toTop{bottom:66px}
+  #toEnd{bottom:20px}
+  #toTop.show,#toEnd.show{opacity:1;pointer-events:auto}
+  #toTop svg,#toEnd svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
   #jumps{position:fixed;right:0;bottom:0;width:40px;z-index:25;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:6px 3px;touch-action:none}
   #jumps[hidden]{display:none}
@@ -368,6 +370,7 @@
   </div>
 </section>
 <button id="toTop" type="button" aria-label="Back to top"><svg viewBox="0 0 24 24"><polyline points="6 14 12 8 18 14"/></svg></button>
+<button id="toEnd" type="button" aria-label="Jump to end"><svg viewBox="0 0 24 24"><polyline points="6 10 12 16 18 10"/></svg></button>
 <div id="jumps" hidden></div>
 <dialog id="csheet" aria-labelledby="ctitle">
   <div class="cbox">
@@ -1367,7 +1370,7 @@ $("mApply").addEventListener("click",()=>{
 });
 
 // region checkpoints: tap to jump, like an A-Z index
-const jumps=$("jumps"),toTop=$("toTop");
+const jumps=$("jumps"),toTop=$("toTop"),toEnd=$("toEnd");
 function bandOf(e){
   if(prefs.placement==="group"&&e[5])return e[5]==="Regional"?e[3]:e[5]==="Other"?"Forms":e[5];
   if(prefs.placement==="regional"&&e[5]==="Regional")return e[3];
@@ -1380,8 +1383,8 @@ function placeJumps(){
   document.documentElement.style.setProperty("--hdr",headH+"px");
 }
 function renderJumps(){
-  if(prefs.view!=="list"||!dispArr.length){jumps.hidden=true;return}
-  jumps.hidden=false;placeJumps();
+  if(prefs.view!=="list"||!dispArr.length){jumps.hidden=true;updateJumpBtns();return}
+  jumps.hidden=false;placeJumps();updateJumpBtns();
   jRuns=[];
   dispArr.forEach((e,i)=>{
     const b=bandOf(e);
@@ -1456,7 +1459,7 @@ function jRelease(){
 }
 jumps.addEventListener("pointerup",jRelease);
 jumps.addEventListener("pointercancel",jRelease);
-window.addEventListener("resize",()=>{placeJumps();cjDirty=true});
+window.addEventListener("resize",()=>{placeJumps();cjDirty=true;updateJumpBtns()});
 
 // the header slides away on a downward scroll and returns on the first upward nudge;
 // it stays put near the top of the page, while it holds focus, hover or an open menu,
@@ -1469,13 +1472,17 @@ function slideHeader(){
   if(dy>6)headerEl.classList.add("away");else if(dy<-6)headerEl.classList.remove("away");
 }
 if(matchMedia("(hover:hover)").matches)document.addEventListener("mousemove",ev=>{if(ev.clientY<16)headerEl.classList.remove("away")},{passive:true});
-// jump to top
+// jump to top and to the end, each shown only when there is at least a screen to go
+function updateJumpBtns(){
+  const y=window.scrollY,rest=document.documentElement.scrollHeight-window.innerHeight-y;
+  toTop.classList.toggle("show",y>500);toEnd.classList.toggle("show",rest>500);
+}
 window.addEventListener("scroll",()=>{
-  slideHeader();
-  toTop.classList.toggle("show",window.scrollY>500);
+  slideHeader();updateJumpBtns();
   if(!cjRaf){cjRaf=true;requestAnimationFrame(()=>{cjRaf=false;updateCurrentJump()})}
 },{passive:true});
 toTop.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+toEnd.addEventListener("click",()=>window.scrollTo({top:document.documentElement.scrollHeight,behavior:"smooth"}));
 
 entryRadios.forEach(r=>r.checked=r.value===prefs.entries);
 placeRadios.forEach(r=>{if(r.value!=="dex")r.disabled=prefs.entries==="col"});
