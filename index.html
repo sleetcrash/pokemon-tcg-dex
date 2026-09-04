@@ -164,8 +164,9 @@
   .gpick .lbl{margin-top:8px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink)}
 
   #binder,#pocket{--cols:3;padding:10px var(--gutter) 60px;max-width:min(100%,max(var(--col),calc(var(--cols) * 132px)));margin:0 auto}
+  @media(max-width:720px){#binder,#pocket{padding-right:calc(var(--gutter) + 40px)}}
   .pgrid,.bgrid{display:grid;grid-template-columns:repeat(3,1fr);--gap:8px;gap:var(--gap);container-type:inline-size;--r:calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols) * .04)}
-  #pgrid .card{content-visibility:auto;contain-intrinsic-size:auto 100px 160px}
+  #pgrid .card{content-visibility:auto;contain-intrinsic-size:auto 100px auto var(--tileh,160px)}
   .bgrid{background:var(--well);border:1px solid var(--line);padding:10px}
   /* one slot format: a full-width 63/88 face with card-radius bottom corners and its own hairline, then one bezel strip under it (search, tags, ball) */
   .card{container-type:inline-size;border-radius:var(--r);background:var(--card);border:1px solid var(--line);position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
@@ -1070,6 +1071,7 @@ function renderBinder(){
   pTot.textContent=`/ ${pages}`;
   pFirst.disabled=pPrev.disabled=page===0;
   pNext.disabled=pLast.disabled=page>=pages-1;
+  updateCurrentJump(true);
 }
 // pocket view: one continuous vertical run of binder tiles, column count selectable
 // via a one-row picker (mouse) or pinch (touch, and ctrl+wheel trackpad pinch)
@@ -1110,14 +1112,20 @@ pocketEl.addEventListener("wheel",ev=>{
   if(wheelAcc>50){setPCols(prefs.pcols+1);wheelAcc=0}
   else if(wheelAcc<-50){setPCols(prefs.pcols-1);wheelAcc=0}
 },{passive:false});
+// a skipped tile's placeholder must match its real height or the checkpoint strip scrubs
+// to the wrong place until layout catches up: face plus bezel, the border is added on top
 function layoutPocket(){
-  pocketEl.style.setProperty("--cols",prefs.pcols);
-  pgrid.style.gridTemplateColumns=`repeat(${prefs.pcols},1fr)`;
-  pgrid.style.setProperty("--gap",prefs.pcols>=5?"4px":prefs.pcols===4?"6px":"8px");
+  const cols=prefs.pcols,gap=cols>=5?4:cols===4?6:8;
+  pocketEl.style.setProperty("--cols",cols);
+  pgrid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
+  pgrid.style.setProperty("--gap",gap+"px");
+  const w=(pgrid.clientWidth-(cols-1)*gap)/cols-2;
+  if(w>0)pgrid.style.setProperty("--tileh",(w*88/63+Math.min(24,Math.max(16,w*.08))).toFixed(2)+"px");
+  cjDirty=true;
 }
 function renderPocket(){
   layoutPocket();
-  pgrid.innerHTML="";pTiles.clear();
+  pgrid.innerHTML="";pTiles.clear();cjDirty=true;
   const frag=document.createDocumentFragment();
   visArr.forEach(e=>frag.appendChild(binderTile(e,pTiles)));
   pgrid.appendChild(frag);
@@ -1369,8 +1377,13 @@ $("mApply").addEventListener("click",()=>{
   mMsg.textContent=`Applied: ${Object.keys(owned).length} checked.`;
 });
 
-// region checkpoints: tap to jump, like an A-Z index
+// region checkpoints: tap to jump, like an A-Z index. The list scrubs its rows, the pocket
+// its tiles; the binder turns to the page that holds the entry and highlights the region
+// its page ends in, the way a dictionary page header names the page's last word
 const jumps=$("jumps"),toTop=$("toTop"),toEnd=$("toEnd");
+const jumpArr=()=>prefs.view==="list"?dispArr:visArr;
+const jumpEl=id=>prefs.view==="list"?rowMap.get(id):prefs.view==="pocket"?pTiles.get(id):bTiles.get(id);
+const docTop=el=>el.getBoundingClientRect().top+window.scrollY;
 function bandOf(e){
   if(prefs.placement==="group"&&e[5])return e[5]==="Regional"?e[3]:e[5]==="Other"?"Forms":e[5];
   if(prefs.placement==="regional"&&e[5]==="Regional")return e[3];
@@ -1383,10 +1396,11 @@ function placeJumps(){
   document.documentElement.style.setProperty("--hdr",headH+"px");
 }
 function renderJumps(){
-  if(prefs.view!=="list"||!dispArr.length){jumps.hidden=true;updateJumpBtns();return}
+  const arr=jumpArr();
+  if(!arr.length){jumps.hidden=true;updateJumpBtns();return}
   jumps.hidden=false;placeJumps();updateJumpBtns();
   jRuns=[];
-  dispArr.forEach((e,i)=>{
+  arr.forEach((e,i)=>{
     const b=bandOf(e);
     if(!jRuns.length||jRuns[jRuns.length-1].b!==b)jRuns.push({b,f:!!e[5],start:i,n:1});
     else jRuns[jRuns.length-1].n++;
@@ -1406,10 +1420,15 @@ function renderJumps(){
 let cjRaf=false,cjLast=-1,cjTops=[],cjDirty=true;
 function updateCurrentJump(force){
   if(jumps.hidden||!jRuns.length)return;
-  if(cjDirty){cjTops=jRuns.map(r=>rowMap.get(dispArr[r.start][1]).offsetTop);cjDirty=false}
-  const line=window.scrollY+headH;
   let cur=0;
-  for(let i=0;i<cjTops.length;i++){if(cjTops[i]<=line)cur=i;else break}
+  if(prefs.view==="binder"){
+    const last=Math.min(visArr.length,(page+1)*perNow())-1;
+    for(let i=0;i<jRuns.length;i++){if(jRuns[i].start<=last)cur=i;else break}
+  }else{
+    if(cjDirty){const arr=jumpArr();cjTops=jRuns.map(r=>docTop(jumpEl(arr[r.start][1])));cjDirty=false}
+    const line=window.scrollY+headH+8;
+    for(let i=0;i<cjTops.length;i++){if(cjTops[i]<=line)cur=i;else break}
+  }
   if(cur===cjLast&&!force)return;
   const kids=jumps.children;
   if(kids[cjLast])kids[cjLast].classList.remove("cur");
@@ -1436,10 +1455,10 @@ function scrubAt(y,btnHint){
   const r=jRuns[Number(btn.dataset.idx)];
   const rect=btn.getBoundingClientRect();
   const frac=rect.height>0?Math.min(1,Math.max(0,(y-rect.top)/rect.height)):0;
-  const e=dispArr[r.start+Math.min(r.n-1,Math.floor(frac*r.n))];
+  const i=r.start+Math.min(r.n-1,Math.floor(frac*r.n)),e=jumpArr()[i];
   jLastId=e[1];
-  const row=rowMap.get(e[1]);
-  queueScroll(row.offsetTop-headH-6);
+  if(prefs.view==="binder"){const p=Math.floor(i/perNow());if(p!==page){page=p;renderBinder()}}
+  queueScroll(docTop(jumpEl(e[1]))-headH-6);
 }
 jumps.addEventListener("touchmove",ev=>ev.preventDefault(),{passive:false});
 jumps.addEventListener("pointerdown",ev=>{
@@ -1452,14 +1471,14 @@ jumps.addEventListener("pointermove",ev=>{
 });
 function jRelease(){
   if(jLastId!==null){
-    const row=rowMap.get(jLastId);
-    row.classList.remove("flash");void row.offsetWidth;row.classList.add("flash");
+    const el=jumpEl(jLastId);
+    if(el){el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash")}
     jLastId=null;
   }
 }
 jumps.addEventListener("pointerup",jRelease);
 jumps.addEventListener("pointercancel",jRelease);
-window.addEventListener("resize",()=>{placeJumps();cjDirty=true;updateJumpBtns()});
+window.addEventListener("resize",()=>{placeJumps();cjDirty=true;if(prefs.view==="pocket")layoutPocket();updateJumpBtns()});
 
 // the header slides away on a downward scroll and returns on the first upward nudge;
 // it stays put near the top of the page, while it holds focus, hover or an open menu,
