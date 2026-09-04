@@ -165,13 +165,13 @@
   .pgrid,.bgrid{display:grid;grid-template-columns:repeat(3,1fr);--gap:8px;gap:var(--gap);container-type:inline-size;--r:calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols) * .04)}
   #pgrid .card{content-visibility:auto;contain-intrinsic-size:auto 100px 160px}
   .bgrid{background:var(--well);border:1px solid var(--line);padding:10px}
-  /* one slot format: a full-width 63/88 face, then one bezel strip under it (search, tags, ball) */
+  /* one slot format: a full-width 63/88 face with card-radius bottom corners and its own hairline, then one bezel strip under it (search, tags, ball) */
   .card{container-type:inline-size;border-radius:var(--r);background:var(--card);border:1px solid var(--line);position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .card.own{border-color:var(--line-hi);background:var(--card-hi)}
   .card.pend{border-color:var(--pend)}
   .card .fbc{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-dim)}
   .card.flash{animation:flash 1.6s ease}
-  .card .face{flex:none;width:100%;aspect-ratio:63/88;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--well)}
+  .card .face{flex:none;width:100%;aspect-ratio:63/88;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--well);border-radius:0 0 4cqw 4cqw;box-shadow:0 0 0 1px var(--line)}
   .blankc{container-type:inline-size;border-radius:var(--r);display:flex;flex-direction:column;border:1px dashed var(--line);background:var(--well);opacity:.5}
   .blankc::before{content:"";aspect-ratio:63/88}
   .blankc::after{content:"";height:clamp(16px,8cqw,24px)}
@@ -187,11 +187,11 @@
   .card.scan .face img{width:100%;height:100%;object-fit:cover;display:block}
   .card.scan .rmx{position:absolute;top:2cqw;right:2cqw;width:clamp(18px,10cqw,26px);height:clamp(18px,10cqw,26px);border:0;padding:0;background:var(--ink);color:var(--card);font-size:clamp(12px,7cqw,18px);font-weight:700;line-height:1;cursor:pointer;box-shadow:0 0 0 1px var(--card);opacity:0;pointer-events:none;transition:opacity .15s;-webkit-tap-highlight-color:transparent}
   .card.scan:hover .rmx,.card.scan:focus-within .rmx{opacity:1;pointer-events:auto}
-  .card .pfoot{flex:none;height:clamp(16px,8cqw,24px);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2cqw;padding:0 2.5cqw;border-top:1px solid var(--line)}
+  .card .pfoot{flex:none;height:clamp(16px,8cqw,24px);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2cqw;padding:0 2.5cqw}
   .card .pfoot .ptag{display:flex;justify-content:center;align-items:center;gap:2.5cqw;min-width:0;overflow:hidden}
   .card .pfoot .chip{flex:none;font-size:clamp(8px,5cqw,11px);padding:0;background:none;white-space:nowrap}
-  .card .pfoot .pprice a{font-family:ui-monospace,Menlo,monospace;font-size:clamp(8px,5.5cqw,12px);color:var(--ink-dim);text-decoration:none;border-bottom:1px dotted var(--line-hi);white-space:nowrap}
-  .card .pfoot .pprice a:hover{color:var(--ink)}
+  .card .pprice{position:absolute;right:2cqw;bottom:2cqw;z-index:1;display:flex}
+  .card .pprice a{font-family:ui-monospace,Menlo,monospace;font-size:clamp(8px,5.5cqw,12px);font-weight:700;line-height:1;padding:1.2cqw 1.8cqw;background:var(--ink);color:var(--card);text-decoration:none;white-space:nowrap;box-shadow:0 0 0 1px var(--card)}
   .card .pball{position:relative;flex:none;width:clamp(12px,6.5cqw,18px);height:clamp(12px,6.5cqw,18px);border-radius:50%;border:max(1.5px,0.7cqw) solid var(--line)}
   .card.own .pball,.card.pend .pball{border-color:transparent}
   .card.own .pball::after,.card.pend .pball::after{content:"";position:absolute;inset:-33.4%;background:var(--ball) center/contain no-repeat;image-rendering:pixelated}
@@ -201,11 +201,10 @@
   .card .setc::before{content:"";position:absolute;inset:0;margin:auto;width:clamp(13px,6.5cqw,18px);height:clamp(13px,6.5cqw,18px);background:var(--ink-dim);-webkit-mask:var(--icon-search) center/contain no-repeat;mask:var(--icon-search) center/contain no-repeat}
   .card.own .setc::before,.card.pend .setc::before{background:var(--ink)}
   /* narrow slots shed bezel content instead of overflowing it */
-  @container (max-width:130px){.card .pfoot .pprice{display:none}}
   @container (max-width:120px){.card .pfoot .chip.f ~ .chip:not(.r){display:none}}
   @container (max-width:100px){.card .pfoot .chip:not(.r):not(.f){display:none}}
   @container (max-width:80px){
-    .card .pfoot .ptag{display:none}
+    .card .pfoot .ptag,.card .pprice{display:none}
     .card.pk .part img{width:78%}
   }
   @container (max-width:62px){
@@ -1010,20 +1009,19 @@ armConfirm($("optReset"),"Tap again to reset everything",()=>{clearCards();apply
 
 // one binder tile. Every slot is a full-width 63/88 face (drawn sprite card, or
 // the chosen scan filling it exactly) over one bezel strip: search button left,
-// tags centre (price after them on scan tiles), status ball right. The scan
-// carries a remove button that shows on hover or after a first tap.
+// tags centre, status ball right. The scan carries a remove button that shows
+// on hover or after a first tap, and its price as a tag over the bottom-right corner.
 function binderTile([n,id,name,region,gen,form,sref],map){
   const sid=sref||id;
   const c=document.createElement("div");
   map.set(id,c);
   const art=cardArt(id);
   const chips=`${form?`<span class="chip f">${form==="Other"?"Form":form}</span>`:""}<span class="chip">Gen ${gen}</span><span class="chip r ${region}">${region}</span>`;
-  const foot=extra=>`<div class="pfoot"><button class="setc" type="button" tabindex="-1" aria-label="Cards" title="Find cards"></button><span class="ptag">${chips}${extra}</span><span class="pball"></span></div>`;
+  const foot=`<div class="pfoot"><button class="setc" type="button" tabindex="-1" aria-label="Cards" title="Find cards"></button><span class="ptag">${chips}</span><span class="pball"></span></div>`;
   c.className="card"+(art?" scan":" pk")+(owned[id]===true?" own":owned[id]==="p"?" pend":"")+(region==="Hisui"?" hs":"")+(form?" ft-"+form:"");
   c.dataset.id=id;c.tabIndex=-1;
   if(art){
-    c.innerHTML=`<div class="face"><img class="cardart" loading="lazy" src="${cimg(art,"low")}" alt="${name}"><button class="rmx" type="button" tabindex="-1" aria-label="Remove card" title="Remove card">&#215;</button></div>`+
-      foot(`<span class="pprice"></span>`);
+    c.innerHTML=`<div class="face"><img class="cardart" loading="lazy" src="${cimg(art,"low")}" alt="${name}"><button class="rmx" type="button" tabindex="-1" aria-label="Remove card" title="Remove card">&#215;</button><span class="pprice"></span></div>`+foot;
     priceInfo(id).then(p=>{
       if(!p||!c.isConnected)return;
       c.querySelector(".pprice").replaceChildren(priceLink(p));
@@ -1031,8 +1029,7 @@ function binderTile([n,id,name,region,gen,form,sref],map){
   }else{
     const dn=name.replace(/^Gigantamax /,"G-Max ");
     c.innerHTML=`<div class="face"><div class="ph"><span class="pname" style="--nl:${dn.length}">${dn}</span><span class="pno">#${String(n).padStart(4,"0")}</span></div>`+
-      `<div class="part">${sprImg(sid)}</div></div>`+
-      foot("");
+      `<div class="part">${sprImg(sid)}</div></div>`+foot;
   }
   c.addEventListener("click",ev=>{
     if(ev.target.closest("a"))return;
