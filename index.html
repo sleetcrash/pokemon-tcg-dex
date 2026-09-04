@@ -35,7 +35,9 @@
   html{scroll-behavior:smooth}
   body{background:var(--page);color:var(--ink);font-family:system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
 
-  header{position:sticky;top:0;z-index:40;background:oklch(0.955 0.006 95 / .94);backdrop-filter:blur(8px);border-bottom:3px solid var(--ink);padding:8px 0 3px}
+  header{position:sticky;top:0;z-index:40;background:oklch(0.955 0.006 95 / .94);backdrop-filter:blur(8px);border-bottom:3px solid var(--ink);padding:8px 0 3px;transition:transform .22s ease}
+  header.away{transform:translateY(-100%)}
+  @media (prefers-reduced-motion:reduce){header{transition:none}}
   .hwrap{max-width:var(--col);margin:0 auto;padding:0 var(--gutter)}
   .brand{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
   h1{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
@@ -1119,7 +1121,7 @@ function renderPocket(){
   if(pgrid.firstElementChild)pgrid.firstElementChild.tabIndex=0;
 }
 function pageCount(){return Math.max(1,Math.ceil(visArr.length/perNow()))}
-function goTo(n){page=Math.min(Math.max(0,n),pageCount()-1);renderBinder();binder.scrollIntoView()}
+function goTo(n){page=Math.min(Math.max(0,n),pageCount()-1);renderBinder();keepHeader();binder.scrollIntoView()}
 pFirst.addEventListener("click",()=>goTo(0));
 pPrev.addEventListener("click",()=>goTo(page-1));
 pNext.addEventListener("click",()=>goTo(page+1));
@@ -1142,7 +1144,7 @@ function setView(v){
   if(v==="binder")renderBinder();
   if(v==="pocket")renderPocket();
   renderJumps();
-  if(prev!==v)requestAnimationFrame(()=>window.scrollTo({top:scrollMem[v],behavior:"instant"}));
+  if(prev!==v){keepHeader();requestAnimationFrame(()=>window.scrollTo({top:scrollMem[v],behavior:"instant"}))}
 }
 $("vList").addEventListener("click",()=>setView("list"));
 $("vBinder").addEventListener("click",()=>setView("binder"));
@@ -1208,7 +1210,7 @@ function searchHits(raw){
   return lastHits;
 }
 function jumpToEntry(entry){
-  const id=entry[1];
+  const id=entry[1];keepHeader();
   sugg.style.display="none";q.value="";q.blur();
   if(!pred(entry)){
     const fb=formBoxes.find(b=>b.value===entry[5]);
@@ -1420,7 +1422,7 @@ function btnAtY(y){
   return el&&el.closest(".jp");
 }
 function queueScroll(top){
-  jPendTop=top;
+  jPendTop=top;keepHeader();
   if(jRaf)return;
   jRaf=true;
   requestAnimationFrame(()=>{jRaf=false;window.scrollTo({top:jPendTop,behavior:"instant"});updateCurrentJump()});
@@ -1456,8 +1458,20 @@ jumps.addEventListener("pointerup",jRelease);
 jumps.addEventListener("pointercancel",jRelease);
 window.addEventListener("resize",()=>{placeJumps();cjDirty=true});
 
+// the header slides away on a downward scroll and returns on the first upward nudge;
+// it stays put near the top of the page, while it holds focus, hover or an open menu,
+// and for a moment after any jump that lands an entry beneath it
+let lastY=window.scrollY,hdrHold=0;
+function keepHeader(){hdrHold=performance.now()+600;headerEl.classList.remove("away")}
+function slideHeader(){
+  const y=window.scrollY,dy=y-lastY;lastY=y;
+  if(y<=headH||performance.now()<hdrHold||headerEl.matches(":focus-within,:hover")||headerEl.querySelector(".dd.open")){headerEl.classList.remove("away");return}
+  if(dy>6)headerEl.classList.add("away");else if(dy<-6)headerEl.classList.remove("away");
+}
+if(matchMedia("(hover:hover)").matches)document.addEventListener("mousemove",ev=>{if(ev.clientY<16)headerEl.classList.remove("away")},{passive:true});
 // jump to top
 window.addEventListener("scroll",()=>{
+  slideHeader();
   toTop.classList.toggle("show",window.scrollY>500);
   if(!cjRaf){cjRaf=true;requestAnimationFrame(()=>{cjRaf=false;updateCurrentJump()})}
 },{passive:true});
