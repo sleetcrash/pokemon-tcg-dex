@@ -173,7 +173,7 @@
      Every part is sized in slot units with a legibility floor and no ceiling, so a tile is the same drawing at any column count */
   /* status paints the ground behind the sprite and the border: mid gray for missing, dark for registered, amber pulsing in step with the ball for pending */
   .card,.blankc{--bz:max(18px,11cqw)}
-  .card{container-type:inline-size;border-radius:var(--r);background:var(--card);border:1px solid var(--line);transition:border-color .3s;position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  .card{container-type:inline-size;border-radius:var(--r) var(--r) 0 0;background:var(--card);border:1px solid var(--line);transition:border-color .3s;position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .card.own,.row.done{--art:var(--e,oklch(0.3 0.012 95));border-color:var(--line-hi)}
   /* a registered sprite sits on the TCG energy colour of its first type (scripts/build-types.py) */
   .e-G{--e:oklch(0.86 0.08 140)}.e-R{--e:oklch(0.84 0.09 32)}.e-W{--e:oklch(0.84 0.07 245)}.e-L{--e:oklch(0.92 0.09 95)}.e-P{--e:oklch(0.85 0.08 315)}
@@ -185,7 +185,7 @@
   .card .fbc{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-dim)}
   .card.flash{animation:flash 1.6s ease}
   .card .face{flex:none;width:100%;aspect-ratio:63/88;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--art);border-radius:0 0 4cqw 4cqw;box-shadow:0 0 0 1px var(--line);transition:background-color .3s}
-  .blankc{container-type:inline-size;border-radius:var(--r);display:flex;flex-direction:column;border:1px dashed var(--line);background:var(--well);opacity:.5}
+  .blankc{container-type:inline-size;border-radius:var(--r) var(--r) 0 0;display:flex;flex-direction:column;border:1px dashed var(--line);background:var(--well);opacity:.5}
   .blankc::before{content:"";aspect-ratio:63/88}
   .blankc::after{content:"";height:var(--bz)}
   .card.pk .ph{flex:none;height:var(--bz);display:flex;justify-content:space-between;align-items:center;gap:3cqw;padding:0 3cqw;background:var(--card);border-bottom:1px solid var(--line)}
