@@ -88,7 +88,7 @@
   .ddpanel input:indeterminate::after{content:"";width:9px;height:1.5px;background:var(--ink-dim)}
 
   main{padding:6px var(--gutter) 60px;max-width:var(--col);margin:0 auto}
-  @media(max-width:720px){main{padding-right:calc(var(--gutter) + 40px)}}
+  @media(max-width:720px){main{padding-right:calc(var(--gutter) + 64px)}}
   @media(hover:hover){.row:hover{border-color:var(--line-hi)}.card:hover{border-color:var(--line-hi)}}
   .ddbtn:disabled{opacity:.4;cursor:default}
   .row{display:flex;align-items:center;gap:10px;padding:8px 10px;margin:6px 0;background:var(--card);border:1px solid var(--line);cursor:pointer;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
@@ -174,7 +174,7 @@
   .gpick .pop button.hi{background:var(--ink);border-color:var(--ink)}
   .gpick .lbl{margin-top:8px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink)}
 
-  #binder,#pocket{--cols:3;padding:10px calc(var(--gutter) + 40px) 60px var(--gutter);max-width:min(100%,max(var(--col),calc(var(--cols) * 132px)));margin:0 auto}
+  #binder,#pocket{--cols:3;padding:10px calc(var(--gutter) + 64px) 60px var(--gutter);max-width:min(100%,max(var(--col),calc(var(--cols) * 132px)));margin:0 auto}
   .pgrid,.bgrid{display:grid;grid-template-columns:repeat(3,1fr);--gap:8px;gap:var(--gap);container-type:inline-size;--r:calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols) * .04)}
   #pgrid .card{content-visibility:auto;contain-intrinsic-size:auto 100px auto var(--tileh,160px)}
   .bgrid{background:var(--well);border:1px solid var(--line);padding:10px}
@@ -284,16 +284,17 @@
   .lrow button{padding:8px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:12px;cursor:pointer}
   .pdiv{height:8px;background:var(--page);border-bottom:1px solid var(--line-soft)}
 
-  #toTop,#toEnd{position:fixed;right:48px;width:44px;height:44px;border:1px solid var(--line);background:oklch(0.93 0.008 95 / .95);color:var(--ink);display:flex;align-items:center;justify-content:center;z-index:20;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s;-webkit-tap-highlight-color:transparent}
+  #toTop,#toEnd{position:fixed;right:72px;width:44px;height:44px;border:1px solid var(--line);background:oklch(0.93 0.008 95 / .95);color:var(--ink);display:flex;align-items:center;justify-content:center;z-index:20;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s;-webkit-tap-highlight-color:transparent}
   #toTop{bottom:66px}
   #toEnd{bottom:20px}
   #toTop.show,#toEnd.show{opacity:1;pointer-events:auto}
   #toTop svg,#toEnd svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-  #jumps{position:fixed;right:0;bottom:0;width:40px;z-index:25;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:6px 3px;touch-action:none}
+  #jumps{position:fixed;right:0;bottom:0;width:64px;z-index:25;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:6px 0;border-left:1px solid var(--line-soft);touch-action:none}
   #jumps[hidden]{display:none}
-  .jp{flex:1;max-height:52px;min-height:26px;display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,monospace;font-size:9px;font-weight:700;letter-spacing:.05em;color:var(--ink-dim);border:0;background:none;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
-  .jp.cur{color:var(--ink);background:var(--card-hi)}
+  .jp{flex:1;max-height:48px;min-height:26px;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:650;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);border:0;background:none;cursor:pointer;padding:0;position:relative;-webkit-tap-highlight-color:transparent}
+  .jp.cur{color:var(--ink)}
+  .jp.cur::before{content:"";position:absolute;left:0;top:25%;bottom:25%;width:2px;background:var(--shell)}
   #jumps *{touch-action:none}
   .jp.f{color:var(--pend)}
 
@@ -1433,7 +1434,7 @@ function bandOf(e){
   if(prefs.placement==="regional"&&e[5]==="Regional")return e[3];
   return speciesRegion(e[0]);
 }
-const ABBR={Kanto:"KAN",Johto:"JOH",Hoenn:"HOE",Sinnoh:"SIN",Unova:"UNO",Kalos:"KAL",Alola:"ALO",POGO:"GO",Galar:"GAL",Hisui:"HIS",Paldea:"PAL",Forms:"FRM",Mega:"MEG",Gmax:"GMX",Dynamax:"DMX",Tera:"TER"};
+const RAIL_NAME={POGO:"GO",Gmax:"G-Max"};
 function placeJumps(){
   headH=headerEl.offsetHeight;
   jumps.style.top=headH+"px";
@@ -1455,7 +1456,7 @@ function renderJumps(){
     btn.type="button";
     btn.className="jp"+(r.f?" f":"");
     btn.dataset.idx=i;
-    btn.textContent=ABBR[r.b]||r.b.slice(0,3).toUpperCase();
+    btn.textContent=RAIL_NAME[r.b]||r.b;
     jumps.appendChild(btn);
   });
   cjLast=-1;cjDirty=true;updateCurrentJump(true);
