@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Card Dex">
-<meta name="theme-color" content="#f1efe7">
+<meta name="theme-color" content="#b02a2d">
 <style>
   :root{
     --col:640px; --gutter:10px;
@@ -21,10 +21,10 @@
     --ink:oklch(0.22 0.012 95); --ink-dim:oklch(0.47 0.012 95);
     --line:oklch(0.6 0.01 95); --line-hi:oklch(0.24 0.012 95);
     --accent:oklch(0.55 0.19 25);
+    --shell:oklch(0.5 0.17 25); --shell-deep:oklch(0.4 0.14 25); --shell-dim:oklch(0.9 0.05 25);
     --pend:oklch(0.55 0.12 85); --pend-deep:oklch(0.42 0.1 85); --pend-lite:oklch(0.82 0.13 88);
     --ok:oklch(0.5 0.13 150); --glow:oklch(0.62 0.22 28); --shadow:0 8px 24px oklch(0.25 0.02 95 / .16);
     --icon-search:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%222.5%22 width=%2214%22 height=%2219%22/%3E%3Ccircle cx=%2214.5%22 cy=%2215%22 r=%224.2%22/%3E%3Cline x1=%2217.6%22 y1=%2218.1%22 x2=%2221%22 y2=%2221.5%22/%3E%3C/svg%3E");
-    --holo:linear-gradient(120deg,#5dd4e8 0%,#c86fd4 38%,#f2c46b 72%,#5dd4e8 100%);
     --ball:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeBAMAAADJHrORAAAAA3NCSVQFBQUYJt5DAAAAIVBMVEX///8xMTH/lDqcSjr/1jr////eWjpKUlKlpcV7e4TezvdcMgHRAAAAAXRSTlMAQObYZgAAAH5JREFUGNNjYKALEBQUROEqKSkhCTACuUpqAnC+kAtIIBEurRLqBOSnCeDgCymB1aclwvlg83DyhcH8tDRDKF/cSL0cyE0uhPHLKyLK0szLYXzG6aWh5eXllXD7l86IAHJXwB0sFTlz1apVjQj/dAG5HQJI/u3o6BDEEx60AwCJgyJdBXcpkgAAAABJRU5ErkJggg==);
     --hball:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADXklEQVRYw+2WTWyTdRzHm43QrRvpCntxWzTqQROjJpDpXlu2vq1P15d1LXAwEi/YzXUoZaPdnm5zslVwToUwHCgXISQcPAw5kEwSEBOoGVJ6AJxuevC2CxdPmnz89WlCIjEatrJTv8k3z5MneZ7vy+/5P/9HpyuggALWDozVRmqfrqB4s46NlRbBpQd/0RXqpivgZOFuBl3JBpgoL9ZRXF9Dar+D07EBvv7lD8YuX2d2IsaXe9vYVP8UL5Q9OSNcv3IJpvyQDDHjbWJOHeTTSZVznlfgsxAc62H40CD1+vybgFQA5pvgkgUWFDiyW9iT4/Qe+HCXGBPOBPj1gJW6fI1ki9T+fTb5fCMP8Y1ZmhCxI48wa+LjIJlwC+NqjBfL82Gipho+6s6J/p8BGQ2fhFjsNbPS306RvBPrEzca4KTUm5T6F1y5+rURyPnkv6SXsaTCraT7LSyGrfz+noOirWXrMLFti8x0T05g6hH+I/muXEvZ9PvaSPfuJN1nYSnSTlldJWtdc3z74x1J5hNBaeCovHSTcn40KKLC6Wzq0MPkWfHU25K+16KJ35bjSl8z0fEEJaaSxzexrc7E1UyGl1/fwU/zZ/gz8hrJKzcZGIwSHRnhJcUDs2FpKKjVfmufWRNe7LNyt6+d5SE3rb4A7yfiVD1T/fgGsq7D8UOsXjxFc8sOjl37ge/On8Rm3Y7D0cDxgTd4tcvHSqSV+xEL90T83jtmlvs7aHPasPm7Sb7VjT/ox1BpWNsYisqK+GBsHK/HTjx2EGvHdi6m7wjTOOwNjI6qON0WXIqFTu9OjU63mXgiwWF1mJ4eD3qTfn0rYWtNKX6vi2F5oNfTQnwwrtHraWVErnmUFk1wRI2TGEvg81hw2pvw+1xU1Zav/ztgMumYmDhIcv+b+PxuzURW3C9Cw6qK3WbGbjfjVjpQXO0oTY08SJ9CVQ+QvTcvX8NS2WDmp+N0dlolpcqoJFWUNizmBpZvnODn1OecjQb5Srh6a44zUxFK870plRh0TB6O4e9sxmZr5MLQbu6LeObacU6Hu1i5eoLVG3NEhwYoNTyhHbHCKD8hzz/H5Ym9LEvSpZuznH83wG+3v+DcTAR9xeb81f5fKJYlaqqv0lj5bK123GTUb/BfUQEFFJAn/A3xe2oF2MNqqgAAAABJRU5ErkJggg==);
     --kanto:oklch(0.5 0.158 23); --johto:oklch(0.48 0.126 87); --hoenn:oklch(0.47 0.131 152); --sinnoh:oklch(0.48 0.108 259); --unova:oklch(0.48 0.015 262);
@@ -35,18 +35,19 @@
   html{scroll-behavior:smooth}
   body{background:var(--page);color:var(--ink);font-family:system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
 
-  header{position:sticky;top:0;z-index:40;background:oklch(0.955 0.006 95 / .94);backdrop-filter:blur(8px);border-bottom:3px solid var(--ink);padding:8px 0 3px;transition:transform .22s ease}
+  header{position:sticky;top:0;z-index:40;background:oklch(0.955 0.006 95 / .94);backdrop-filter:blur(8px);border-bottom:3px solid var(--ink);padding:0 0 3px;transition:transform .22s ease}
   header.away{transform:translateY(-100%)}
   @media (prefers-reduced-motion:reduce){header{transition:none}}
   .hwrap{max-width:var(--col);margin:0 auto;padding:0 var(--gutter)}
+  .band{background:var(--shell);color:var(--card);padding:8px 0 6px;margin-bottom:6px}
   .brand{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
   h1{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-  .count{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink-dim)}
-  .count b{color:var(--ink);font-weight:600}
-  #pend{color:var(--pend);font-weight:600}
-  .pct{color:var(--ink-dim)}
-  .bar{height:3px;background:var(--well);margin:4px 0 6px;overflow:hidden}
-  .bar i{display:block;height:100%;width:0;background:var(--holo);background-size:200% 100%;transition:width .3s ease}
+  .count{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--shell-dim)}
+  .count b{color:var(--card);font-weight:600}
+  #pend{color:var(--pend-lite);font-weight:600}
+  .pct{color:var(--shell-dim)}
+  .bar{height:3px;background:var(--shell-deep);margin-top:4px;overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:var(--card);transition:width .3s ease}
 
   .search{position:relative}
   .search input{width:100%;padding:6px 10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:16px;outline:none}
@@ -307,12 +308,14 @@
 </head>
 <body>
 <header>
- <div class="hwrap">
+ <div class="band"><div class="hwrap">
   <div class="brand">
     <h1>National Card Dex</h1>
     <div class="count"><b id="have">0</b><span id="pend"></span> / <span id="total">0</span> <span class="pct" id="pct"></span></div>
   </div>
   <div class="bar"><i id="fill"></i></div>
+ </div></div>
+ <div class="hwrap">
   <div class="search">
     <input id="q" type="search" placeholder="Search a Pokemon" autocomplete="off">
     <div class="sugg" id="sugg" role="listbox"></div>
