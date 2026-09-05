@@ -24,8 +24,8 @@ Single-file web app (`index.html`) tracking a Pokemon TCG National Card Dex: 1,6
 
 ## Interaction model
 
-- Tap row or tile: register / unregister. Long press: toggle Pending (right click is a reserved no-op). Card icon (far left of row, bezel of binder tile): open card sheet. Tiles with chosen art keep the same bezel, so tap-to-register and the card icon stay reachable with art in the slot; the scan carries a remove X (hover, or after the first tap on touch), and the card sheet header has Remove card too.
-- Forms menu: type checkboxes only, Base checked by default. Entry mode (Separate / Collapsible) and placement (National / Regional / Grouped) live under the gear menu with Manage lists.
+- Tap row or tile: register / unregister (a pending entry registers on one tap). Long press: toggle Pending (right click is a reserved no-op). Only the click that ends a hold is swallowed (`holdId`, cleared by the next pointerdown); the old 600ms window after release also ate a quick follow-up tap on touch, where the hold's own click often never fires. Card icon (far left of row, bezel of binder tile): open card sheet. Tiles with chosen art keep the same bezel, so tap-to-register and the card icon stay reachable with art in the slot; the scan carries a remove X (hover, or after the first tap on touch), and the card sheet header has Remove card too.
+- Forms menu: type checkboxes only, Base checked by default; an All Forms master row on top checks every kind (partial picks show a dash), unchecking it returns to Base. Entry mode (Separate / Collapsible) and placement (National / Regional / Grouped) live under the gear menu with Manage lists.
 - Collapsible mode: `+n` chip on bases with forms; chip color reflects form completion only; drawers are the same row elements, so no state sync is needed.
 - Right-edge checkpoint strip: tap to jump, hold and slide to scrub (coarse across regions, fine within one); highlight follows scroll position.
 
@@ -90,6 +90,16 @@ A five-lane review (visual lens, architecture lens, web-platform research, feasi
 Not built (verified ideas for later, in order): run marking (long-press then drag to mark a stretch; needs an owner call on what a run paints), checkpoint strip as a progress spine with a scrub bubble, a capture wobble on the status ball (collides with the star burst; pick one), a root cross-fade on view switch only (View Transitions, Safari 18+), a page-turn animation on the existing pager. Rejected on verification: native popover (Safari 17 floor), content-visibility on the list (breaks offsetTop reads the scrub needs), scroll-snap paging, anchor positioning, scroll-driven header bar, pocket-lip pending treatment, ghost-sprite proposal.
 
 DEFERRED: global rarity filter (mark rarities you collect; card sheets show only those). Blocked on rarity data: TCGdex list responses carry no rarity and per-card detail fetches would be 90 requests a sheet. It is the first feature of the build-time card-data pipeline below, where rarity is baked into each file.
+
+## 2026-09-05 shell: the Ledger treatment (owner pick S2 from the shell mockups, shipped on MAX-forms)
+
+- Header: the shell band thins to the brand row (title, count in mono, pending count amber, percent) and the progress moves to the header's bottom edge: `.bar` is absolutely positioned across the full header width at `bottom:-1px`, 2px tall, and its `#fill` is shell red, so the sticky header's edge is the progress bar. The 3px ink rule under the header is gone; a hairline (`--line-soft`, oklch 0.8 0.01 95) closes it.
+- Search: an underline field (no box) with a search glyph masked at the left (`--icon-find`); the suggestion list is a 4px-radius card with a soft shadow.
+- Filter menus: text buttons sized to their label with a chevron (`--icon-chev`), separated by hairlines; the first is flush left. An active or open menu turns ink and an active one carries a 2px shell-red underline. The row wraps when selections widen the labels (no overflow on the row: an overflow rule there clips the absolutely positioned panels). The Gen menu is labelled Generation; its count form stays "n gens" to fit.
+- Panels: 4px radius, soft border, hairline rows 42px tall, the checkbox or radio drawn as a trailing check glyph (no box; indeterminate is a dash); group dividers (`.pdiv`) are 8px recessed bands; the gear panel's action rows share the same hairlines. The size and column pickers take the same card.
+- Icons: view switcher, size pickers and gear redrawn at 20px with 1.5px strokes; the active view carries the same red underline as an active filter; the gear is a toothed gear (before it read as a sun).
+- Checkpoint strip: 64px wide with a hairline on its left, labels are the full region names (`RAIL_NAME` maps only POGO to GO and Gmax to G-Max) in 8.5px tracked capitals, the current one in ink with a 2px shell-red tick on its left edge. List, pocket and binder reserve 64px on the right (was 40px) and the jump pair sits at right:72px.
+- Verified with Playwright at 390 and 1280: no horizontal overflow in any view, every rail label fits its 64px, the Forms panel shows all eight rows on a 390 by 844 viewport, a three-gen plus three-region plus status selection fits one filter row at 390, header height 144px feeds the strip's top.
 
 ## 2026-09-04 header, navigation and checkpoint strip (owner walk feedback, shipped on MAX-forms)
 
