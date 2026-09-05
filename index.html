@@ -19,7 +19,7 @@
     --page:oklch(0.955 0.006 95); --card:oklch(0.98 0.004 95); --card-hi:oklch(0.9 0.008 95);
     --well:oklch(0.885 0.008 95); --art:oklch(0.74 0.01 95);
     --ink:oklch(0.22 0.012 95); --ink-dim:oklch(0.47 0.012 95);
-    --line:oklch(0.6 0.01 95); --line-hi:oklch(0.24 0.012 95);
+    --line:oklch(0.6 0.01 95); --line-soft:oklch(0.8 0.01 95); --line-hi:oklch(0.24 0.012 95);
     --accent:oklch(0.55 0.19 25);
     --shell:oklch(0.5 0.17 25); --shell-deep:oklch(0.4 0.14 25); --shell-dim:oklch(0.9 0.05 25);
     --pend:oklch(0.55 0.12 85); --pend-deep:oklch(0.42 0.1 85); --pend-lite:oklch(0.82 0.13 88);
@@ -36,19 +36,19 @@
   html{scroll-behavior:smooth}
   body{background:var(--page);color:var(--ink);font-family:system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
 
-  header{position:sticky;top:0;z-index:40;background:oklch(0.955 0.006 95 / .94);backdrop-filter:blur(8px);border-bottom:3px solid var(--ink);padding:0 0 3px;transition:transform .22s ease}
+  header{position:sticky;top:0;z-index:40;background:oklch(0.955 0.006 95 / .94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft);transition:transform .22s ease}
   header.away{transform:translateY(-100%)}
   @media (prefers-reduced-motion:reduce){header{transition:none}}
   .hwrap{max-width:var(--col);margin:0 auto;padding:0 var(--gutter)}
-  .band{background:var(--shell);color:var(--card);padding:8px 0 6px;margin-bottom:6px}
+  .band{background:var(--shell);color:var(--card);padding:6px 0;margin-bottom:6px}
   .brand{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
   h1{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
   .count{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--shell-dim)}
   .count b{color:var(--card);font-weight:600}
   #pend{color:var(--pend-lite);font-weight:600}
   .pct{color:var(--shell-dim)}
-  .bar{height:3px;background:var(--shell-deep);margin-top:4px;overflow:hidden}
-  .bar i{display:block;height:100%;width:0;background:var(--card);transition:width .3s ease}
+  .bar{position:absolute;left:0;right:0;bottom:-1px;height:2px;pointer-events:none}
+  .bar i{display:block;height:100%;width:0;background:var(--shell);transition:width .3s ease}
 
   .search{position:relative}
   .search input{width:100%;padding:6px 10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:16px;outline:none}
@@ -330,7 +330,6 @@
     <h1>National Card Dex</h1>
     <div class="count"><b id="have">0</b><span id="pend"></span> / <span id="total">0</span> <span class="pct" id="pct"></span></div>
   </div>
-  <div class="bar"><i id="fill"></i></div>
  </div></div>
  <div class="hwrap">
   <div class="search">
@@ -385,6 +384,7 @@
     </div>
   </div>
  </div>
+ <div class="bar"><i id="fill"></i></div>
 </header>
 
 <main id="list"></main>
