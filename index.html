@@ -107,7 +107,7 @@
   .colmode .row.frm{margin-left:18px}
   .spr{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--art)}
   .spr img{width:44px;height:44px;image-rendering:pixelated}
-  .spr img.sm,.card .part img.sm{image-rendering:auto}
+  .spr img.sm,.card .part img.sm,.card .lbl img.sm{image-rendering:auto}
   .spr .fb{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-dim)}
   .who{flex:1;min-width:0}
   .name{font-size:14px;font-weight:650;line-height:1.2}
@@ -171,7 +171,8 @@
   /* one slot format: a full-width 63/88 face with card-radius bottom corners and its own hairline, then one bezel strip under it (search, tags, ball).
      Every part is sized in slot units with a legibility floor and no ceiling, so a tile is the same drawing at any column count */
   /* status: missing is grayed out (gray ground, grayscale sprite or scan), registered is full colour on its energy ground,
-     pending covers the face with the black poly bubble mailer the card ships in (bubbles through the film, flap with its peel liner, a paper label), static */
+     pending covers the face with the black poly bubble mailer the card ships in (bubbles through the film, flap with its peel liner), static:
+     a sprite entry gets a paper label with the sprite, a chosen card shows through a plastic window cut in the mailer */
   .card,.blankc{--bz:max(18px,11cqw)}
   .card{container-type:inline-size;border-radius:var(--r) var(--r) 0 0;background:var(--card);border:1px solid var(--line);transition:border-color .3s;position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .card.own,.row.done{--art:var(--e,oklch(0.3 0.012 95));border-color:var(--line-hi)}
@@ -196,13 +197,17 @@
   .card.pk.own .part img{opacity:1;filter:none}
   .card.scan .face{background:none}
   .card .cardart{width:100%;height:100%;object-fit:cover;display:block;opacity:.55;filter:grayscale(1);transition:opacity .2s,filter .2s}
-  .card.own .cardart{opacity:1;filter:none}
+  .card.own .cardart,.card.pend .cardart{opacity:1;filter:none}
   .card.scan .rmx{position:absolute;top:2cqw;right:2cqw;width:max(18px,10cqw);height:max(18px,10cqw);border:0;padding:0;background:var(--ink);color:var(--card);font-size:max(12px,7cqw);font-weight:700;line-height:1;cursor:pointer;box-shadow:0 0 0 1px var(--card);opacity:0;pointer-events:none;transition:opacity .15s;-webkit-tap-highlight-color:transparent}
   .card.scan:hover .rmx,.card.scan:focus-within .rmx{opacity:1;pointer-events:auto}
+  .card{--wx:7cqw;--wt:21%;--wb:7cqw}
   .card .mail{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;background:radial-gradient(circle,oklch(1 0 0 / .04) 0 32%,var(--poly-hi) 35% 40%,transparent 44%) 0 0/9cqw 15.6cqw,radial-gradient(circle,oklch(1 0 0 / .04) 0 32%,var(--poly-hi) 35% 40%,transparent 44%) 4.5cqw 7.8cqw/9cqw 15.6cqw,linear-gradient(100deg,oklch(1 0 0 / .07),transparent 45%,oklch(0 0 0 / .2)),var(--poly)}
   .card .flap{flex:none;width:100%;height:16%;background:linear-gradient(to bottom,transparent 52%,var(--card) 52%,var(--card) 100%),linear-gradient(100deg,oklch(1 0 0 / .08),transparent 50%),var(--poly);position:relative;box-shadow:0 1px 0 oklch(1 0 0 / .12),0 2px 5px -1px oklch(0 0 0 / .6)}
   .card .flap::after{content:"";position:absolute;left:0;right:0;top:62%;height:16%;background:repeating-linear-gradient(90deg,var(--ink-dim) 0 3px,transparent 3px 5px,var(--ink-dim) 5px 6px,transparent 6px 8px);opacity:.35}
-  .card .lbl{width:74%;margin-top:22%;padding:2.2cqw 2.6cqw;background:var(--card);border:1px solid var(--line);box-shadow:0 1px 2px oklch(0 0 0 / .5)}
+  .card.scan .mail{clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,var(--wx) var(--wt),calc(100% - var(--wx)) var(--wt),calc(100% - var(--wx)) calc(100% - var(--wb)),var(--wx) calc(100% - var(--wb)),var(--wx) var(--wt))}
+  .card .win{position:absolute;left:var(--wx);right:var(--wx);top:var(--wt);bottom:var(--wb);z-index:2;pointer-events:none;box-shadow:inset 0 0 0 1px oklch(1 0 0 / .4),inset 0 1cqw 3cqw oklch(0 0 0 / .45);background:linear-gradient(115deg,oklch(1 0 0 / .16) 0 28%,oklch(1 0 0 / .04) 44%,transparent 58%)}
+  .card .lbl{width:74%;margin-top:22%;padding:2.2cqw 2.6cqw;display:flex;gap:2.5cqw;align-items:center;background:var(--card);border:1px solid var(--line);box-shadow:0 1px 2px oklch(0 0 0 / .5)}
+  .card .lbl img{flex:none;width:max(12px,17cqw);aspect-ratio:1;object-fit:contain;image-rendering:pixelated}
   .card .lt{display:flex;flex-direction:column;gap:.8cqw;min-width:0;line-height:1.15}
   .card .lt span{font-size:max(7px,5.4cqw);font-weight:750;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
   .card .lt b{font-family:ui-monospace,Menlo,monospace;font-size:max(7px,4.6cqw);font-weight:600;letter-spacing:.06em;color:var(--ink-dim)}
@@ -224,7 +229,7 @@
   @container (max-width:120px){.card .pfoot .chip.f ~ .chip:not(.r){display:none}}
   @container (max-width:100px){.card .pfoot .chip:not(.r):not(.f){display:none}}
   @container (max-width:80px){
-    .card .pfoot .ptag,.card .pprice,.card .lt span{display:none}
+    .card .pfoot .ptag,.card .pprice,.card .lt span,.card .lbl img{display:none}
     .card .lbl{width:84%;padding:1.5cqw 2cqw}
     .card.pk .part img{width:78%}
   }
@@ -497,13 +502,13 @@ function syncEntryUI(id){
     if(card){card.classList.toggle("own",owned[id]===true);card.classList.toggle("pend",owned[id]==="p");syncMailer(card,id)}});
 }
 // a pending entry is in the post: its face holds the mailer it ships in, added or removed as the state changes
-function mailerHTML([n,,name]){
-  return `<div class="mail"><i class="flap"></i><div class="lbl"><div class="lt"><span>${name.replace(/^Gigantamax /,"G-Max ")}</span><b>No.${String(n).padStart(4,"0")}</b><i class="bar"></i></div></div></div>`;
+function mailerHTML([n,id,name,,,,sref],scan){
+  return scan?`<div class="mail"><i class="flap"></i></div><i class="win"></i>`:
+    `<div class="mail"><i class="flap"></i><div class="lbl">${sprImg(sref||id)}<div class="lt"><span>${name.replace(/^Gigantamax /,"G-Max ")}</span><b>No.${String(n).padStart(4,"0")}</b><i class="bar"></i></div></div></div>`;
 }
 function syncMailer(card,id){
-  const m=card.querySelector(".mail");
-  if(owned[id]==="p"){if(!m)card.querySelector(".face").insertAdjacentHTML("beforeend",mailerHTML(byId.get(id)))}
-  else m?.remove();
+  if(owned[id]==="p"){if(!card.querySelector(".mail"))card.querySelector(".face").insertAdjacentHTML("beforeend",mailerHTML(byId.get(id),card.classList.contains("scan")))}
+  else card.querySelectorAll(".mail,.win").forEach(m=>m.remove());
 }
 function paintChip(exp,n,reg,cnt){
   exp.hidden=!cnt;
@@ -1074,8 +1079,8 @@ function binderTile([n,id,name,region,gen,form,sref],map){
   return c;
 }
 document.addEventListener("error",ev=>{
-  const img=ev.target;if(!(img instanceof HTMLImageElement)||!img.closest(".spr,.part"))return;
-  const fb=document.createElement("span");fb.className=img.closest(".part")?"fbc":"fb";fb.textContent="#"+img.closest("[data-id]").dataset.id;img.replaceWith(fb);
+  const img=ev.target;if(!(img instanceof HTMLImageElement)||!img.closest(".spr,.part,.lbl"))return;
+  const fb=document.createElement("span");fb.className=img.closest(".part,.lbl")?"fbc":"fb";fb.textContent="#"+img.closest("[data-id]").dataset.id;img.replaceWith(fb);
 },true);
 function refreshTile(id){
   [bTiles,pTiles].forEach(map=>{const old=map.get(id);if(old)old.replaceWith(binderTile(byId.get(id),map))});
