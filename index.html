@@ -69,8 +69,7 @@
   .sugg button:active{background:var(--card)}
   .sugg .no{font-family:ui-monospace,Menlo,monospace;color:var(--ink-dim);font-size:12px}
 
-  .filters{display:flex;margin-top:2px;overflow-x:auto;scrollbar-width:none}
-  .filters::-webkit-scrollbar{display:none}
+  .filters{display:flex;flex-wrap:wrap;margin-top:2px}
   .dd{position:relative;flex:none}
   .ddbtn{display:inline-flex;align-items:center;gap:2px;padding:0 6px 0 10px;min-height:40px;border:0;border-left:1px solid var(--line-soft);background:none;color:var(--ink-dim);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;position:relative;-webkit-tap-highlight-color:transparent}
   .dd:first-child .ddbtn{border-left:0;padding-left:2px}
@@ -165,7 +164,7 @@
   .gpick{position:relative;margin-left:auto}
   .gpick:not([hidden])~.dd{margin-left:0}
   .gpick>button{padding:4px 8px;border:0;background:none;color:var(--ink-dim);cursor:pointer;display:flex;align-items:center;-webkit-tap-highlight-color:transparent}
-  .gpick .pop{position:absolute;right:0;top:calc(100% + 6px);z-index:40;background:var(--page);border:1px solid var(--line);padding:10px;box-shadow:var(--shadow)}
+  .gpick .pop{position:absolute;right:0;top:calc(100% + 2px);z-index:40;background:var(--card);border:1px solid var(--line-soft);border-radius:4px;padding:10px;box-shadow:0 4px 14px oklch(0.25 0.02 95 / .12)}
   .gpick .pop[hidden]{display:none}
   .gpick .pop>div:first-child{display:grid;gap:4px}
   #gpGrid{grid-template-columns:repeat(6,22px);grid-auto-rows:22px}
