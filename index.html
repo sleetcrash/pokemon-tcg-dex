@@ -23,7 +23,7 @@
     --accent:oklch(0.55 0.19 25);
     --shell:oklch(0.5 0.17 25); --shell-deep:oklch(0.4 0.14 25); --shell-dim:oklch(0.9 0.05 25);
     --pend:oklch(0.55 0.12 85); --pend-deep:oklch(0.42 0.1 85); --pend-lite:oklch(0.82 0.13 88);
-    --kraft:oklch(0.78 0.06 75); --kraft-deep:oklch(0.62 0.07 70);
+    --poly:oklch(0.23 0.006 260); --poly-hi:oklch(0.36 0.008 260);
     --ok:oklch(0.5 0.13 150); --glow:oklch(0.62 0.22 28); --shadow:0 8px 24px oklch(0.25 0.02 95 / .16);
     --icon-search:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%222.5%22 width=%2214%22 height=%2219%22/%3E%3Ccircle cx=%2214.5%22 cy=%2215%22 r=%224.2%22/%3E%3Cline x1=%2217.6%22 y1=%2218.1%22 x2=%2221%22 y2=%2221.5%22/%3E%3C/svg%3E");
     --ball:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeBAMAAADJHrORAAAAA3NCSVQFBQUYJt5DAAAAIVBMVEX///8xMTH/lDqcSjr/1jr////eWjpKUlKlpcV7e4TezvdcMgHRAAAAAXRSTlMAQObYZgAAAH5JREFUGNNjYKALEBQUROEqKSkhCTACuUpqAnC+kAtIIBEurRLqBOSnCeDgCymB1aclwvlg83DyhcH8tDRDKF/cSL0cyE0uhPHLKyLK0szLYXzG6aWh5eXllXD7l86IAHJXwB0sFTlz1apVjQj/dAG5HQJI/u3o6BDEEx60AwCJgyJdBXcpkgAAAABJRU5ErkJggg==);
@@ -107,7 +107,7 @@
   .colmode .row.frm{margin-left:18px}
   .spr{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--art)}
   .spr img{width:44px;height:44px;image-rendering:pixelated}
-  .spr img.sm,.card .part img.sm,.card .lbl img.sm{image-rendering:auto}
+  .spr img.sm,.card .part img.sm{image-rendering:auto}
   .spr .fb{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-dim)}
   .who{flex:1;min-width:0}
   .name{font-size:14px;font-weight:650;line-height:1.2}
@@ -171,7 +171,7 @@
   /* one slot format: a full-width 63/88 face with card-radius bottom corners and its own hairline, then one bezel strip under it (search, tags, ball).
      Every part is sized in slot units with a legibility floor and no ceiling, so a tile is the same drawing at any column count */
   /* status: missing is grayed out (gray ground, grayscale sprite or scan), registered is full colour on its energy ground,
-     pending covers the face with the kraft mailer the card ships in (label with thumbnail, number, name, barcode), static */
+     pending covers the face with the black poly bubble mailer the card ships in (bubbles through the film, flap with its peel liner, a paper label), static */
   .card,.blankc{--bz:max(18px,11cqw)}
   .card{container-type:inline-size;border-radius:var(--r) var(--r) 0 0;background:var(--card);border:1px solid var(--line);transition:border-color .3s;position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .card.own,.row.done{--art:var(--e,oklch(0.3 0.012 95));border-color:var(--line-hi)}
@@ -199,15 +199,14 @@
   .card.own .cardart{opacity:1;filter:none}
   .card.scan .rmx{position:absolute;top:2cqw;right:2cqw;width:max(18px,10cqw);height:max(18px,10cqw);border:0;padding:0;background:var(--ink);color:var(--card);font-size:max(12px,7cqw);font-weight:700;line-height:1;cursor:pointer;box-shadow:0 0 0 1px var(--card);opacity:0;pointer-events:none;transition:opacity .15s;-webkit-tap-highlight-color:transparent}
   .card.scan:hover .rmx,.card.scan:focus-within .rmx{opacity:1;pointer-events:auto}
-  .card .mail{position:absolute;inset:0;z-index:2;background:var(--well);display:flex;align-items:center;justify-content:center}
-  .card .env{position:relative;width:86%;aspect-ratio:1/1.25;background:var(--kraft) radial-gradient(oklch(1 0 0 / .18) 18%,transparent 20%) 0 0/5cqw 5cqw;border:1px solid var(--kraft-deep);box-shadow:0 1.5cqw 3cqw -1cqw oklch(0.3 0.05 70 / .5);transform:rotate(-3deg);display:flex;align-items:center;justify-content:center}
-  .card .flap{position:absolute;left:-1px;right:-1px;top:-1px;height:22%;background:var(--kraft-deep);clip-path:polygon(0 0,100% 0,50% 100%);opacity:.55}
-  .card .lbl{width:78%;margin-top:12%;padding:2cqw;display:flex;gap:2cqw;align-items:center;background:var(--card);border:1px solid var(--line)}
-  .card .lbl img{flex:none;width:max(12px,16cqw);aspect-ratio:1;object-fit:contain;image-rendering:pixelated}
-  .card .lt{display:flex;flex-direction:column;gap:1cqw;min-width:0;line-height:1.1}
-  .card .lt b{font-family:ui-monospace,Menlo,monospace;font-size:max(7px,5cqw);letter-spacing:.04em}
-  .card .lt span{font-size:max(7px,4.6cqw);font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;letter-spacing:.03em}
-  .card .bar{display:block;height:max(4px,4cqw);margin-top:1cqw;background:repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 2px,var(--ink) 2px 4px,transparent 4px 5px,var(--ink) 5px 6px,transparent 6px 9px)}
+  .card .mail{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;background:radial-gradient(circle,oklch(1 0 0 / .04) 0 32%,var(--poly-hi) 35% 40%,transparent 44%) 0 0/9cqw 15.6cqw,radial-gradient(circle,oklch(1 0 0 / .04) 0 32%,var(--poly-hi) 35% 40%,transparent 44%) 4.5cqw 7.8cqw/9cqw 15.6cqw,linear-gradient(100deg,oklch(1 0 0 / .07),transparent 45%,oklch(0 0 0 / .2)),var(--poly)}
+  .card .flap{flex:none;width:100%;height:16%;background:linear-gradient(to bottom,transparent 52%,var(--card) 52%,var(--card) 100%),linear-gradient(100deg,oklch(1 0 0 / .08),transparent 50%),var(--poly);position:relative;box-shadow:0 1px 0 oklch(1 0 0 / .12),0 2px 5px -1px oklch(0 0 0 / .6)}
+  .card .flap::after{content:"";position:absolute;left:0;right:0;top:62%;height:16%;background:repeating-linear-gradient(90deg,var(--ink-dim) 0 3px,transparent 3px 5px,var(--ink-dim) 5px 6px,transparent 6px 8px);opacity:.35}
+  .card .lbl{width:74%;margin-top:22%;padding:2.2cqw 2.6cqw;background:var(--card);border:1px solid var(--line);box-shadow:0 1px 2px oklch(0 0 0 / .5)}
+  .card .lt{display:flex;flex-direction:column;gap:.8cqw;min-width:0;line-height:1.15}
+  .card .lt span{font-size:max(7px,5.4cqw);font-weight:750;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+  .card .lt b{font-family:ui-monospace,Menlo,monospace;font-size:max(7px,4.6cqw);font-weight:600;letter-spacing:.06em;color:var(--ink-dim)}
+  .card .bar{display:block;height:max(4px,4.5cqw);margin-top:1cqw;background:repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 2px,var(--ink) 2px 4px,transparent 4px 5px,var(--ink) 5px 6px,transparent 6px 9px)}
   .card .pfoot{flex:none;height:var(--bz);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2cqw;padding:0 2.5cqw;background:var(--card)}
   .card .pfoot .ptag{display:flex;justify-content:center;align-items:center;gap:2.5cqw;min-width:0;overflow:hidden}
   .card .pfoot .chip{flex:none;font-size:max(8px,5cqw);padding:0;background:none;white-space:nowrap}
@@ -225,8 +224,8 @@
   @container (max-width:120px){.card .pfoot .chip.f ~ .chip:not(.r){display:none}}
   @container (max-width:100px){.card .pfoot .chip:not(.r):not(.f){display:none}}
   @container (max-width:80px){
-    .card .pfoot .ptag,.card .pprice,.card .lt span,.card .lbl img{display:none}
-    .card .lbl{width:90%}
+    .card .pfoot .ptag,.card .pprice,.card .lt span{display:none}
+    .card .lbl{width:84%;padding:1.5cqw 2cqw}
     .card.pk .part img{width:78%}
   }
   @container (max-width:62px){
@@ -498,8 +497,8 @@ function syncEntryUI(id){
     if(card){card.classList.toggle("own",owned[id]===true);card.classList.toggle("pend",owned[id]==="p");syncMailer(card,id)}});
 }
 // a pending entry is in the post: its face holds the mailer it ships in, added or removed as the state changes
-function mailerHTML([n,id,name,,,,sref]){
-  return `<div class="mail"><div class="env"><i class="flap"></i><div class="lbl">${sprImg(sref||id)}<div class="lt"><b>No.${String(n).padStart(4,"0")}</b><span>${name.replace(/^Gigantamax /,"G-Max ")}</span><i class="bar"></i></div></div></div></div>`;
+function mailerHTML([n,,name]){
+  return `<div class="mail"><i class="flap"></i><div class="lbl"><div class="lt"><span>${name.replace(/^Gigantamax /,"G-Max ")}</span><b>No.${String(n).padStart(4,"0")}</b><i class="bar"></i></div></div></div>`;
 }
 function syncMailer(card,id){
   const m=card.querySelector(".mail");
@@ -1075,8 +1074,8 @@ function binderTile([n,id,name,region,gen,form,sref],map){
   return c;
 }
 document.addEventListener("error",ev=>{
-  const img=ev.target;if(!(img instanceof HTMLImageElement)||!img.closest(".spr,.part,.lbl"))return;
-  const fb=document.createElement("span");fb.className=img.closest(".part,.lbl")?"fbc":"fb";fb.textContent="#"+img.closest("[data-id]").dataset.id;img.replaceWith(fb);
+  const img=ev.target;if(!(img instanceof HTMLImageElement)||!img.closest(".spr,.part"))return;
+  const fb=document.createElement("span");fb.className=img.closest(".part")?"fbc":"fb";fb.textContent="#"+img.closest("[data-id]").dataset.id;img.replaceWith(fb);
 },true);
 function refreshTile(id){
   [bTiles,pTiles].forEach(map=>{const old=map.get(id);if(old)old.replaceWith(binderTile(byId.get(id),map))});
