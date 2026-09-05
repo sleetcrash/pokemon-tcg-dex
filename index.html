@@ -172,7 +172,7 @@
      Every part is sized in slot units with a legibility floor and no ceiling, so a tile is the same drawing at any column count */
   /* status: missing is grayed out (gray ground, grayscale sprite or scan), registered is full colour on its energy ground,
      pending covers the face with the black poly bubble mailer the card ships in (bubbles through the film, flap with its peel liner), static:
-     a sprite entry gets a paper label with the sprite, a chosen card shows through a plastic window cut in the mailer */
+     a paper label carries the sprite, name, number and barcode; a chosen card also shows through a plastic window cut above the label */
   .card,.blankc{--bz:max(18px,11cqw)}
   .card{container-type:inline-size;border-radius:var(--r) var(--r) 0 0;background:var(--card);border:1px solid var(--line);transition:border-color .3s;position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .card.own,.row.done{--art:var(--e,oklch(0.3 0.012 95));border-color:var(--line-hi)}
@@ -210,6 +210,7 @@
   /* clear film over the slit: a glossy diagonal highlight, a faint milky tint, a bright rim where the film meets the poly, depth under the cut edge */
   .card .win{position:absolute;left:var(--wx);right:var(--wx);top:var(--wt);height:var(--wh);z-index:2;pointer-events:none;box-shadow:inset 0 0 0 1px oklch(1 0 0 / .55),inset 0 1.2cqw 2.5cqw oklch(0 0 0 / .5);background:linear-gradient(115deg,transparent 18%,oklch(1 0 0 / .42) 30%,oklch(1 0 0 / .14) 38%,transparent 46%,transparent 68%,oklch(1 0 0 / .16) 78%,transparent 86%),oklch(1 0 0 / .07)}
   .card .lbl{width:calc(100% - 2 * var(--wx));height:var(--wh);margin-top:22%;padding:2.2cqw 2.6cqw;display:flex;gap:2.5cqw;align-items:center;background:var(--card);border:1px solid var(--line);box-shadow:0 1px 2px oklch(0 0 0 / .5)}
+  .card.scan .lbl{margin-top:calc(22% + var(--wh) + 3cqw)}
   .card .lbl img{flex:none;width:max(12px,17cqw);aspect-ratio:1;object-fit:contain;image-rendering:pixelated}
   .card .lt{display:flex;flex-direction:column;gap:.8cqw;min-width:0;line-height:1.15}
   .card .lt span{font-size:max(7px,5.4cqw);font-weight:750;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
@@ -507,8 +508,7 @@ function syncEntryUI(id){
 }
 // a pending entry is in the post: its face holds the mailer it ships in, added or removed as the state changes
 function mailerHTML([n,id,name,,,,sref],scan){
-  return scan?`<div class="mail"><i class="flap"></i></div><i class="win"></i>`:
-    `<div class="mail"><i class="flap"></i><div class="lbl">${sprImg(sref||id)}<div class="lt"><span>${name.replace(/^Gigantamax /,"G-Max ")}</span><b>No.${String(n).padStart(4,"0")}</b><i class="bar"></i></div></div></div>`;
+  return `<div class="mail"><i class="flap"></i><div class="lbl">${sprImg(sref||id)}<div class="lt"><span>${name.replace(/^Gigantamax /,"G-Max ")}</span><b>No.${String(n).padStart(4,"0")}</b><i class="bar"></i></div></div></div>`+(scan?'<i class="win"></i>':"");
 }
 function syncMailer(card,id){
   if(owned[id]==="p"){if(!card.querySelector(".mail"))card.querySelector(".face").insertAdjacentHTML("beforeend",mailerHTML(byId.get(id),card.classList.contains("scan")))}
