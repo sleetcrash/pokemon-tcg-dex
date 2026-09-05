@@ -337,7 +337,7 @@
     <div class="sugg" id="sugg" role="listbox"></div>
   </div>
   <div class="filters">
-    <div class="dd" id="ddGen"><button class="ddbtn" type="button">Gen</button><div class="ddpanel"><label><input type="checkbox" value="1">Gen 1</label><label><input type="checkbox" value="2">Gen 2</label><label><input type="checkbox" value="3">Gen 3</label><label><input type="checkbox" value="4">Gen 4</label><label><input type="checkbox" value="5">Gen 5</label><label><input type="checkbox" value="6">Gen 6</label><label><input type="checkbox" value="7">Gen 7</label><label><input type="checkbox" value="8">Gen 8</label><label><input type="checkbox" value="9">Gen 9</label></div></div>
+    <div class="dd" id="ddGen"><button class="ddbtn" type="button">Generation</button><div class="ddpanel"><label><input type="checkbox" value="1">Gen 1</label><label><input type="checkbox" value="2">Gen 2</label><label><input type="checkbox" value="3">Gen 3</label><label><input type="checkbox" value="4">Gen 4</label><label><input type="checkbox" value="5">Gen 5</label><label><input type="checkbox" value="6">Gen 6</label><label><input type="checkbox" value="7">Gen 7</label><label><input type="checkbox" value="8">Gen 8</label><label><input type="checkbox" value="9">Gen 9</label></div></div>
     <div class="dd" id="ddRegion"><button class="ddbtn" type="button">Region</button><div class="ddpanel"><label><input type="checkbox" value="Kanto">Kanto</label><label><input type="checkbox" value="Johto">Johto</label><label><input type="checkbox" value="Hoenn">Hoenn</label><label><input type="checkbox" value="Sinnoh">Sinnoh</label><label><input type="checkbox" value="Unova">Unova</label><label><input type="checkbox" value="Kalos">Kalos</label><label><input type="checkbox" value="Alola">Alola</label><label><input type="checkbox" value="Galar">Galar</label><label><input type="checkbox" value="Hisui">Hisui</label><label><input type="checkbox" value="Paldea">Paldea</label><label><input type="checkbox" value="POGO">POGO</label></div></div>
     <div class="dd" id="ddForm"><button class="ddbtn" type="button">Forms</button><div class="ddpanel">
       <label><input type="checkbox" value="" checked>Base</label>
@@ -924,7 +924,7 @@ function ddInit(id,noun,allLabel){
     clear(){boxes.forEach(b=>b.checked=false);update()}
   };
 }
-const ddGen=ddInit("ddGen","gens","Gen"),
+const ddGen=ddInit("ddGen","gens","Generation"),
       ddRegion=ddInit("ddRegion","regions","Region"),
       ddStatus=ddInit("ddStatus","statuses","Status");
 
