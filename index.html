@@ -809,15 +809,14 @@ function burstAt(id){
   const r=el.getBoundingClientRect();
   burst(r.left+r.width/2,r.top+r.height/2);
 }
-// long press toggles Pending; the click that follows a hold is ignored by time, not by a flag
-let holdAt=0,holdId=null;
+// long press toggles Pending; only the click that ends that hold is swallowed, a new pointerdown clears it
+let holdId=null;
 function togglePending(id){
   document.querySelectorAll(".star").forEach(s=>s.remove());
   setState(id,owned[id]==="p"?undefined:"p");
-  holdAt=performance.now();holdId=id;
 }
 function handleTap(id){
-  if(id===holdId&&performance.now()-holdAt<600)return;
+  if(id===holdId){holdId=null;return}
   const next=owned[id]===undefined?true:owned[id]===true?undefined:true;
   if(next===true)burstAt(id);
   setState(id,next);
@@ -825,6 +824,7 @@ function handleTap(id){
 function armLongPress(container,sel){
   let t=null,sx=0,sy=0,tid=null,held=null,fired=false;
   container.addEventListener("pointerdown",ev=>{
+    holdId=null;
     if(!ev.isPrimary){drop();return}
     const el=ev.target.closest(sel);
     if(!el||ev.button!==0||ev.target.closest(".cardbtn,.setc,.rmx,a"))return;
@@ -832,11 +832,10 @@ function armLongPress(container,sel){
     held=el;fired=false;el.classList.add("hold");
     t=setTimeout(()=>{t=null;fired=true;el.classList.remove("hold");togglePending(tid)},450);
   });
-  // the click that ends a hold is stamped at release, so a long hold still reads as pending
   const drop=()=>{
     if(t){clearTimeout(t);t=null}
     if(held){held.classList.remove("hold");held=null}
-    if(fired){holdAt=performance.now();holdId=tid;fired=false}
+    if(fired){holdId=tid;fired=false}
   };
   container.addEventListener("pointermove",ev=>{
     if(t&&Math.hypot(ev.clientX-sx,ev.clientY-sy)>8)drop();
