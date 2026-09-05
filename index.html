@@ -200,13 +200,16 @@
   .card.own .cardart,.card.pend .cardart{opacity:1;filter:none}
   .card.scan .rmx{position:absolute;top:2cqw;right:2cqw;width:max(18px,10cqw);height:max(18px,10cqw);border:0;padding:0;background:var(--ink);color:var(--card);font-size:max(12px,7cqw);font-weight:700;line-height:1;cursor:pointer;box-shadow:0 0 0 1px var(--card);opacity:0;pointer-events:none;transition:opacity .15s;-webkit-tap-highlight-color:transparent}
   .card.scan:hover .rmx,.card.scan:focus-within .rmx{opacity:1;pointer-events:auto}
-  .card{--wx:7cqw;--wt:21%;--wb:7cqw}
+  /* one sticker-sized panel on both mailers: the label takes its box from these tokens and the window is cut to the same box
+     (--wt = flap height plus the label's top margin; --wh = the label's tallest content line plus its padding and border) */
+  .card .face{--wx:13%;--wt:44.4cqw;--wh:calc(max(18.6cqw,23px) + 4.4cqw + 2px)}
   .card .mail{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;background:radial-gradient(circle,oklch(1 0 0 / .04) 0 32%,var(--poly-hi) 35% 40%,transparent 44%) 0 0/9cqw 15.6cqw,radial-gradient(circle,oklch(1 0 0 / .04) 0 32%,var(--poly-hi) 35% 40%,transparent 44%) 4.5cqw 7.8cqw/9cqw 15.6cqw,linear-gradient(100deg,oklch(1 0 0 / .07),transparent 45%,oklch(0 0 0 / .2)),var(--poly)}
   .card .flap{flex:none;width:100%;height:16%;background:linear-gradient(to bottom,transparent 52%,var(--card) 52%,var(--card) 100%),linear-gradient(100deg,oklch(1 0 0 / .08),transparent 50%),var(--poly);position:relative;box-shadow:0 1px 0 oklch(1 0 0 / .12),0 2px 5px -1px oklch(0 0 0 / .6)}
   .card .flap::after{content:"";position:absolute;left:0;right:0;top:62%;height:16%;background:repeating-linear-gradient(90deg,var(--ink-dim) 0 3px,transparent 3px 5px,var(--ink-dim) 5px 6px,transparent 6px 8px);opacity:.35}
-  .card.scan .mail{clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,var(--wx) var(--wt),calc(100% - var(--wx)) var(--wt),calc(100% - var(--wx)) calc(100% - var(--wb)),var(--wx) calc(100% - var(--wb)),var(--wx) var(--wt))}
-  .card .win{position:absolute;left:var(--wx);right:var(--wx);top:var(--wt);bottom:var(--wb);z-index:2;pointer-events:none;box-shadow:inset 0 0 0 1px oklch(1 0 0 / .4),inset 0 1cqw 3cqw oklch(0 0 0 / .45);background:linear-gradient(115deg,oklch(1 0 0 / .16) 0 28%,oklch(1 0 0 / .04) 44%,transparent 58%)}
-  .card .lbl{width:74%;margin-top:22%;padding:2.2cqw 2.6cqw;display:flex;gap:2.5cqw;align-items:center;background:var(--card);border:1px solid var(--line);box-shadow:0 1px 2px oklch(0 0 0 / .5)}
+  .card.scan .mail{clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,var(--wx) var(--wt),calc(100% - var(--wx)) var(--wt),calc(100% - var(--wx)) calc(var(--wt) + var(--wh)),var(--wx) calc(var(--wt) + var(--wh)),var(--wx) var(--wt))}
+  /* clear film over the slit: a glossy diagonal highlight, a faint milky tint, a bright rim where the film meets the poly, depth under the cut edge */
+  .card .win{position:absolute;left:var(--wx);right:var(--wx);top:var(--wt);height:var(--wh);z-index:2;pointer-events:none;box-shadow:inset 0 0 0 1px oklch(1 0 0 / .55),inset 0 1.2cqw 2.5cqw oklch(0 0 0 / .5);background:linear-gradient(115deg,transparent 18%,oklch(1 0 0 / .42) 30%,oklch(1 0 0 / .14) 38%,transparent 46%,transparent 68%,oklch(1 0 0 / .16) 78%,transparent 86%),oklch(1 0 0 / .07)}
+  .card .lbl{width:calc(100% - 2 * var(--wx));height:var(--wh);margin-top:22%;padding:2.2cqw 2.6cqw;display:flex;gap:2.5cqw;align-items:center;background:var(--card);border:1px solid var(--line);box-shadow:0 1px 2px oklch(0 0 0 / .5)}
   .card .lbl img{flex:none;width:max(12px,17cqw);aspect-ratio:1;object-fit:contain;image-rendering:pixelated}
   .card .lt{display:flex;flex-direction:column;gap:.8cqw;min-width:0;line-height:1.15}
   .card .lt span{font-size:max(7px,5.4cqw);font-weight:750;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
@@ -230,7 +233,8 @@
   @container (max-width:100px){.card .pfoot .chip:not(.r):not(.f){display:none}}
   @container (max-width:80px){
     .card .pfoot .ptag,.card .pprice,.card .lt span,.card .lbl img{display:none}
-    .card .lbl{width:84%;padding:1.5cqw 2cqw}
+    .card .face{--wx:8%;--wh:calc(max(10.8cqw,12.5px) + 3cqw + 2px)}
+    .card .lbl{padding:1.5cqw 2cqw}
     .card.pk .part img{width:78%}
   }
   @container (max-width:62px){
