@@ -146,6 +146,8 @@
   .row.hs.done .slot::after,.row.hs.pend .slot::after{background-image:var(--hball);inset:-30%}
   .row.pend .slot{transform:rotate(22deg)}
   .row.pend .slot::before,.card.pend .pball::before{content:"";position:absolute;inset:-33.4%;background:var(--ball) center/contain no-repeat;filter:drop-shadow(0 0 2px var(--glow)) drop-shadow(0 0 5px var(--glow));animation:catchpulse 1.1s ease-in-out infinite}
+  /* the tile's ball glow holds still: its infinite pulse ran inside the hidden strip and stalled the tile's repaint on iOS Safari when the entry left pending */
+  .card.pend .pball::before{animation:none;opacity:.6}
   .row.hs.pend .slot::before,.card.hs.pend .pball::before{background-image:var(--hball);inset:-30%}
   .row.pend::before{opacity:1;background:linear-gradient(180deg,var(--pend-lite),var(--pend-deep) 50%,var(--pend-lite))}
   .star{position:fixed;width:10px;height:10px;pointer-events:none;z-index:60;background:var(--pend-lite);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:starfly .6s ease-out forwards;opacity:0}
@@ -340,7 +342,7 @@
   .crow button{flex:1;padding:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:13px;font-weight:650;cursor:pointer}
   .crow button.pri{background:var(--ink);color:var(--page);border-color:var(--ink)}
 
-  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.row.flash,.card.flash,.row.hold .slot,.card.hold{animation:none}.card,.card .strip{transition:none}.row.pend .slot::before,.card.pend .pball::before{animation:none;opacity:.6}.star{display:none}}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.row.flash,.card.flash,.row.hold .slot,.card.hold{animation:none}.card,.card .strip{transition:none}.row.pend .slot::before{animation:none;opacity:.6}.star{display:none}}
 </style>
 </head>
 <body>
