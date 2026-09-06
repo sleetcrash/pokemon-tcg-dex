@@ -836,9 +836,9 @@ function handleTap(id){
   setState(id,next);
 }
 function armLongPress(container,sel){
-  let t=null,sx=0,sy=0,tid=null,held=null,fired=false,swipe=null;
+  let t=null,sx=0,sy=0,tid=null,held=null,fired=false,swipe=null,ptype="mouse";
   container.addEventListener("pointerdown",ev=>{
-    holdId=null;
+    holdId=null;ptype=ev.pointerType;
     if(!ev.isPrimary){end();return}
     const el=ev.target.closest(sel);
     if(!el||ev.button!==0||ev.target.closest(".cardbtn,.setc,.rmx,a"))return;
@@ -861,9 +861,12 @@ function armLongPress(container,sel){
   });
   container.addEventListener("pointerup",end);
   container.addEventListener("pointercancel",end);
-  // long press owns Pending on every input; right click is reserved for later
+  // right click is the mouse's second gesture, so it toggles Pending like a long press; the touch callout stays suppressed
   container.addEventListener("contextmenu",ev=>{
-    if(ev.target.closest(sel))ev.preventDefault();
+    const el=ev.target.closest(sel);
+    if(!el)return;
+    ev.preventDefault();
+    if(ptype==="mouse"&&!ev.target.closest("a,button"))togglePending(Number(el.dataset.id));
   });
 }
 function armKeys(container,cols){
