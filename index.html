@@ -90,7 +90,7 @@
 
   main{padding:6px var(--gutter) 60px;max-width:var(--col);margin:0 auto}
   @media(max-width:720px){main{padding-right:calc(var(--gutter) + 64px)}}
-  @media(hover:hover){.row:hover{border-color:var(--line-hi)}.card:hover{border-color:var(--line-hi)}}
+  @media(hover:hover){.row:hover{border-color:var(--line-hi)}}
   .ddbtn:disabled{opacity:.4;cursor:default}
   .row{display:flex;align-items:center;gap:10px;padding:8px 10px;margin:6px 0;background:var(--card);border:1px solid var(--line);cursor:pointer;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .row .spr img{opacity:.6;filter:grayscale(1);transition:opacity .2s,filter .2s}
@@ -186,7 +186,7 @@
   /* status: missing is grayed out (gray ground, grayscale sprite or scan), registered is full colour on its energy ground,
      pending covers the face with the black poly bubble mailer the card ships in (bubbles through the film, the sealed flap folded over the top), static:
      a paper label carries the sprite, name and number; a chosen card also shows through a plastic window, the label centred between window and bottom edge */
-  .card{container-type:inline-size;border-radius:var(--r);background:var(--card);box-shadow:0 0 0 1px oklch(0.25 0.02 95 / .18),0 1px 3px oklch(0.25 0.02 95 / .18);transition:box-shadow .3s,transform .3s ease;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  .card{container-type:inline-size;border-radius:var(--r);background:var(--card);box-shadow:0 0 0 1px oklch(0.25 0.02 95 / .18),0 1px 3px oklch(0.25 0.02 95 / .18);transition:box-shadow .3s,transform .3s ease;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:pan-y pinch-zoom;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   /* press feel: the tile eases down while the pointer is on it and back up a little slower */
   .card.down{transform:scale(.975);transition:box-shadow .3s,transform .12s ease}
   .card.own,.row.done{--art:var(--e,oklch(0.3 0.012 95))}
@@ -239,7 +239,7 @@
   .card .sprice a{font-family:ui-monospace,Menlo,monospace;font-size:max(8px,5cqw);font-weight:700;line-height:1;padding:.8cqw 1.5cqw;background:var(--card);color:var(--ink);text-decoration:none;white-space:nowrap;box-shadow:0 0 0 1px var(--line)}
   .card .pprice{position:absolute;right:2cqw;bottom:2cqw;z-index:1;display:flex}
   .card .pprice a{font-family:ui-monospace,Menlo,monospace;font-size:max(8px,5.5cqw);font-weight:700;line-height:1;padding:1.2cqw 1.8cqw;background:var(--ink);color:var(--card);text-decoration:none;white-space:nowrap;box-shadow:0 0 0 1px var(--card)}
-  .card .pball{position:relative;flex:none;width:max(12px,6.5cqw);height:max(12px,6.5cqw);border-radius:50%;border:max(1.5px,0.7cqw) solid var(--line)}
+  .card .pball{position:relative;flex:none;justify-self:end;width:max(12px,6.5cqw);height:max(12px,6.5cqw);border-radius:50%;border:max(1.5px,0.7cqw) solid var(--line)}
   .card.own .pball,.card.pend .pball{border-color:transparent}
   .card.own .pball::after,.card.pend .pball::after{content:"";position:absolute;inset:-33.4%;background:var(--ball) center/contain no-repeat;image-rendering:pixelated}
   .card.hs.own .pball::after,.card.hs.pend .pball::after{background-image:var(--hball);inset:-30%}
