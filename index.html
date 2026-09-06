@@ -867,12 +867,13 @@ function armLongPress(container,sel){
   });
   container.addEventListener("pointerup",end);
   container.addEventListener("pointercancel",end);
-  // right click is the mouse's second gesture, so it toggles Pending like a long press; the touch callout stays suppressed
+  // right click is the mouse's second gesture, so it toggles Pending like a long press; the touch callout stays suppressed;
+  // links and buttons keep their native menu
   container.addEventListener("contextmenu",ev=>{
     const el=ev.target.closest(sel);
-    if(!el)return;
+    if(!el||ev.target.closest("a,button"))return;
     ev.preventDefault();
-    if(ptype==="mouse"&&!ev.target.closest("a,button"))togglePending(Number(el.dataset.id));
+    if(ptype==="mouse")togglePending(Number(el.dataset.id));
   });
 }
 function armKeys(container,cols){
