@@ -60,8 +60,10 @@
   :focus-visible{outline:2px solid var(--accent);outline-offset:1px}
   .row:focus-visible,.card:focus-visible{outline-offset:-2px}
   .row,.card{scroll-margin-top:calc(var(--hdr,150px) + 6px)}
-  .row.hold .slot,.card.hold .pball{animation:holdring .45s linear forwards}
+  .row.hold .slot{animation:holdring .45s linear forwards}
   @keyframes holdring{from{box-shadow:0 0 0 0 oklch(0.55 0.19 25 / 0)}to{box-shadow:0 0 0 4px oklch(0.55 0.19 25 / .6)}}
+  .card.hold{animation:holdcard .45s linear forwards}
+  @keyframes holdcard{from{outline:0 solid oklch(0.55 0.19 25 / 0)}to{outline:4px solid oklch(0.55 0.19 25 / .6)}}
   .sugg button.hi{background:var(--card)}
   .sugg{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--line-soft);border-radius:4px;box-shadow:0 4px 14px oklch(0.25 0.02 95 / .12);overflow:hidden;display:none;max-height:260px;overflow-y:auto;z-index:40}
   .sugg button{display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;background:none;border:0;border-bottom:1px solid var(--line);color:var(--ink);font-size:14px;text-align:left;cursor:pointer}
@@ -184,7 +186,7 @@
   /* status: missing is grayed out (gray ground, grayscale sprite or scan), registered is full colour on its energy ground,
      pending covers the face with the black poly bubble mailer the card ships in (bubbles through the film, the sealed flap folded over the top), static:
      a paper label carries the sprite, name and number; a chosen card also shows through a plastic window, the label centred between window and bottom edge */
-  .card{container-type:inline-size;border-radius:var(--r);background:var(--card);box-shadow:0 0 0 1px oklch(0.25 0.02 95 / .18),0 1px 3px oklch(0.25 0.02 95 / .18);transition:box-shadow .3s;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  .card{container-type:inline-size;border-radius:var(--r);background:var(--card);box-shadow:0 0 0 1px oklch(0.25 0.02 95 / .18),0 1px 3px oklch(0.25 0.02 95 / .18);transition:box-shadow .3s;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .card.own,.row.done{--art:var(--e,oklch(0.3 0.012 95))}
   /* a registered sprite sits on the TCG energy colour of its first type (scripts/build-types.py) */
   .e-G{--e:oklch(0.86 0.08 140)}.e-R{--e:oklch(0.84 0.09 32)}.e-W{--e:oklch(0.84 0.07 245)}.e-L{--e:oklch(0.92 0.09 95)}.e-P{--e:oklch(0.85 0.08 315)}
@@ -222,7 +224,10 @@
   .card .lt{display:flex;flex-direction:column;gap:.8cqw;min-width:0;line-height:1.15}
   .card .lt span{font-size:max(7px,5.4cqw);font-weight:750;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
   .card .lt b{font-family:ui-monospace,Menlo,monospace;font-size:max(7px,4.6cqw);font-weight:600;letter-spacing:.06em;color:var(--ink-dim)}
-  .card .strip{position:absolute;left:0;right:0;bottom:0;z-index:3;height:max(22px,13cqw);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2cqw;padding:0 2.5cqw;background:oklch(0.98 0.004 95 / .92);backdrop-filter:blur(6px);border-top:1px solid oklch(0.25 0.02 95 / .15)}
+  .card .strip{position:absolute;left:0;right:0;bottom:0;z-index:3;height:max(22px,13cqw);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2cqw;padding:0 2.5cqw;background:oklch(0.98 0.004 95 / .92);backdrop-filter:blur(6px);border-top:1px solid oklch(0.25 0.02 95 / .15);transform:translateY(100%);transition:transform .22s cubic-bezier(.2,.7,.2,1)}
+  /* the strip slides up on hover (mouse), stays pinned after a sideways swipe (touch), and shows on keyboard focus */
+  .card.pin .strip,.card:focus-visible .strip{transform:none}
+  @media (hover:hover){.card:hover .strip{transform:none}}
   .card .strip .ptag{display:flex;justify-content:center;align-items:center;gap:2.5cqw;min-width:0;overflow:hidden}
   .card .strip .chip{flex:none;font-size:max(8px,5cqw);padding:0;background:none;white-space:nowrap}
   .card .sprice a{font-family:ui-monospace,Menlo,monospace;font-size:max(8px,5cqw);font-weight:700;line-height:1;padding:.8cqw 1.5cqw;background:var(--card);color:var(--ink);text-decoration:none;white-space:nowrap;box-shadow:0 0 0 1px var(--line)}
@@ -329,7 +334,7 @@
   .crow button{flex:1;padding:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:13px;font-weight:650;cursor:pointer}
   .crow button.pri{background:var(--ink);color:var(--page);border-color:var(--ink)}
 
-  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.row.flash,.card.flash,.row.hold .slot,.card.hold .pball{animation:none}.row.pend .slot::before,.card.pend .pball::before{animation:none;opacity:.6}.star{display:none}}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.row.flash,.card.flash,.row.hold .slot,.card.hold{animation:none}.card .strip{transition:none}.row.pend .slot::before,.card.pend .pball::before{animation:none;opacity:.6}.star{display:none}}
 </style>
 </head>
 <body>
@@ -831,14 +836,15 @@ function handleTap(id){
   setState(id,next);
 }
 function armLongPress(container,sel){
-  let t=null,sx=0,sy=0,tid=null,held=null,fired=false;
+  let t=null,sx=0,sy=0,tid=null,held=null,fired=false,swipe=null;
   container.addEventListener("pointerdown",ev=>{
     holdId=null;
-    if(!ev.isPrimary){drop();return}
+    if(!ev.isPrimary){end();return}
     const el=ev.target.closest(sel);
     if(!el||ev.button!==0||ev.target.closest(".cardbtn,.setc,.rmx,a"))return;
     sx=ev.clientX;sy=ev.clientY;tid=Number(el.dataset.id);
     held=el;fired=false;el.classList.add("hold");
+    swipe=ev.pointerType!=="mouse"&&el.classList.contains("card")?el:null;
     t=setTimeout(()=>{t=null;fired=true;el.classList.remove("hold");togglePending(tid)},450);
   });
   const drop=()=>{
@@ -846,11 +852,15 @@ function armLongPress(container,sel){
     if(held){held.classList.remove("hold");held=null}
     if(fired){holdId=tid;fired=false}
   };
+  const end=()=>{drop();swipe=null};
+  // a sideways swipe on a tile (24px across, under 16px down) pins its strip; the hold is already off past 8px
   container.addEventListener("pointermove",ev=>{
-    if(t&&Math.hypot(ev.clientX-sx,ev.clientY-sy)>8)drop();
+    const dx=ev.clientX-sx,dy=ev.clientY-sy;
+    if(t&&Math.hypot(dx,dy)>8)drop();
+    if(swipe&&Math.abs(dx)>24&&Math.abs(dy)<16){pinStrip(swipe);holdId=tid;swipe=null}
   });
-  container.addEventListener("pointerup",drop);
-  container.addEventListener("pointercancel",drop);
+  container.addEventListener("pointerup",end);
+  container.addEventListener("pointercancel",end);
   // long press owns Pending on every input; right click is reserved for later
   container.addEventListener("contextmenu",ev=>{
     if(ev.target.closest(sel))ev.preventDefault();
@@ -871,6 +881,12 @@ function armKeys(container,cols){
     else if(ev.key==="c")openCards(byId.get(id));
   });
 }
+// one strip is pinned at a time; a pointerdown outside its tile or a scroll releases it
+let pinned=null;
+function pinStrip(el){unpinStrip();pinned=el;el.classList.add("pin")}
+function unpinStrip(){if(pinned){pinned.classList.remove("pin");pinned=null}}
+document.addEventListener("pointerdown",ev=>{if(pinned&&!pinned.contains(ev.target))unpinStrip()},{passive:true});
+document.addEventListener("scroll",unpinStrip,{passive:true});
 armLongPress(list,".row");armKeys(list,()=>1);
 armLongPress(bgrid,".card");armKeys(bgrid,()=>prefs.bcols);
 armLongPress(pgrid,".card");armKeys(pgrid,()=>prefs.pcols);
