@@ -100,7 +100,7 @@
   .row.done{background:var(--card-hi);border-color:var(--line-hi)}
   .row.flash{animation:flash 1.6s ease}
   @keyframes flash{0%,60%{border-color:var(--accent);box-shadow:0 0 0 2px oklch(0.55 0.19 25 / .3)}100%{border-color:var(--line);box-shadow:none}}
-  .row:active,.card:active{background:var(--card-hi)}
+  .row:active{background:var(--card-hi)}
 
   .lz{width:44px;flex:none;align-self:stretch;display:flex;flex-direction:column;justify-content:center;gap:4px}
   .no{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink-dim)}
@@ -174,30 +174,28 @@
   .gpick .lbl{margin-top:8px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink)}
 
   #binder,#pocket{--cols:3;padding:10px calc(var(--gutter) + 64px) 60px var(--gutter);max-width:min(100%,max(var(--col),calc(var(--cols) * 132px)));margin:0 auto}
-  .pgrid,.bgrid{display:grid;grid-template-columns:repeat(3,1fr);--gap:8px;gap:var(--gap);container-type:inline-size;--r:calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols) * .04)}
+  .pgrid,.bgrid{display:grid;grid-template-columns:repeat(3,1fr);--gap:8px;gap:var(--gap);container-type:inline-size;--r:calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols) * .045)}
   #pgrid .card{content-visibility:auto;contain-intrinsic-size:auto 100px auto var(--tileh,160px)}
   .bgrid{background:var(--well);border:1px solid var(--line);padding:10px}
-  /* one slot format: a full-width 63/88 face with card-radius bottom corners and its own hairline, then one bezel strip under it (search, tags, ball).
+  /* one slot format: the tile is the card and nothing else, a full-width 63/88 face with a hairline and a soft shadow;
+     the old bezel parts (search, tags, price, ball) sit in a translucent paper strip over the card's bottom edge.
      Every part is sized in slot units with a legibility floor and no ceiling, so a tile is the same drawing at any column count */
   /* status: missing is grayed out (gray ground, grayscale sprite or scan), registered is full colour on its energy ground,
      pending covers the face with the black poly bubble mailer the card ships in (bubbles through the film, the sealed flap folded over the top), static:
      a paper label carries the sprite, name and number; a chosen card also shows through a plastic window, the label centred between window and bottom edge */
-  .card,.blankc{--bz:max(18px,11cqw)}
-  .card{container-type:inline-size;border-radius:var(--r) var(--r) 0 0;background:var(--card);border:1px solid var(--line);transition:border-color .3s;position:relative;display:flex;flex-direction:column;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-  .card.own,.row.done{--art:var(--e,oklch(0.3 0.012 95));border-color:var(--line-hi)}
+  .card{container-type:inline-size;border-radius:var(--r);background:var(--card);box-shadow:0 0 0 1px oklch(0.25 0.02 95 / .18),0 1px 3px oklch(0.25 0.02 95 / .18);transition:box-shadow .3s;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  .card.own,.row.done{--art:var(--e,oklch(0.3 0.012 95))}
   /* a registered sprite sits on the TCG energy colour of its first type (scripts/build-types.py) */
   .e-G{--e:oklch(0.86 0.08 140)}.e-R{--e:oklch(0.84 0.09 32)}.e-W{--e:oklch(0.84 0.07 245)}.e-L{--e:oklch(0.92 0.09 95)}.e-P{--e:oklch(0.85 0.08 315)}
   .e-F{--e:oklch(0.84 0.07 50)}.e-D{--e:oklch(0.72 0.03 260)}.e-M{--e:oklch(0.86 0.015 250)}.e-N{--e:oklch(0.86 0.07 80)}.e-C{--e:oklch(0.97 0.004 95)}
-  .card.own{background:var(--card-hi)}
+  .card.own{background:var(--card-hi);box-shadow:0 0 0 1px var(--line-hi),0 1px 3px oklch(0.25 0.02 95 / .2)}
   .row.pend{--art:var(--pend-lite)}
-  .card.pend{border-color:var(--pend)}
+  .card.pend{box-shadow:0 0 0 1.5px var(--pend),0 1px 3px oklch(0.25 0.02 95 / .2)}
   .card .fbc{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-dim)}
   .card.flash{animation:flash 1.6s ease}
-  .card .face{flex:none;width:100%;aspect-ratio:63/88;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--art);border-radius:0 0 4cqw 4cqw;box-shadow:0 0 0 1px var(--line);transition:background-color .3s}
-  .blankc{container-type:inline-size;border-radius:var(--r) var(--r) 0 0;display:flex;flex-direction:column;border:1px dashed var(--line);background:var(--well);opacity:.5}
-  .blankc::before{content:"";aspect-ratio:63/88}
-  .blankc::after{content:"";height:var(--bz)}
-  .card.pk .ph{flex:none;height:var(--bz);display:flex;justify-content:space-between;align-items:center;gap:3cqw;padding:0 3cqw;background:var(--card);border-bottom:1px solid var(--line)}
+  .card .face{width:100%;aspect-ratio:63/88;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--art);transition:background-color .3s}
+  .blankc{aspect-ratio:63/88;border-radius:var(--r);outline:1px dashed var(--line-soft);outline-offset:-1px;background:oklch(0.9 0.008 95 / .6)}
+  .card.pk .ph{flex:none;height:max(18px,11cqw);display:flex;justify-content:space-between;align-items:center;gap:3cqw;padding:0 3cqw;background:var(--card);border-bottom:1px solid var(--line)}
   .card.pk .pname{font-size:max(8px,min(7.5cqw,calc(140cqw / var(--nl,9))));font-weight:700;color:var(--ink-dim);line-height:1.1;min-width:0}
   .card.pk.own .pname{color:var(--ink)}
   .card .pno{flex:none;font-family:ui-monospace,Menlo,monospace;font-size:max(9px,6cqw);color:var(--ink-dim)}
@@ -223,9 +221,10 @@
   .card .lt{display:flex;flex-direction:column;gap:.8cqw;min-width:0;line-height:1.15}
   .card .lt span{font-size:max(7px,5.4cqw);font-weight:750;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
   .card .lt b{font-family:ui-monospace,Menlo,monospace;font-size:max(7px,4.6cqw);font-weight:600;letter-spacing:.06em;color:var(--ink-dim)}
-  .card .pfoot{flex:none;height:var(--bz);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2cqw;padding:0 2.5cqw;background:var(--card)}
-  .card .pfoot .ptag{display:flex;justify-content:center;align-items:center;gap:2.5cqw;min-width:0;overflow:hidden}
-  .card .pfoot .chip{flex:none;font-size:max(8px,5cqw);padding:0;background:none;white-space:nowrap}
+  .card .strip{position:absolute;left:0;right:0;bottom:0;z-index:3;height:max(22px,13cqw);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2cqw;padding:0 2.5cqw;background:oklch(0.98 0.004 95 / .92);backdrop-filter:blur(6px);border-top:1px solid oklch(0.25 0.02 95 / .15)}
+  .card .strip .ptag{display:flex;justify-content:center;align-items:center;gap:2.5cqw;min-width:0;overflow:hidden}
+  .card .strip .chip{flex:none;font-size:max(8px,5cqw);padding:0;background:none;white-space:nowrap}
+  .card .sprice a{font-family:ui-monospace,Menlo,monospace;font-size:max(8px,5cqw);font-weight:700;line-height:1;padding:.8cqw 1.5cqw;background:var(--card);color:var(--ink);text-decoration:none;white-space:nowrap;box-shadow:0 0 0 1px var(--line)}
   .card .pprice{position:absolute;right:2cqw;bottom:2cqw;z-index:1;display:flex}
   .card .pprice a{font-family:ui-monospace,Menlo,monospace;font-size:max(8px,5.5cqw);font-weight:700;line-height:1;padding:1.2cqw 1.8cqw;background:var(--ink);color:var(--card);text-decoration:none;white-space:nowrap;box-shadow:0 0 0 1px var(--card)}
   .card .pball{position:relative;flex:none;width:max(12px,6.5cqw);height:max(12px,6.5cqw);border-radius:50%;border:max(1.5px,0.7cqw) solid var(--line)}
@@ -236,11 +235,10 @@
   .card .setc{flex:none;height:100%;width:max(18px,9cqw);border:0;background:none;padding:0;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
   .card .setc::before{content:"";position:absolute;inset:0;margin:auto;width:max(13px,6.5cqw);height:max(13px,6.5cqw);background:var(--ink-dim);-webkit-mask:var(--icon-search) center/contain no-repeat;mask:var(--icon-search) center/contain no-repeat}
   .card.own .setc::before,.card.pend .setc::before{background:var(--ink)}
-  /* narrow slots shed bezel content instead of overflowing it */
-  @container (max-width:120px){.card .pfoot .chip.f ~ .chip:not(.r){display:none}}
-  @container (max-width:100px){.card .pfoot .chip:not(.r):not(.f){display:none}}
+  /* narrow slots shed strip content instead of overflowing it: under 110px the strip keeps lookup and ball only */
+  @container (max-width:110px){.card .strip .ptag{display:none}}
   @container (max-width:80px){
-    .card .pfoot .ptag,.card .pprice,.card .lt span,.card .lbl img{display:none}
+    .card .pprice,.card .lt span,.card .lbl img{display:none}
     .card .face{--wx:8%;--wh:calc(max(5.3cqw,8.5px) + 3cqw + 2px)}
     .card .lbl{padding:1.5cqw 2cqw}
     .card.pk .part img{width:78%}
@@ -1063,23 +1061,24 @@ armConfirm($("optReset"),"Tap again to reset everything",()=>{clearCards();apply
 
 
 // one binder tile. Every slot is a full-width 63/88 face (drawn sprite card, or
-// the chosen scan filling it exactly) over one bezel strip: search button left,
-// tags centre, status ball right. The scan carries a remove button that shows
-// on hover or after a first tap, and its price as a tag over the bottom-right corner.
+// the chosen scan filling it exactly) and nothing else; a strip over its bottom edge
+// carries the search button left, tags (and the price on a scan) centre, status ball
+// right. The scan also carries a remove button that shows on hover or after a first
+// tap, and its price as a tag over the bottom-right corner.
 function binderTile([n,id,name,region,gen,form,sref],map){
   const sid=sref||id;
   const c=document.createElement("div");
   map.set(id,c);
   const art=cardArt(id);
   const chips=`${form?`<span class="chip f">${form==="Other"?"Form":form}</span>`:""}<span class="chip">Gen ${gen}</span><span class="chip r ${region}">${region}</span>`;
-  const foot=`<div class="pfoot"><button class="setc" type="button" tabindex="-1" aria-label="Cards" title="Find cards"></button><span class="ptag">${chips}</span><span class="pball"></span></div>`;
+  const foot=`<div class="strip"><button class="setc" type="button" tabindex="-1" aria-label="Cards" title="Find cards"></button><span class="ptag">${chips}${art?'<span class="sprice"></span>':""}</span><span class="pball"></span></div>`;
   c.className="card e-"+energyOf.get(id)+(art?" scan":" pk")+(owned[id]===true?" own":owned[id]==="p"?" pend":"")+(region==="Hisui"?" hs":"")+(form?" ft-"+form:"");
   c.dataset.id=id;c.tabIndex=-1;
   if(art){
     c.innerHTML=`<div class="face"><img class="cardart" loading="lazy" src="${cimg(art,"low")}" alt="${name}"><button class="rmx" type="button" tabindex="-1" aria-label="Remove card" title="Remove card">&#215;</button><span class="pprice"></span></div>`+foot;
     priceInfo(id).then(p=>{
       if(!p||!c.isConnected)return;
-      c.querySelector(".pprice").replaceChildren(priceLink(p));
+      c.querySelectorAll(".pprice,.sprice").forEach(s=>s.replaceChildren(priceLink(p)));
     });
   }else{
     const dn=name.replace(/^Gigantamax /,"G-Max ");
@@ -1167,14 +1166,14 @@ pocketEl.addEventListener("wheel",ev=>{
   else if(wheelAcc<-50){setPCols(prefs.pcols-1);wheelAcc=0}
 },{passive:false});
 // a skipped tile's placeholder must match its real height or the checkpoint strip scrubs
-// to the wrong place until layout catches up: face plus bezel, the border is added on top
+// to the wrong place until layout catches up: the tile is the 63/88 face and nothing else
 function layoutPocket(){
   const cols=prefs.pcols,gap=cols>=5?4:cols===4?6:8;
   pocketEl.style.setProperty("--cols",cols);
   pgrid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
   pgrid.style.setProperty("--gap",gap+"px");
-  const w=(pgrid.clientWidth-(cols-1)*gap)/cols-2;
-  if(w>0)pgrid.style.setProperty("--tileh",(w*88/63+Math.max(18,w*.11)).toFixed(2)+"px");
+  const w=(pgrid.clientWidth-(cols-1)*gap)/cols;
+  if(w>0)pgrid.style.setProperty("--tileh",(w*88/63).toFixed(2)+"px");
   cjDirty=true;
 }
 function renderPocket(){
