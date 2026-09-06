@@ -433,6 +433,9 @@
         <label><input type="radio" name="sprites" value="game" checked>Game sprites</label>
         <label><input type="radio" name="sprites" value="home">HOME renders</label>
         <div class="pdiv"></div>
+        <label><input type="radio" name="cur" value="USD" checked>Prices in USD</label>
+        <label><input type="radio" name="cur" value="EUR">Prices in EUR</label>
+        <div class="pdiv"></div>
         <button id="optLists" class="plabel" type="button">Manage lists</button>
         <button id="optClearCards" class="plabel" type="button">Clear all cards</button>
         <button id="optReset" class="plabel" type="button">Reset list</button>
@@ -471,8 +474,10 @@
     <div class="filters cfilters" id="cfilters">
       <i class="cprog" id="cprog"></i>
       <div class="dd" id="ddSort"><button class="ddbtn" type="button">Newest first</button><div class="ddpanel"><label><input type="radio" name="csort" value="new">Newest first</label><label><input type="radio" name="csort" value="old">Oldest first</label></div></div>
-      <div class="dd" id="ddLang"><button class="ddbtn" type="button">English</button><div class="ddpanel" id="langPanel"></div></div>
+      <div class="dd" id="ddSet"><button class="ddbtn" type="button">Set</button><div class="ddpanel" id="setPanel"></div></div>
       <div class="dd" id="ddRarity"><button class="ddbtn" type="button">Rarity</button><div class="ddpanel" id="rarPanel"></div></div>
+      <div class="dd" id="ddLang"><button class="ddbtn" type="button">Language</button><div class="ddpanel" id="langPanel"></div></div>
+      <div class="dd" id="ddGame"><button class="ddbtn" type="button">Game</button><div class="ddpanel"><label><input type="checkbox" value="tcg">Pokemon TCG</label><label><input type="checkbox" value="pocket">TCG Pocket</label></div></div>
     </div>
     <div class="cbody" id="cbody"></div>
   </div>
@@ -508,7 +513,7 @@ const store={
   save(k,s){try{localStorage.setItem(k,JSON.stringify(s))}catch(e){}}
 };
 let owned=store.load("dex-il");
-let prefs=Object.assign({view:"list",per:9,placement:"dex",entries:"sep",clang:["en"],csort:"new"},store.load("dex-il-ui"));
+let prefs=Object.assign({view:"list",per:9,placement:"dex",entries:"sep",clang:["en"],csort:"new",cur:"USD",cgame:["tcg","pocket"]},store.load("dex-il-ui"));
 const sprSrc=id=>`sprites/${prefs.sprites==="home"?"home":"game"}/${id}.webp`;
 const genOf=new Map(DEX.map(e=>[e[1],e[4]]));
 const sprImg=sid=>`<img loading="lazy" decoding="async" src="${sprSrc(sid)}" alt=""${prefs.sprites==="home"||genOf.get(sid)>5||SPRSMOOTH.has(sid)?' class="sm"':""}>`;
@@ -763,10 +768,19 @@ async function cardsFor(e,lang){
   }
   return all;
 }
-// set release dates are baked per language (scripts/build-sets.py); a set the data does not know yet is fetched once
-let SETDATES={},SETDP=null;
-function ensureSetDates(){return SETDP||(SETDP=fetch("data/sets.json").then(r=>r.ok?r.json():{}).then(d=>{SETDATES=d}).catch(()=>{}))}
+// set release dates and the Pocket set ids are baked per language (scripts/build-sets.py); a set the data does not know yet is fetched once
+let SETDATES={},POCKET={},SETDP=null;
+const NOSETS=new Set();
+function ensureSetDates(){return SETDP||(SETDP=fetch("data/sets.json").then(r=>r.ok?r.json():{}).then(d=>{SETDATES=d.dates||{};POCKET=Object.fromEntries(Object.entries(d.pocket||{}).map(([l,ids])=>[l,new Set(ids)]))}).catch(()=>{}))}
 const setDate=c=>(c.set&&c.set.releaseDate)||(SETDATES[c.lang]||{})[setIdOf(c.id)]||"";
+const isPocket=c=>(POCKET[c.lang]||NOSETS).has(setIdOf(c.id))||/\/tcgp\//.test(c.image||"");
+// Cardmarket prices are EUR, TCGplayer USD; the price line shows one currency, converting at the ECB rate of the day
+let RATE=null;
+function ensureRate(){
+  if(RATE)return Promise.resolve(RATE);
+  try{const c=JSON.parse(localStorage.getItem("fx:eurusd")||"null");if(c&&Date.now()-c.t<864e5){RATE=c.v;return Promise.resolve(RATE)}}catch(e){}
+  return fetch("https://api.frankfurter.app/latest?from=EUR&to=USD").then(r=>r.json()).then(j=>{RATE=j.rates.USD;try{localStorage.setItem("fx:eurusd",JSON.stringify({t:Date.now(),v:RATE}))}catch(e){}return RATE}).catch(()=>null);
+}
 function fillSetDates(cards){
   const miss=[...new Set(cards.filter(c=>!setDate(c)).map(c=>c.lang+" "+setIdOf(c.id)))];
   return Promise.all(miss.map(k=>{const [lang,id]=k.split(" ");
@@ -780,7 +794,12 @@ function priceOf(c){
   if(cm&&cm.trend)return{unit:"EUR",v:cm.trend};
   return null;
 }
-const fmtPrice=p=>(p.unit==="USD"?"$":"€")+(p.v>=1000?Math.round(p.v).toLocaleString("en-US"):p.v.toFixed(2));
+const fmtPrice=p=>(p.approx?"≈":"")+(p.unit==="USD"?"$":"€")+(p.v>=1000?Math.round(p.v).toLocaleString("en-US"):p.v.toFixed(2));
+function shownPrice(c){
+  const p=priceOf(c);
+  if(!p||p.unit===prefs.cur||!RATE)return p;
+  return prefs.cur==="USD"?{unit:"USD",v:p.v*RATE,approx:true}:{unit:"EUR",v:p.v/RATE,approx:true};
+}
 // six card details in flight at a time; a sheet change (cSeq) stops the run
 function hydrate(cards,seq,onCard,onProg){
   const q=cards.filter(c=>!c.full);let i=0,active=0,done=0;
@@ -826,18 +845,20 @@ async function openCards(e){
   cEntry=e;ctitle.textContent=e[2];csub.textContent="";cback.hidden=true;cremove.hidden=!CARDART[e[1]];
   cfilters.hidden=false;cbody.classList.remove("detail");openDialog(csheet);
   skeleton();setProg(0);
+  const rateP=ensureRate();
   let lists;
   try{lists=await Promise.all(prefs.clang.map(l=>cardsFor(e,l).catch(err=>{if(l==="en")throw err;return []})))}
   catch(err){if(my===cSeq)cmsg(navigator.onLine?"Couldn't reach the card database.":"Card lookup needs a connection.",err.message,true);return}
   if(my!==cSeq)return;
   const cards=lists.flat();cards.note=lists.map(l=>l.note).filter(Boolean).join(" ");
   if(!cards.length){cmsg("No cards found for this entry yet.");return}
-  await ensureSetDates();await fillSetDates(cards);
+  await ensureSetDates();await fillSetDates(cards);await rateP;
   if(my!==cSeq)return;
-  cCards=cards;rarClear();buildRarityPanel();renderGrid();
-  hydrate(cards,my,c=>{updateCell(c);buildRarityPanel()},setProg);
+  cCards=cards;listMenusClear();buildSetPanel();buildRarityPanel();renderGrid();
+  hydrate(cards,my,c=>{updateCell(c);buildSetPanel();buildRarityPanel()},setProg);
 }
-const visibleCards=()=>cCards.filter(c=>!rarSel.size||rarSel.has(rarityCode(c.rarity)));
+const gameOf=c=>isPocket(c)?"pocket":"tcg";
+const visibleCards=()=>cCards.filter(c=>(!rarSel.size||rarSel.has(rarityCode(c.rarity)))&&(!setSel.size||setSel.has(groupKey(c)))&&prefs.cgame.includes(gameOf(c)));
 const groupKey=c=>c.lang+" "+setIdOf(c.id);
 function renderGrid(){
   if(!cCards)return;
@@ -847,7 +868,7 @@ function renderGrid(){
   const sets=new Set(cCards.map(groupKey)).size;
   csub.textContent=`${vis.length<cCards.length?vis.length+" of "+cCards.length:cCards.length} card${cCards.length===1?"":"s"} in ${sets} set${sets===1?"":"s"}`;
   if(cCards.note){const p=document.createElement("p");p.className="cmsg";p.textContent=cCards.note;cbody.appendChild(p)}
-  if(!vis.length){const p=document.createElement("p");p.className="cmsg";p.textContent="No cards of that rarity here.";cbody.appendChild(p);return}
+  if(!vis.length){const p=document.createElement("p");p.className="cmsg";p.textContent="No cards match those menus.";cbody.appendChild(p);return}
   const multi=new Set(cCards.map(c=>c.lang)).size>1;
   const counts=new Map();vis.forEach(c=>counts.set(groupKey(c),(counts.get(groupKey(c))||0)+1));
   let grid=null,key=null;
@@ -886,42 +907,63 @@ function cell(c){
 function updateCell(c){
   const b=cCells.get(c.lang+" "+c.id);if(!b)return;
   const rar=b.querySelector(".rar");rar.textContent=rarityCode(c.rarity);rar.title=c.rarity||"";
-  const p=priceOf(c),pr=b.querySelector(".pr");pr.textContent=p?fmtPrice(p):"";pr.classList.toggle("wait",!c.full);
+  const p=shownPrice(c),pr=b.querySelector(".pr");pr.textContent=p?fmtPrice(p):"";pr.classList.toggle("wait",!c.full);
+  const art=b.querySelector(".art"),cu=art.querySelector(".noimg")&&cimg(c.image,"low");
+  if(cu){art.innerHTML="";const im=document.createElement("img");im.decoding="async";im.alt="";im.onload=()=>im.classList.add("ld");im.src=cu;art.appendChild(im)}
   const h=b.parentElement&&b.parentElement.previousElementSibling;
   if(h&&h.classList.contains("cset")&&c.set&&c.set.name)h.firstChild.textContent=c.set.name;
 }
-// thumbnails load 12 at a time and reveal per batch (all ready, or 700ms cap), so
-// rows snap in together instead of rolling top-down; chunks ahead load on scroll
+// thumbnails load as they come within 900px of the sheet's viewport; the ones that arrive together
+// reveal together (all loaded, or a 700ms cap), so rows snap in instead of rolling top-down
 let chunkIO=null;
 function chunkLoad(root){
   if(chunkIO){chunkIO.disconnect();chunkIO=null}
-  const pend=[...root.querySelectorAll("img[data-src]")];
-  if(!pend.length)return;
-  const next=()=>{
-    const batch=pend.splice(0,12);
-    if(!batch.length)return;
+  const pend=new Set(root.querySelectorAll("img[data-src]"));
+  if(!pend.size)return;
+  let batch=[],timer=null;
+  const flush=()=>{
+    const b=batch;batch=[];timer=null;
     let done=0;
-    const reveal=()=>batch.forEach(im=>im.classList.add("ld"));
+    const reveal=()=>b.forEach(im=>im.classList.add("ld"));
     const cap=setTimeout(reveal,700);
-    const fin=()=>{if(++done===batch.length){clearTimeout(cap);reveal()}};
-    batch.forEach(im=>{im.onload=fin;im.onerror=fin;im.src=im.dataset.src;im.removeAttribute("data-src")});
+    const fin=()=>{if(++done===b.length){clearTimeout(cap);reveal()}};
+    b.forEach(im=>{im.onload=fin;im.onerror=fin;im.src=im.dataset.src;im.removeAttribute("data-src")});
   };
-  next();
-  const sent=document.createElement("div");
-  sent.style.height="1px";
-  root.appendChild(sent);
   chunkIO=new IntersectionObserver((es,io)=>{
-    if(!es.some(x=>x.isIntersecting))return;
-    next();
-    if(!pend.length){io.disconnect();if(chunkIO===io)chunkIO=null;sent.remove();return}
-    io.unobserve(sent);io.observe(sent);
-  },{root:cbody,rootMargin:"1200px"});
-  chunkIO.observe(sent);
+    es.forEach(x=>{if(!x.isIntersecting)return;io.unobserve(x.target);pend.delete(x.target);batch.push(x.target)});
+    if(batch.length&&!timer)timer=setTimeout(flush,40);
+    if(!pend.size){io.disconnect();if(chunkIO===io)chunkIO=null}
+  },{root:cbody,rootMargin:"900px 0px"});
+  pend.forEach(im=>chunkIO.observe(im));
 }
 // the sheet's three menus: sort and language persist, rarity is per list
-const ddSort=$("ddSort"),sortBtn=ddSort.querySelector(".ddbtn"),ddLang=$("ddLang"),langBtn=ddLang.querySelector(".ddbtn"),langPanel=$("langPanel"),ddRar=$("ddRarity"),rarBtn=ddRar.querySelector(".ddbtn"),rarPanel=$("rarPanel");
-const rarSel=new Set();let rarSig="";
-[ddSort,ddLang,ddRar].forEach(wireDropdown);
+const ddSort=$("ddSort"),sortBtn=ddSort.querySelector(".ddbtn"),ddLang=$("ddLang"),langBtn=ddLang.querySelector(".ddbtn"),langPanel=$("langPanel"),ddRar=$("ddRarity"),rarBtn=ddRar.querySelector(".ddbtn"),rarPanel=$("rarPanel"),ddSet=$("ddSet"),setBtn=ddSet.querySelector(".ddbtn"),setPanel=$("setPanel"),ddGame=$("ddGame"),gameBtn=ddGame.querySelector(".ddbtn");
+const rarSel=new Set(),setSel=new Set();let rarSig="",setSig="";
+[ddSort,ddSet,ddRar,ddLang,ddGame].forEach(wireDropdown);
+function gameLabel(){const on=prefs.cgame;gameBtn.textContent=on.length===2?"Game":on[0]==="pocket"?"Pocket":"TCG";ddGame.classList.toggle("has",on.length!==2)}
+ddGame.querySelectorAll("input").forEach(i=>{i.checked=prefs.cgame.includes(i.value);i.addEventListener("change",()=>{
+  const on=["tcg","pocket"].filter(v=>ddGame.querySelector(`input[value="${v}"]`).checked);
+  if(!on.length){ddGame.querySelectorAll("input").forEach(x=>x.checked=true);on.push("tcg","pocket")}
+  prefs.cgame=on;store.save("dex-il-ui",prefs);gameLabel();renderGrid();
+})});
+gameLabel();
+function setLabel(){const n=setSel.size;setBtn.textContent=n===0?"Set":n===1?setName(cCards.find(c=>groupKey(c)===[...setSel][0])):`${n} sets`;ddSet.classList.toggle("has",n>0)}
+const setName=c=>(c.set&&c.set.name)||SETS[setIdOf(c.id)]||setIdOf(c.id);
+function buildSetPanel(){
+  if(!cCards)return;
+  const first=new Map();cCards.forEach(c=>{if(!first.has(groupKey(c)))first.set(groupKey(c),c)});
+  const order=[...first.values()].sort((a,b)=>setDate(b).localeCompare(setDate(a))||a.lang.localeCompare(b.lang));
+  const multi=new Set(cCards.map(c=>c.lang)).size>1;
+  const sig=order.map(c=>groupKey(c)+setName(c)).join("|");if(sig===setSig)return;setSig=sig;
+  setPanel.innerHTML="";
+  order.forEach(c=>{
+    const k=groupKey(c),l=document.createElement("label"),i=document.createElement("input");i.type="checkbox";i.value=k;i.checked=setSel.has(k);
+    l.append(i,setName(c));
+    const sm=document.createElement("small");sm.textContent=setDate(c).slice(0,7)+(multi?" "+c.lang.toUpperCase():"");l.appendChild(sm);
+    i.addEventListener("change",()=>{i.checked?setSel.add(k):setSel.delete(k);setLabel();renderGrid()});
+    setPanel.appendChild(l);
+  });
+}
 function sortLabel(){sortBtn.textContent=prefs.csort==="old"?"Oldest first":"Newest first";ddSort.classList.toggle("has",prefs.csort==="old")}
 ddSort.querySelectorAll("input").forEach(r=>{r.checked=r.value===prefs.csort;r.addEventListener("change",()=>{prefs.csort=r.value;store.save("dex-il-ui",prefs);sortLabel();renderGrid()})});
 sortLabel();
@@ -938,7 +980,7 @@ CLANGS.forEach(([code,name])=>{
 });
 langLabel();
 function rarLabel(){const n=rarSel.size;rarBtn.textContent=n===0?"Rarity":n===1?[...rarSel][0]:`${n} rarities`;ddRar.classList.toggle("has",n>0)}
-function rarClear(){rarSel.clear();rarSig="";rarPanel.innerHTML="";rarLabel()}
+function listMenusClear(){rarSel.clear();rarSig="";rarPanel.innerHTML="";rarLabel();setSel.clear();setSig="";setPanel.innerHTML="";setLabel()}
 function buildRarityPanel(){
   if(!cCards)return;
   const codes=new Map();cCards.forEach(c=>{const k=rarityCode(c.rarity);if(k)codes.set(k,c.rarity)});
@@ -995,6 +1037,7 @@ function showCard(c){
   paint(c);
   tget("cards/"+c.id,c.lang).then(d=>{if(!d||!box.isConnected)return;absorb(c,d);paint(d)}).catch(()=>{});
 }
+document.querySelectorAll('input[name="cur"]').forEach(r=>{r.checked=r.value===prefs.cur;r.addEventListener("change",()=>{prefs.cur=r.value;store.save("dex-il-ui",prefs);if(cCards)cCards.forEach(updateCell)})});
 function backToGrid(){
   if(!cCards){openCards(cEntry);return}
   cback.hidden=true;cfilters.hidden=false;cbody.classList.remove("detail");renderGrid();
