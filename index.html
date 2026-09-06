@@ -197,7 +197,8 @@
   .row.pend{--art:var(--pend-lite)}
   .card.pend{box-shadow:0 0 0 1.5px var(--pend),0 1px 3px oklch(0.25 0.02 95 / .2)}
   .card .fbc{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-dim)}
-  .card.flash{animation:flash 1.6s ease}
+  .card.flash{animation:flashcard 1.6s ease}
+  @keyframes flashcard{0%,60%{outline:2px solid oklch(0.55 0.19 25 / .5)}100%{outline:2px solid transparent}}
   .card .face{width:100%;aspect-ratio:63/88;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--art);transition:background-color .3s}
   .blankc{aspect-ratio:63/88;border-radius:var(--r);outline:1px dashed var(--line-soft);outline-offset:-1px;background:oklch(0.9 0.008 95 / .6)}
   .card.pk .ph{flex:none;height:max(18px,11cqw);display:flex;justify-content:space-between;align-items:center;gap:3cqw;padding:0 3cqw;background:var(--card);border-bottom:1px solid var(--line)}
