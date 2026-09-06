@@ -925,7 +925,7 @@ const rarSel=new Set();let rarSig="";
 function sortLabel(){sortBtn.textContent=prefs.csort==="old"?"Oldest first":"Newest first";ddSort.classList.toggle("has",prefs.csort==="old")}
 ddSort.querySelectorAll("input").forEach(r=>{r.checked=r.value===prefs.csort;r.addEventListener("change",()=>{prefs.csort=r.value;store.save("dex-il-ui",prefs);sortLabel();renderGrid()})});
 sortLabel();
-function langLabel(){const on=prefs.clang;langBtn.textContent=on.length===1?CLANG_NAME.get(on[0]):`${on.length} languages`;ddLang.classList.toggle("has",!(on.length===1&&on[0]==="en"))}
+function langLabel(){const on=prefs.clang,dflt=on.length===1&&on[0]==="en";langBtn.textContent=dflt?"Language":on.length===1?CLANG_NAME.get(on[0]):`${on.length} languages`;ddLang.classList.toggle("has",!dflt)}
 CLANGS.forEach(([code,name])=>{
   const l=document.createElement("label"),i=document.createElement("input");i.type="checkbox";i.value=code;i.checked=prefs.clang.includes(code);
   l.append(i,name);langPanel.appendChild(l);
