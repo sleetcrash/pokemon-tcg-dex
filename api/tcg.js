@@ -1,8 +1,10 @@
 // Same-origin proxy for the card lookup so the browser never makes a cross-origin request.
-// Primary: TCGdex. Fallback: pokemontcg.io, mapped to the TCGdex response shape.
-// GET /api/tcg?path=dex-ids/6   ->   https://api.tcgdex.net/v2/en/dex-ids/6
+// Primary: TCGdex. Fallback: pokemontcg.io (English only), mapped to the TCGdex response shape.
+// GET /api/tcg?path=dex-ids/6            ->   https://api.tcgdex.net/v2/en/dex-ids/6
+// GET /api/tcg?path=dex-ids/6&lang=ja    ->   https://api.tcgdex.net/v2/ja/dex-ids/6
 
-const TCGDEX = "https://api.tcgdex.net/v2/en/";
+const TCGDEX = "https://api.tcgdex.net/v2/";
+const LANGS = new Set(["en", "ja", "fr", "de", "es", "it", "pt-br", "zh-tw", "zh-cn", "th", "id"]);
 const PTCG = "https://api.pokemontcg.io/v2/";
 const UA = { "User-Agent": "national-card-dex/1.0", Accept: "application/json" };
 
@@ -137,6 +139,8 @@ export default async function handler(req, res) {
   if (!/^[A-Za-z0-9/_?=&%.-]{1,200}$/.test(path) || path.includes("..")) {
     return res.status(400).json({ error: "bad path" });
   }
+  const lang = String(req.query.lang || "en");
+  if (!LANGS.has(lang)) return res.status(400).json({ error: "bad lang" });
   const deadline = Date.now() + 9000;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   // A flapping provider can 200 a truncated list; small lists are cross-checked
@@ -154,7 +158,8 @@ export default async function handler(req, res) {
   // Hedge: if TCGdex hasn't answered in 800ms, start the fallback in parallel
   // so a dead probe costs max(probe, fallback) instead of their sum.
   let fbPromise = null;
-  const startFb = () => (fbPromise ||= fallback(path, deadline).then((v) => ({ v }), (e) => ({ e })));
+  const startFb = () =>
+    (fbPromise ||= (lang === "en" ? fallback(path, deadline) : Promise.resolve(null)).then((v) => ({ v }), (e) => ({ e })));
   let primary = null;
   // X-Card-Fb: the client saw a fresh fallback-served response in the last minute; skip the probe
   // (the instance-local breaker can't cover cold starts, the client hint can). A header keeps
@@ -162,7 +167,7 @@ export default async function handler(req, res) {
   if (req.headers["x-card-fb"] !== "1" && Date.now() >= tcgdexDownUntil) {
     const hedge = setTimeout(startFb, 800);
     try {
-      const r = await get(TCGDEX + path, 2500, UA);
+      const r = await get(TCGDEX + lang + "/" + path, 2500, UA);
       if (r.ok) {
         const body = await r.text();
         const n = listShaped ? listLen(body) : Number.MAX_SAFE_INTEGER;
