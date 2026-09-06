@@ -717,11 +717,11 @@ const rarityCode=r=>r&&r!=="None"?RCODE.get(r.toLowerCase())||r:"";
 // form heuristics that hold across languages: names are localised, these tokens are not
 const nm=c=>c.name||"";
 const isVmax=c=>/VMAX/.test(nm(c));
-const isMega=c=>/^(M |Mega|Méga|メガ)/i.test(nm(c));
+const isMega=c=>/^(M |Mega[ -]|Méga[ -]|メガ)/.test(nm(c));
 const REGX=/^(Alolan|Galarian|Hisuian|Paldean|Alola-|Galar-|Hisui-|Paldea-|アローラ|ガラル|ヒスイ|パルデア)|\s(d'Alola|de Alola|di Alola|de Galar|di Galar|d'Hisui|de Hisui|di Hisui|de Paldea|di Paldea)\b/;
 const isReg=c=>REGX.test(nm(c));
 const REGTOK={Alolan:/Alola|アローラ/,Galarian:/Galar|ガラル/,Hisuian:/Hisui|ヒスイ/,Paldean:/Paldea|パルデア/};
-const isEx=c=>/ex$/.test(nm(c))&&!isReg(c)&&!isMega(c);
+const isEx=c=>/(^|[\s-]|[^\x00-\x7F])ex$/.test(nm(c))&&!isReg(c)&&!isMega(c);
 function absorb(c,d){if(!d)return;c.rarity=d.rarity;c.set=d.set;c.pricing=d.pricing;c.illustrator=d.illustrator;if(!c.image&&d.image)c.image=d.image;c.full=true}
 async function cardsFor(e,lang){
   const setsReady=lang==="en"?ensureSets().catch(()=>{}):null;
@@ -887,6 +887,8 @@ function updateCell(c){
   const b=cCells.get(c.lang+" "+c.id);if(!b)return;
   const rar=b.querySelector(".rar");rar.textContent=rarityCode(c.rarity);rar.title=c.rarity||"";
   const p=priceOf(c),pr=b.querySelector(".pr");pr.textContent=p?fmtPrice(p):"";pr.classList.toggle("wait",!c.full);
+  const h=b.parentElement&&b.parentElement.previousElementSibling;
+  if(h&&h.classList.contains("cset")&&c.set&&c.set.name)h.firstChild.textContent=c.set.name;
 }
 // thumbnails load 12 at a time and reveal per batch (all ready, or 700ms cap), so
 // rows snap in together instead of rolling top-down; chunks ahead load on scroll
@@ -938,6 +940,7 @@ langLabel();
 function rarLabel(){const n=rarSel.size;rarBtn.textContent=n===0?"Rarity":n===1?[...rarSel][0]:`${n} rarities`;ddRar.classList.toggle("has",n>0)}
 function rarClear(){rarSel.clear();rarSig="";rarPanel.innerHTML="";rarLabel()}
 function buildRarityPanel(){
+  if(!cCards)return;
   const codes=new Map();cCards.forEach(c=>{const k=rarityCode(c.rarity);if(k)codes.set(k,c.rarity)});
   const order=[...codes.keys()].sort((a,b)=>(RRANK.get(a)??99)-(RRANK.get(b)??99)||a.localeCompare(b));
   const sig=order.join("|");if(sig===rarSig)return;rarSig=sig;
