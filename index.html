@@ -186,7 +186,9 @@
   /* status: missing is grayed out (gray ground, grayscale sprite or scan), registered is full colour on its energy ground,
      pending covers the face with the black poly bubble mailer the card ships in (bubbles through the film, the sealed flap folded over the top), static:
      a paper label carries the sprite, name and number; a chosen card also shows through a plastic window, the label centred between window and bottom edge */
-  .card{container-type:inline-size;border-radius:var(--r);background:var(--card);box-shadow:0 0 0 1px oklch(0.25 0.02 95 / .18),0 1px 3px oklch(0.25 0.02 95 / .18);transition:box-shadow .3s;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  .card{container-type:inline-size;border-radius:var(--r);background:var(--card);box-shadow:0 0 0 1px oklch(0.25 0.02 95 / .18),0 1px 3px oklch(0.25 0.02 95 / .18);transition:box-shadow .3s,transform .3s ease;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  /* press feel: the tile eases down while the pointer is on it and back up a little slower */
+  .card.down{transform:scale(.975);transition:box-shadow .3s,transform .12s ease}
   .card.own,.row.done{--art:var(--e,oklch(0.3 0.012 95))}
   /* a registered sprite sits on the TCG energy colour of its first type (scripts/build-types.py) */
   .e-G{--e:oklch(0.86 0.08 140)}.e-R{--e:oklch(0.84 0.09 32)}.e-W{--e:oklch(0.84 0.07 245)}.e-L{--e:oklch(0.92 0.09 95)}.e-P{--e:oklch(0.85 0.08 315)}
@@ -203,11 +205,13 @@
   .card.pk.own .pname{color:var(--ink)}
   .card .pno{flex:none;font-family:ui-monospace,Menlo,monospace;font-size:max(9px,6cqw);color:var(--ink-dim)}
   .card.pk .part{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
-  .card.pk .part img{width:64%;max-height:92%;object-fit:contain;image-rendering:pixelated;opacity:.6;filter:grayscale(1);transition:opacity .2s,filter .2s}
+  .card.pk .part img{width:64%;max-height:92%;object-fit:contain;image-rendering:pixelated;opacity:.6;filter:grayscale(1);transition:opacity .2s ease-out,filter .2s}
   .card.pk.own .part img{opacity:1;filter:none}
   .card.scan .face{background:none}
-  .card .cardart{width:100%;height:100%;object-fit:cover;display:block;opacity:.55;filter:grayscale(1);transition:opacity .2s,filter .2s}
+  .card .cardart{width:100%;height:100%;object-fit:cover;display:block;opacity:.55;filter:grayscale(1);transition:opacity .2s ease-out,filter .2s}
   .card.own .cardart,.card.pend .cardart{opacity:1;filter:none}
+  /* art settles in on load instead of popping: hidden until its load event adds .in, then the opacity transition carries it up */
+  @media (prefers-reduced-motion:no-preference){.card .cardart:not(.in),.card.pk .part img:not(.in){opacity:0}}
   .card.scan .rmx{position:absolute;top:2cqw;right:2cqw;width:max(18px,10cqw);height:max(18px,10cqw);border:0;padding:0;background:var(--ink);color:var(--card);font-size:max(12px,7cqw);font-weight:700;line-height:1;cursor:pointer;box-shadow:0 0 0 1px var(--card);opacity:0;pointer-events:none;transition:opacity .15s;-webkit-tap-highlight-color:transparent}
   .card.scan:hover .rmx,.card.scan:focus-within .rmx{opacity:1;pointer-events:auto}
   /* one sticker-sized panel on both mailers: the label takes its box from these tokens and the window is cut to the same box
@@ -334,7 +338,7 @@
   .crow button{flex:1;padding:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:13px;font-weight:650;cursor:pointer}
   .crow button.pri{background:var(--ink);color:var(--page);border-color:var(--ink)}
 
-  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.row.flash,.card.flash,.row.hold .slot,.card.hold{animation:none}.card .strip{transition:none}.row.pend .slot::before,.card.pend .pball::before{animation:none;opacity:.6}.star{display:none}}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.row.flash,.card.flash,.row.hold .slot,.card.hold{animation:none}.card,.card .strip{transition:none}.row.pend .slot::before,.card.pend .pball::before{animation:none;opacity:.6}.star{display:none}}
 </style>
 </head>
 <body>
@@ -843,13 +847,13 @@ function armLongPress(container,sel){
     const el=ev.target.closest(sel);
     if(!el||ev.button!==0||ev.target.closest(".cardbtn,.setc,.rmx,a"))return;
     sx=ev.clientX;sy=ev.clientY;tid=Number(el.dataset.id);
-    held=el;fired=false;el.classList.add("hold");
+    held=el;fired=false;el.classList.add("hold","down");
     swipe=ev.pointerType!=="mouse"&&el.classList.contains("card")?el:null;
     t=setTimeout(()=>{t=null;fired=true;el.classList.remove("hold");togglePending(tid)},450);
   });
   const drop=()=>{
     if(t){clearTimeout(t);t=null}
-    if(held){held.classList.remove("hold");held=null}
+    if(held){held.classList.remove("hold","down");held=null}
     if(fired){holdId=tid;fired=false}
   };
   const end=()=>{drop();swipe=null};
@@ -1114,6 +1118,9 @@ function binderTile([n,id,name,region,gen,form,sref],map){
   });
   return c;
 }
+document.addEventListener("load",ev=>{
+  if(ev.target instanceof HTMLImageElement&&ev.target.matches(".card .cardart,.card.pk .part img"))ev.target.classList.add("in");
+},true);
 document.addEventListener("error",ev=>{
   const img=ev.target;if(!(img instanceof HTMLImageElement)||!img.closest(".spr,.part,.lbl"))return;
   const fb=document.createElement("span");fb.className=img.closest(".part,.lbl")?"fbc":"fb";fb.textContent="#"+img.closest("[data-id]").dataset.id;img.replaceWith(fb);
