@@ -188,7 +188,7 @@
   /* status: missing is grayed out (gray ground, grayscale sprite or scan), registered is full colour on its energy ground,
      pending covers the face with the black poly bubble mailer the card ships in (bubbles through the film, the sealed flap folded over the top), static:
      a paper label carries the sprite, name and number; a chosen card also shows through a plastic window, the label centred between window and bottom edge */
-  .card{container-type:inline-size;border-radius:var(--r);background:var(--card);box-shadow:0 0 0 1px oklch(0.25 0.02 95 / .18),0 1px 3px oklch(0.25 0.02 95 / .18);transition:box-shadow .3s,transform .3s ease;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:pan-y pinch-zoom;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  .card{container-type:inline-size;border-radius:var(--r);background:var(--card);box-shadow:0 0 0 1px oklch(0.25 0.02 95 / .18),0 1px 3px oklch(0.25 0.02 95 / .18);transition:box-shadow .3s,transform .3s ease;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   /* press feel: the tile eases down while the pointer is on it and back up a little slower */
   .card.down{transform:scale(.975);transition:box-shadow .3s,transform .12s ease}
   .card.own,.row.done{--art:var(--e,oklch(0.3 0.012 95))}
@@ -232,7 +232,9 @@
   .card .lt span{font-size:max(7px,5.4cqw);font-weight:750;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
   .card .lt b{font-family:ui-monospace,Menlo,monospace;font-size:max(7px,4.6cqw);font-weight:600;letter-spacing:.06em;color:var(--ink-dim)}
   .card .strip{position:absolute;left:0;right:0;bottom:0;z-index:3;height:max(22px,13cqw);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2cqw;padding:0 2.5cqw;background:oklch(0.98 0.004 95 / .92);border-top:1px solid oklch(0.25 0.02 95 / .15);transform:translateY(100%);transition:transform .22s cubic-bezier(.2,.7,.2,1)}
-  /* the strip slides up on hover (mouse), stays pinned after a sideways swipe (touch), and shows on keyboard focus;
+  /* the strip slides up on hover (mouse), stays pinned after a sideways swipe (touch), and shows on keyboard focus.
+     The tile's touch-action must be exactly pan-y: WebKit arms the recognizers that keep a sideways drag from starting
+     a scroll only for that value, so pan-y pinch-zoom hands the swipe to the scroll view on iOS and the strip never pins;
      it blurs what it covers only while shown, so a thousand hidden strips cost no compositing layers */
   .card.pin .strip,.card:focus-visible .strip{transform:none;backdrop-filter:blur(6px)}
   @media (hover:hover){.card:hover .strip{transform:none;backdrop-filter:blur(6px)}}
@@ -1098,11 +1100,11 @@ function armLongPress(container,sel){
     if(fired){holdId=tid;fired=false}
   };
   const end=()=>{drop();swipe=null};
-  // a sideways swipe on a tile (24px across, under 16px down) pins its strip; the hold is already off past 8px
+  // a sideways swipe on a tile (24px across, and more across than down by half again) pins its strip; the hold is already off past 8px
   container.addEventListener("pointermove",ev=>{
     const dx=ev.clientX-sx,dy=ev.clientY-sy;
     if(t&&Math.hypot(dx,dy)>8)drop();
-    if(swipe&&Math.abs(dx)>24&&Math.abs(dy)<16){pinStrip(swipe);holdId=tid;swipe=null}
+    if(swipe&&Math.abs(dx)>24&&Math.abs(dx)>Math.abs(dy)*1.5){pinStrip(swipe);holdId=tid;swipe=null}
   });
   container.addEventListener("pointerup",end);
   container.addEventListener("pointercancel",end);
