@@ -178,6 +178,11 @@
   .gpick .lbl{margin-top:8px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink)}
 
   #binder,#pocket{--cols:3;padding:10px calc(var(--gutter) + 64px) 60px var(--gutter);max-width:min(100%,max(var(--col),calc(var(--cols) * 132px)));margin:0 auto}
+  /* desktop: the shell widens to 960px and the grids follow it, with tiles capped near 260px so a three-column page does not balloon */
+  @media(min-width:1000px){
+    :root{--col:960px}
+    #binder,#pocket{max-width:min(100%,var(--col),max(640px,calc(var(--cols) * 260px + var(--gutter) * 2 + 64px)))}
+  }
   .pgrid,.bgrid{display:grid;grid-template-columns:repeat(3,1fr);--gap:8px;gap:var(--gap);container-type:inline-size;--r:calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols) * .045)}
   #pgrid .card{content-visibility:auto;contain-intrinsic-size:auto 100px auto var(--tileh,160px)}
   /* the binder page is a paper panel the cards sit on (its padding equals the gap); the pocket run has no panel, cards sit straight on the page ground */
