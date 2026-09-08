@@ -216,7 +216,8 @@
   /* art settles in on load instead of popping: hidden until its load event adds .in, then the opacity transition carries it up */
   @media (prefers-reduced-motion:no-preference){.card .cardart:not(.in),.card.pk .part img:not(.in){opacity:0}}
   .card.scan .rmx{position:absolute;top:2cqw;right:2cqw;width:max(18px,10cqw);height:max(18px,10cqw);border:0;padding:0;background:var(--ink);color:var(--card);font-size:max(12px,7cqw);font-weight:700;line-height:1;cursor:pointer;box-shadow:0 0 0 1px var(--card);opacity:0;pointer-events:none;transition:opacity .15s;-webkit-tap-highlight-color:transparent}
-  .card.scan:hover .rmx,.card.scan:focus-within .rmx{opacity:1;pointer-events:auto}
+  .card.scan.pin .rmx,.card.scan:focus-visible .rmx{opacity:1;pointer-events:auto}
+  @media (hover:hover){.card.scan:hover .rmx{opacity:1;pointer-events:auto}}
   /* one sticker-sized panel on both mailers: the label takes its box from these tokens and the window is cut to the same box
      (--wt = flap height plus the label's top margin; --wh = the label's thumbnail, or the two text lines at their floors, plus padding and border) */
   .card .face{--wx:13%;--wt:44.4cqw;--wh:calc(max(17cqw,17px) + 4.4cqw + 2px)}
