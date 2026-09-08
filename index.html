@@ -183,13 +183,32 @@
   @media(min-width:1000px){
     :root{--col:960px}
     #binder,#pocket{max-width:min(100%,var(--col),max(640px,calc(var(--cols) * 260px + var(--gutter) * 2 + 64px)))}
-    #binder{--fit:calc((100svh - var(--hdr,150px) - 86px - (var(--rows,4) + 1) * var(--gap)) / var(--rows,4) * 63 / 88 * var(--cols) + (var(--cols) + 1) * var(--gap) + var(--gutter) * 2 + 66px);
-      max-width:min(100%,var(--col),max(640px,calc(var(--cols) * 260px + var(--gutter) * 2 + 64px)),max(320px,var(--fit)));padding-bottom:16px}
+    #binder{--tileh:calc((100svh - var(--hdr,150px) - 100px - 2 * var(--bpad) - 2 * var(--lpad) - (var(--rows,4) - 1) * var(--gap) - var(--rows,4) * 2 * var(--ppad)) / var(--rows,4));
+      --pagew:calc(var(--cols) * (var(--tileh) * 63 / 88 + 2 * var(--ppad)) + (var(--cols) - 1) * var(--gap) + 2 * var(--lpad));
+      --fit:calc(2 * var(--pagew) + 36px + 2 * var(--bpad) + var(--gutter) * 2 + 64px);
+      max-width:min(100%,1440px,max(360px,var(--fit)));padding-bottom:16px}
   }
   .pgrid,.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap);container-type:inline-size;--r:calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols) * .045)}
   #pgrid .card{content-visibility:auto;contain-intrinsic-size:auto 100px auto var(--tileh,160px)}
-  /* the binder page is a paper panel the cards sit on (its padding equals the gap); the pocket run has no panel, cards sit straight on the page ground */
-  .bgrid{background:var(--card);border:1px solid var(--line-soft);border-radius:8px;padding:var(--gap);box-shadow:0 1px 2px oklch(0.25 0.02 95 / .08)}
+  /* the binder is the physical object (owner reference: a charcoal woven zip binder, ringless, open to a spread of dark pocket sheets):
+     .book is the cover, each .leaf a pocket sheet, each .pkt a clear sleeve around one card with a static film sheen and welded seams;
+     the pocket run has no panel, cards sit straight on the page ground */
+  #binder{--cover:oklch(0.3 0.006 260);--cover-hi:oklch(0.345 0.006 260);--sheet:oklch(0.37 0.004 260);--pocket:oklch(0.335 0.004 260);--seam:oklch(0.66 0.005 260 / .5);--bpad:6px;--lpad:calc(var(--gap) * .7);--ppad:calc(var(--gap) * .3)}
+  .book{position:relative;display:grid;padding:var(--bpad) var(--bpad) calc(var(--bpad) + 14px);border-radius:6px;
+    background:repeating-linear-gradient(45deg,oklch(1 0 0 / .025) 0 1px,transparent 1px 3px),repeating-linear-gradient(-45deg,oklch(1 0 0 / .025) 0 1px,transparent 1px 3px),radial-gradient(120% 90% at 50% 35%,var(--cover-hi),var(--cover) 75%);
+    box-shadow:inset 0 1px 0 oklch(1 0 0 / .08),inset 0 0 0 1px oklch(0 0 0 / .35),0 10px 24px oklch(0.2 0.02 95 / .35),0 1px 2px oklch(0.2 0.02 95 / .4)}
+  .book.spread{grid-template-columns:1fr 1fr;column-gap:36px}
+  .book.spread::before{content:"";position:absolute;left:50%;top:6px;bottom:6px;width:36px;transform:translateX(-50%);pointer-events:none;
+    background:linear-gradient(90deg,transparent,oklch(0 0 0 / .3) 40%,oklch(0 0 0 / .5) 50%,oklch(0 0 0 / .3) 60%,transparent)}
+  .leaf{position:relative;padding:var(--lpad);background:var(--sheet);border-radius:3px;box-shadow:inset 0 0 0 1px oklch(1 0 0 / .07),0 1px 2px oklch(0 0 0 / .45)}
+  .leaf::after{content:attr(data-p);position:absolute;right:2px;bottom:-14px;font-family:ui-monospace,Menlo,monospace;font-size:10px;font-weight:600;color:oklch(0.7 0.005 260)}
+  .pkt{position:relative;padding:var(--ppad);border-radius:2px;background:var(--pocket);outline:1px dashed var(--seam);outline-offset:-1px}
+  .pkt.empty{aspect-ratio:63/88}
+  .pkt::before{content:"";position:absolute;inset:0;border-radius:2px;z-index:6;pointer-events:none;
+    background:radial-gradient(60% 40% at 18% 12%,oklch(1 0 0 / .22),transparent 70%),linear-gradient(158deg,oklch(1 0 0 / .2) 0%,oklch(1 0 0 / .07) 24%,transparent 46%,oklch(1 0 0 / .06) 72%,transparent 100%)}
+  .pkt::after{content:"";position:absolute;left:0;right:0;top:0;height:8%;border-radius:2px 2px 0 0;z-index:7;pointer-events:none;
+    border-top:1.5px solid oklch(1 0 0 / .55);box-shadow:inset 0 4px 5px -2px oklch(0 0 0 / .4)}
+  @media(min-width:1000px){#binder{--bpad:16px;--lpad:var(--gap);--ppad:calc(var(--gap) * .45)}}
   /* one slot format: the tile is the card and nothing else, a full-width 63/88 face with a hairline and a soft shadow;
      the old bezel parts (search, tags, price, ball) sit in a translucent paper strip over the card's bottom edge.
      Every part is sized in slot units with a legibility floor and no ceiling, so a tile is the same drawing at any column count */
@@ -210,7 +229,6 @@
   .card.flash{animation:flashcard 1.6s ease}
   @keyframes flashcard{0%,60%{outline:2px solid oklch(0.55 0.19 25 / .5)}100%{outline:2px solid transparent}}
   .card .face{width:100%;aspect-ratio:63/88;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--art);transition:background-color .3s}
-  .blankc{aspect-ratio:63/88;border-radius:var(--r);outline:1px dashed var(--line-soft);outline-offset:-1px;background:oklch(0.9 0.008 95 / .6)}
   .card.pk .ph{flex:none;height:max(18px,11cqw);display:flex;justify-content:space-between;align-items:center;gap:3cqw;padding:0 3cqw;background:var(--card);border-bottom:1px solid var(--line)}
   .card.pk .pname{font-size:max(8px,min(7.5cqw,calc(140cqw / var(--nl,9))));font-weight:700;color:var(--ink-dim);line-height:1.1;min-width:0}
   .card.pk.own .pname{color:var(--ink)}
@@ -265,7 +283,7 @@
   /* narrow slots shed strip content instead of overflowing it: under 110px the strip keeps lookup and ball only */
   @container (max-width:110px){.card .strip .ptag{display:none}}
   @container (max-width:80px){
-    .card .pprice,.card .lt span,.card .lbl img{display:none}
+    .card .pprice,.card .lt span,.card .lbl img,.card.pk .pno{display:none}
     .card .face{--wx:8%;--wh:calc(max(5.3cqw,8.5px) + 3cqw + 2px)}
     .card .lbl{padding:1.5cqw 2cqw}
     .card.pk .part img{width:78%}
@@ -466,7 +484,7 @@
   <div class="pgrid" id="pgrid"></div>
 </section>
 <section id="binder" hidden>
-  <div class="bgrid" id="bgrid"></div>
+  <div class="book" id="book"><div class="leaf"><div class="bgrid" id="bgrid"></div></div><div class="leaf" id="leaf2" hidden><div class="bgrid" id="bgrid2"></div></div></div>
   <div class="pager">
     <button id="pFirst" type="button" aria-label="First page">&#171;</button>
     <button id="pPrev" type="button" aria-label="Previous page">&#8249;</button>
@@ -540,7 +558,9 @@ if(!["group","regional"].includes(prefs.placement))prefs.placement="dex";
 delete prefs.sort;delete prefs.sortBy;delete prefs.group;delete prefs.incBase;
 
 const $=id=>document.getElementById(id);
-const list=$("list"),binder=$("binder"),bgrid=$("bgrid"),pocketEl=$("pocket"),pgrid=$("pgrid");
+const list=$("list"),binder=$("binder"),bgrid=$("bgrid"),bgrid2=$("bgrid2"),leaf2=$("leaf2"),book=$("book"),pocketEl=$("pocket"),pgrid=$("pgrid");
+const spreadMq=matchMedia("(min-width:1000px)"),spread=()=>spreadMq.matches;
+spreadMq.addEventListener("change",()=>{if(prefs.view==="binder")renderBinder()});
 const headerEl=document.querySelector("header");
 let headH=headerEl.offsetHeight;
 let CARDART=store.load("dex-il-cards");
@@ -1152,7 +1172,7 @@ function unpinStrip(){if(pinned){pinned.classList.remove("pin");pinned=null}}
 document.addEventListener("pointerdown",ev=>{if(pinned&&!pinned.contains(ev.target))unpinStrip()},{passive:true});
 document.addEventListener("scroll",unpinStrip,{passive:true});
 armLongPress(list,".row");armKeys(list,()=>1);
-armLongPress(bgrid,".card");armKeys(bgrid,()=>prefs.bcols);
+armLongPress(book,".card");armKeys(book,()=>prefs.bcols);
 armLongPress(pgrid,".card");armKeys(pgrid,()=>prefs.pcols);
 function tally(){
   const vals=Object.values(owned);
@@ -1391,23 +1411,28 @@ function removeArt(id){
 }
 // binder view: paginated pocket pages
 function renderBinder(){
-  const per=perNow(),cols=prefs.bcols;
+  const per=perNow(),cols=prefs.bcols,two=spread();
   binder.style.setProperty("--cols",cols);binder.style.setProperty("--rows",prefs.brows);
-  bgrid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
   binder.style.setProperty("--gap",cols>=5?"8px":cols===4?"10px":"14px");
+  book.classList.toggle("spread",two);leaf2.hidden=!two;
   const pages=Math.max(1,Math.ceil(visArr.length/per));
   if(page>=pages)page=pages-1;
   if(page<0)page=0;
-  bgrid.innerHTML="";bTiles.clear();
-  const slice=visArr.slice(page*per,page*per+per);
-  slice.forEach(e=>bgrid.appendChild(binderTile(e,bTiles)));
-  if(bgrid.firstElementChild)bgrid.firstElementChild.tabIndex=0;
-  for(let i=slice.length;i<per;i++){const b=document.createElement("div");b.className="blankc";bgrid.appendChild(b)}
+  if(two)page-=page%2;
+  bTiles.clear();
+  const fill=(grid,p)=>{
+    grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;grid.innerHTML="";grid.parentElement.dataset.p=p<pages?p+1:"";
+    const slice=p<pages?visArr.slice(p*per,p*per+per):[];
+    slice.forEach(e=>{const w=document.createElement("div");w.className="pkt";w.appendChild(binderTile(e,bTiles));grid.appendChild(w)});
+    for(let i=slice.length;i<per;i++){const b=document.createElement("div");b.className="pkt empty";grid.appendChild(b)}
+  };
+  fill(bgrid,page);if(two)fill(bgrid2,page+1);
+  const first=bgrid.querySelector("[data-id]");if(first)first.tabIndex=0;
   pIn.value=page+1;
   pIn.max=pages;
-  pTot.textContent=`/ ${pages}`;
+  pTot.textContent=two&&page+1<pages?`+ ${page+2} / ${pages}`:`/ ${pages}`;
   pFirst.disabled=pPrev.disabled=page===0;
-  pNext.disabled=pLast.disabled=page>=pages-1;
+  pNext.disabled=pLast.disabled=page+(two?2:1)>=pages;
   updateCurrentJump(true);
 }
 // pocket view: one continuous vertical run of binder tiles, column count selectable
@@ -1471,8 +1496,8 @@ function renderPocket(){
 function pageCount(){return Math.max(1,Math.ceil(visArr.length/perNow()))}
 function goTo(n){page=Math.min(Math.max(0,n),pageCount()-1);renderBinder();keepHeader();binder.scrollIntoView()}
 pFirst.addEventListener("click",()=>goTo(0));
-pPrev.addEventListener("click",()=>goTo(page-1));
-pNext.addEventListener("click",()=>goTo(page+1));
+pPrev.addEventListener("click",()=>goTo(page-(spread()?2:1)));
+pNext.addEventListener("click",()=>goTo(page+(spread()?2:1)));
 pLast.addEventListener("click",()=>goTo(pageCount()-1));
 pIn.addEventListener("change",()=>goTo((parseInt(pIn.value,10)||1)-1));
 pIn.addEventListener("keydown",e=>{if(e.key==="Enter")pIn.blur()});
@@ -1749,7 +1774,7 @@ function updateCurrentJump(force){
   if(jumps.hidden||!jRuns.length)return;
   let cur=0;
   if(prefs.view==="binder"){
-    const last=Math.min(visArr.length,(page+1)*perNow())-1;
+    const last=Math.min(visArr.length,(page+(spread()?2:1))*perNow())-1;
     for(let i=0;i<jRuns.length;i++){if(jRuns[i].start<=last)cur=i;else break}
   }else{
     if(cjDirty){const arr=jumpArr();cjTops=jRuns.map(r=>docTop(jumpEl(arr[r.start][1])));cjDirty=false}
