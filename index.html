@@ -215,9 +215,6 @@
   .card.own .cardart,.card.pend .cardart{opacity:1;filter:none}
   /* art settles in on load instead of popping: hidden until its load event adds .in, then the opacity transition carries it up */
   @media (prefers-reduced-motion:no-preference){.card .cardart:not(.in),.card.pk .part img:not(.in){opacity:0}}
-  .card.scan .rmx{position:absolute;top:2cqw;right:2cqw;width:max(18px,10cqw);height:max(18px,10cqw);border:0;padding:0;background:var(--ink);color:var(--card);font-size:max(12px,7cqw);font-weight:700;line-height:1;cursor:pointer;box-shadow:0 0 0 1px var(--card);opacity:0;pointer-events:none;transition:opacity .15s;-webkit-tap-highlight-color:transparent}
-  .card.scan.pin .rmx,.card.scan:focus-visible .rmx{opacity:1;pointer-events:auto}
-  @media (hover:hover){.card.scan:hover .rmx{opacity:1;pointer-events:auto}}
   /* one sticker-sized panel on both mailers: the label takes its box from these tokens and the window is cut to the same box
      (--wt = flap height plus the label's top margin; --wh = the label's thumbnail, or the two text lines at their floors, plus padding and border) */
   .card .face{--wx:13%;--wt:44.4cqw;--wh:calc(max(17cqw,17px) + 4.4cqw + 2px)}
@@ -252,6 +249,10 @@
   .card .setc{flex:none;height:100%;width:max(18px,9cqw);border:0;background:none;padding:0;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
   .card .setc::before{content:"";position:absolute;inset:0;margin:auto;width:max(13px,6.5cqw);height:max(13px,6.5cqw);background:var(--ink-dim);-webkit-mask:var(--icon-search) center/contain no-repeat;mask:var(--icon-search) center/contain no-repeat}
   .card.own .setc::before,.card.pend .setc::before{background:var(--ink)}
+  .card.scan .strip{grid-template-columns:auto auto 1fr auto}
+  .card .strip .rmx{flex:none;height:100%;width:max(18px,9cqw);border:0;background:none;padding:0;cursor:pointer;color:var(--ink-dim);font-size:max(13px,7cqw);font-weight:700;line-height:1;-webkit-tap-highlight-color:transparent}
+  .card.own .rmx,.card.pend .rmx{color:var(--ink)}
+  @container (max-width:60px){.card .strip .rmx{display:none}}
   /* narrow slots shed strip content instead of overflowing it: under 110px the strip keeps lookup and ball only */
   @container (max-width:110px){.card .strip .ptag{display:none}}
   @container (max-width:80px){
@@ -1340,11 +1341,11 @@ function binderTile([n,id,name,region,gen,form,sref],map){
   map.set(id,c);
   const art=cardArt(id);
   const chips=`${form?`<span class="chip f">${form==="Other"?"Form":form}</span>`:""}<span class="chip">Gen ${gen}</span><span class="chip r ${region}">${region}</span>`;
-  const foot=`<div class="strip"><button class="setc" type="button" tabindex="-1" aria-label="Cards" title="Find cards"></button><span class="ptag">${chips}${art?'<span class="sprice"></span>':""}</span><span class="pball"></span></div>`;
+  const foot=`<div class="strip"><button class="setc" type="button" tabindex="-1" aria-label="Cards" title="Find cards"></button>${art?'<button class="rmx" type="button" tabindex="-1" aria-label="Remove card" title="Remove card">&#215;</button>':""}<span class="ptag">${chips}${art?'<span class="sprice"></span>':""}</span><span class="pball"></span></div>`;
   c.className="card e-"+energyOf.get(id)+(art?" scan":" pk")+(owned[id]===true?" own":owned[id]==="p"?" pend":"")+(region==="Hisui"?" hs":"")+(form?" ft-"+form:"");
   c.dataset.id=id;c.tabIndex=-1;
   if(art){
-    c.innerHTML=`<div class="face"><img class="cardart" loading="lazy" src="${cimg(art,"low")}" alt="${name}"><button class="rmx" type="button" tabindex="-1" aria-label="Remove card" title="Remove card">&#215;</button><span class="pprice"></span></div>`+foot;
+    c.innerHTML=`<div class="face"><img class="cardart" loading="lazy" src="${cimg(art,"low")}" alt="${name}"><span class="pprice"></span></div>`+foot;
     priceInfo(id).then(p=>{
       if(!p||!c.isConnected)return;
       c.querySelectorAll(".pprice,.sprice").forEach(s=>s.replaceChildren(priceLink(p)));
