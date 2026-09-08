@@ -381,6 +381,8 @@
   .cact button{flex:1;min-height:46px;border:1px solid var(--line-soft);border-radius:4px;background:var(--card);color:var(--ink);font-size:14px;font-weight:650;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .cact button.pri{background:var(--shell);border-color:var(--shell);color:var(--card)}
   .cact button:disabled{opacity:.45;cursor:default}
+  .cact{flex-wrap:wrap}
+  .cact .as{flex-basis:100%;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-dim)}
 
   @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.row.flash,.card.flash,.row.hold .slot,.card.hold{animation:none}.card,.card .strip{transition:none}.row.pend .slot::before{animation:none;opacity:.6}.star{display:none}}
 </style>
@@ -1014,16 +1016,16 @@ function showCard(c){
   const rows=document.createElement("div");led.append(h,rows);
   box.append(art,led);
   const act=document.createElement("div");act.className="cact";
-  const use=document.createElement("button");use.type="button";use.disabled=!c.image;
   const inBinder=()=>CARDART[cEntry[1]]===c.image;
-  const label=()=>{use.textContent=inBinder()?"Remove from binder":"Use in binder";use.classList.toggle("pri",!inBinder())};
-  label();
-  use.addEventListener("click",()=>{
-    const id=cEntry[1];
-    if(inBinder()){delete CARDART[id];store.save("dex-il-cards",CARDART);label();refreshTile(id);fillRowPrice(rowMap.get(id));cremove.hidden=true;return}
-    CARDART[id]=c.image;store.save("dex-il-cards",CARDART);refreshTile(id);fillRowPrice(rowMap.get(id));closeSheet();
-  });
-  act.appendChild(use);
+  const btn=(text,fn,pri)=>{const b=document.createElement("button");b.type="button";b.textContent=text;b.disabled=!c.image;b.classList.toggle("pri",!!pri);b.addEventListener("click",fn);return b};
+  const put=st=>{const id=cEntry[1];CARDART[id]=c.image;store.save("dex-il-cards",CARDART);if(owned[id]!==st)setState(id,st);refreshTile(id);fillRowPrice(rowMap.get(id));closeSheet()};
+  const paintAct=()=>{
+    act.replaceChildren();
+    if(inBinder()){act.appendChild(btn("Remove from binder",()=>{const id=cEntry[1];delete CARDART[id];store.save("dex-il-cards",CARDART);refreshTile(id);fillRowPrice(rowMap.get(id));cremove.hidden=true;paintAct()}));return}
+    const as=document.createElement("span");as.className="as";as.textContent="Use in binder as";
+    act.append(as,btn("Registered",()=>put(true),true),btn("Pending",()=>put("p")),btn("Unregistered",()=>put(undefined)));
+  };
+  paintAct();
   cbody.append(box,act);
   const paint=d=>{
     rows.innerHTML="";
