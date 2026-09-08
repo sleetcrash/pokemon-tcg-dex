@@ -1,0 +1,76 @@
+/* card-binder v1.1.0 (2026-09-08) */
+/* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
+   Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
+   Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
+.cb-host{
+  --cb-cover:oklch(0.3 0.006 260);--cb-cover-hi:oklch(0.345 0.006 260);--cb-sheet:oklch(0.37 0.004 260);--cb-pocket:oklch(0.335 0.004 260);
+  --cb-seam:oklch(0.66 0.005 260 / .5);--cb-stitch:oklch(0.5 0.006 260 / .6);--cb-paper:oklch(0.98 0.004 95);--cb-ink:oklch(0.22 0.012 95);--cb-ink-dim:oklch(0.47 0.012 95);
+  --cb-line:oklch(0.6 0.01 95);--cb-line-soft:oklch(0.8 0.01 95);
+  --cb-aw:63;--cb-ah:88;               /* pocket aspect, width and height units of whatever sits in a pocket */
+  --cb-gap:14px;                       /* between pockets; the module lowers it at four and five plus columns unless --cb-gap-fixed is set */
+  --cb-bpad:6px;--cb-lpad:calc(var(--cb-gap) * .7);--cb-ppad:calc(var(--cb-gap) * .3);
+  --cb-spine:36px;--cb-reserve:160px;  /* reserve: viewport height taken by everything outside the book when cb-fit is on (site header, margins, this pager) */
+  --cb-mono:ui-monospace,Menlo,monospace;
+  --cb-cols:3;--cb-rows:3;
+  display:block;margin:0 auto;max-width:100%;font-family:system-ui,-apple-system,sans-serif;color:var(--cb-ink)}
+.cb-host.cb-two{--cb-bpad:16px;--cb-lpad:var(--cb-gap);--cb-ppad:calc(var(--cb-gap) * .45)}
+.cb-host.cb-two.cb-fit{
+  --cb-tileh:calc((100svh - var(--cb-reserve) - 2 * var(--cb-bpad) - 2 * var(--cb-lpad) - (var(--cb-rows) - 1) * var(--cb-gap) - var(--cb-rows) * 2 * var(--cb-ppad)) / var(--cb-rows));
+  --cb-pagew:calc(var(--cb-cols) * (var(--cb-tileh) * var(--cb-aw) / var(--cb-ah) + 2 * var(--cb-ppad)) + (var(--cb-cols) - 1) * var(--cb-gap) + 2 * var(--cb-lpad));
+  max-width:min(100%,max(360px,calc(2 * var(--cb-pagew) + var(--cb-spine) + 2 * var(--cb-bpad))))}
+
+.cb-book{position:relative;display:grid;padding:var(--cb-bpad) var(--cb-bpad) calc(var(--cb-bpad) + 14px);border-radius:6px;
+  background:repeating-linear-gradient(45deg,oklch(1 0 0 / .025) 0 1px,transparent 1px 3px),repeating-linear-gradient(-45deg,oklch(1 0 0 / .025) 0 1px,transparent 1px 3px),radial-gradient(120% 90% at 50% 35%,var(--cb-cover-hi),var(--cb-cover) 75%);
+  box-shadow:inset 0 1px 0 oklch(1 0 0 / .08),inset 0 0 0 1px oklch(0 0 0 / .35),0 10px 24px oklch(0.2 0.02 95 / .35),0 1px 2px oklch(0.2 0.02 95 / .4)}
+.cb-book.cb-spread{grid-template-columns:1fr 1fr;column-gap:var(--cb-spine)}
+.cb-book.cb-spread::before{content:"";position:absolute;left:50%;top:6px;bottom:6px;width:var(--cb-spine);transform:translateX(-50%);pointer-events:none;
+  background:linear-gradient(90deg,transparent,oklch(0 0 0 / .3) 40%,oklch(0 0 0 / .5) 50%,oklch(0 0 0 / .3) 60%,transparent)}
+.cb-leaf{position:relative;padding:var(--cb-lpad);background:var(--cb-sheet);border-radius:3px;box-shadow:inset 0 0 0 1px oklch(1 0 0 / .07),0 1px 2px oklch(0 0 0 / .45)}
+.cb-leaf::after{content:attr(data-p);position:absolute;right:2px;bottom:-14px;font-family:var(--cb-mono);font-size:10px;font-weight:600;color:oklch(0.7 0.005 260)}
+.cb-grid{display:grid;grid-template-columns:repeat(var(--cb-cols),1fr);gap:var(--cb-gap)}
+.cb-pkt{position:relative;padding:var(--cb-ppad);border-radius:2px;background:var(--cb-pocket);outline:1px dashed var(--cb-seam);outline-offset:-1px}
+.cb-pkt.cb-empty{box-sizing:content-box;aspect-ratio:var(--cb-aw) / var(--cb-ah)}
+.cb-pkt>*{display:block;width:100%}
+.cb-pkt::before{content:"";position:absolute;inset:0;border-radius:2px;z-index:6;pointer-events:none;
+  background:radial-gradient(60% 40% at 18% 12%,oklch(1 0 0 / .22),transparent 70%),linear-gradient(158deg,oklch(1 0 0 / .2) 0%,oklch(1 0 0 / .07) 24%,transparent 46%,oklch(1 0 0 / .06) 72%,transparent 100%)}
+.cb-pkt::after{content:"";position:absolute;left:0;right:0;top:0;height:8%;border-radius:2px 2px 0 0;z-index:7;pointer-events:none;
+  border-top:1.5px solid oklch(1 0 0 / .55);box-shadow:inset 0 4px 5px -2px oklch(0 0 0 / .4)}
+
+/* the inside of a cover, and the closed covers */
+.cb-leaf.cb-cov{padding:0;background:none;box-shadow:none}
+.cb-leaf.cb-cov .cb-grid{display:block;height:100%}
+.cb-incover{position:relative;height:100%;min-height:120px;border-radius:3px;background:radial-gradient(100% 80% at 50% 40%,var(--cb-cover-hi),var(--cb-cover) 80%);box-shadow:inset 0 0 0 1px oklch(0 0 0 / .3)}
+.cb-incover::before{content:"";position:absolute;inset:10px;border:1px dashed var(--cb-stitch);border-radius:2px;pointer-events:none}
+.cb-incover .cb-lbl{position:absolute;left:50%;top:14%;transform:translateX(-50%);padding:6px 12px;background:var(--cb-paper);color:var(--cb-ink);font-family:var(--cb-mono);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-align:center;white-space:nowrap;box-shadow:0 1px 2px oklch(0 0 0 / .5)}
+.cb-incover .cb-lbl small{display:block;margin-top:3px;font-size:9px;font-weight:500;letter-spacing:.06em;color:var(--cb-ink-dim);text-transform:none}
+.cb-book.cb-closed{width:min(100%,calc(var(--cb-pagew,100%) + 2 * var(--cb-bpad)));container-type:inline-size;cursor:pointer}
+.cb-book.cb-closed.cb-front{margin-left:auto}
+.cb-book.cb-closed.cb-back{margin-right:auto}
+.cb-book.cb-closed .cb-leaf{--cb-tw:calc((100cqw - 2 * var(--cb-lpad) - (var(--cb-cols) - 1) * var(--cb-gap) - var(--cb-cols) * 2 * var(--cb-ppad)) / var(--cb-cols));
+  height:calc(var(--cb-rows) * (var(--cb-tw) * var(--cb-ah) / var(--cb-aw) + 2 * var(--cb-ppad)) + (var(--cb-rows) - 1) * var(--cb-gap) + 2 * var(--cb-lpad))}
+.cb-incover.cb-front,.cb-incover.cb-back{background:radial-gradient(120% 90% at 50% 35%,var(--cb-cover-hi),var(--cb-cover) 75%)}
+.cb-incover.cb-front::before,.cb-incover.cb-back::before{inset:12px;border-style:solid;border-color:oklch(0.5 0.006 260 / .35)}
+.cb-incover.cb-front::after,.cb-incover.cb-back::after{content:"";position:absolute;top:0;bottom:0;width:10px;pointer-events:none}
+.cb-incover.cb-front::after{left:0;background:linear-gradient(90deg,oklch(0 0 0 / .4),transparent)}
+.cb-incover.cb-back::after{right:0;background:linear-gradient(-90deg,oklch(0 0 0 / .4),transparent)}
+.cb-incover.cb-front .cb-lbl{top:20%;padding:10px 18px;font-size:12px}
+.cb-incover.cb-back .cb-lbl{display:none}
+
+/* pager: first, previous, page box, next, last, and the optional size picker */
+.cb-pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;margin-top:10px;position:relative}
+.cb-pager button{min-width:38px;height:38px;padding:0 10px;border:1px solid var(--cb-line-soft);background:var(--cb-paper);color:var(--cb-ink);font-size:16px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cb-pager button:disabled{opacity:.4;cursor:default}
+.cb-pager button:focus-visible{outline:2px solid var(--cb-ink);outline-offset:1px}
+.cb-pgo{display:flex;align-items:center;gap:6px;margin:0 12px;font-family:var(--cb-mono);font-size:14px}
+.cb-pgo input{width:52px;height:38px;border:1px solid var(--cb-line-soft);background:var(--cb-paper);color:var(--cb-ink);font:inherit;text-align:center}
+.cb-pgo input[hidden]{display:none}
+.cb-size{position:absolute;right:0;top:0}
+.cb-size>button{font-size:13px;font-family:var(--cb-mono)}
+.cb-size .cb-pop{position:absolute;right:0;bottom:calc(100% + 4px);z-index:40;background:var(--cb-paper);border:1px solid var(--cb-line-soft);border-radius:4px;padding:10px;box-shadow:0 4px 14px oklch(0.25 0.02 95 / .12)}
+.cb-size .cb-pop[hidden]{display:none}
+.cb-size .cb-pop>div{display:grid;grid-template-columns:repeat(6,22px);gap:4px}
+.cb-size .cb-pop>div button{width:22px;height:22px;min-width:0;padding:0;border:1px solid var(--cb-line)}
+.cb-size .cb-pop>div button.cb-hi{background:var(--cb-ink);border-color:var(--cb-ink)}
+.cb-size .cb-pop .cb-slbl{margin-top:8px;text-align:center;font-family:var(--cb-mono);font-size:12px}
+@media (max-width:600px){.cb-size{position:static;flex-basis:100%;display:flex;justify-content:center;margin-top:4px}.cb-size .cb-pop{right:auto;left:50%;transform:translateX(-50%)}}
+@media (prefers-reduced-motion:no-preference){.cb-book{transition:width .2s ease}}
