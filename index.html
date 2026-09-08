@@ -1083,9 +1083,9 @@ function handleTap(id){
   setState(id,next);
 }
 function armLongPress(container,sel){
-  let t=null,sx=0,sy=0,tid=null,held=null,fired=false,swipe=null,ptype="mouse";
+  let t=null,sx=0,sy=0,tid=null,held=null,fired=false,swipe=null;
   container.addEventListener("pointerdown",ev=>{
-    holdId=null;ptype=ev.pointerType;
+    holdId=null;
     if(!ev.isPrimary){end();return}
     const el=ev.target.closest(sel);
     if(!el||ev.button!==0||ev.target.closest(".cardbtn,.setc,.rmx,a"))return;
@@ -1108,13 +1108,12 @@ function armLongPress(container,sel){
   });
   container.addEventListener("pointerup",end);
   container.addEventListener("pointercancel",end);
-  // right click is the mouse's second gesture, so it toggles Pending like a long press; the touch callout stays suppressed;
-  // links and buttons keep their native menu
+  // right click does nothing on rows and tiles (Pending is the long press only); the menu stays suppressed so a touch
+  // long press cannot pop a callout; links and buttons keep their native menu
   container.addEventListener("contextmenu",ev=>{
     const el=ev.target.closest(sel);
     if(!el||ev.target.closest("a,button"))return;
     ev.preventDefault();
-    if(ptype==="mouse")togglePending(Number(el.dataset.id));
   });
 }
 function armKeys(container,cols){
