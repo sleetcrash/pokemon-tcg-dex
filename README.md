@@ -35,7 +35,7 @@ Quick Reference:
 
 Intuitive Collection Management: 
 - Tap to Register a card to your collection.
-- Long press (mobile) or right click (desktop) to mark as Pending (helpful for tracking cards purchased but not delivered).
+- Long press (touch) or long click (mouse) to mark as Pending (helpful for tracking cards purchased but not delivered).
 - View as a list or in a binder. 
 - Save multiple lists (I have a separate list for only AR/SIR, another for mixed rarity).
 (Note: Share lists across devices with a unique list identifier. Auto sync planned for a future update.)
