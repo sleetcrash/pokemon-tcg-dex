@@ -222,7 +222,7 @@
   .incover.back .lbl{display:none}
   .leaf::after{content:attr(data-p);position:absolute;right:2px;bottom:-14px;font-family:ui-monospace,Menlo,monospace;font-size:10px;font-weight:600;color:oklch(0.7 0.005 260)}
   .pkt{position:relative;padding:var(--ppad);border-radius:2px;background:var(--pocket);outline:1px dashed var(--seam);outline-offset:-1px}
-  .pkt.empty{aspect-ratio:63/88}
+  .pkt.empty{box-sizing:content-box;aspect-ratio:63/88}
   .pkt::before{content:"";position:absolute;inset:0;border-radius:2px;z-index:6;pointer-events:none;
     background:radial-gradient(60% 40% at 18% 12%,oklch(1 0 0 / .22),transparent 70%),linear-gradient(158deg,oklch(1 0 0 / .2) 0%,oklch(1 0 0 / .07) 24%,transparent 46%,oklch(1 0 0 / .06) 72%,transparent 100%)}
   .pkt::after{content:"";position:absolute;left:0;right:0;top:0;height:8%;border-radius:2px 2px 0 0;z-index:7;pointer-events:none;
