@@ -41,6 +41,8 @@ Single-file web app (`index.html`) tracking a Pokemon TCG National Card Dex: 1,6
 
 ## Known issues / open threads
 
+- 2026-09-08: the owner reports the binder's page turn (card-binder v2.2.0, one sheet over the spine) still reads as two pages turning with a duplicate of the first page in Mac Chrome. Not reproduced headless (a single turn frozen at every phase renders as designed). Open; suspects in order: stale vendor files in the tab, a second turn overlapping the first (ghosts stay up to the 1500ms safety timeout), backface-visibility on the dex's tiles, or the right leaf changing under the lifting sheet at frame 0.
+
 - 2026-09-01: full provider outage cycle observed. TCGdex was down all session (ports 80/443 timing out) while pokemontcg.io was up but degraded; the card sheet was verified end to end through the fallback. TCGdex then recovered the same day and the primary path was verified live on the preview too: base/Mega/Gmax/Tera filtering all correct (Gmax = all 4 Charizard VMAX), lists 200-900ms, detail tap visible ~20ms and enriched ~155ms, hi-res image swap working. By then pokemontcg.io had flipped to 500s, so both failover directions are proven. Neither provider is fully healthy; run `scripts/check-providers.mjs` before debugging any lookup issue.
 - A failed detail fetch during Gmax/Dynamax classification silently drops the card into the wrong bucket for that load (client treats missing detail as non-Gmax). Successes cache client-side for 7 days, so this self-heals; only matters while a provider is flaky.
 - Card lookup failing on iPhone Safari on `MAX-forms`: cross-origin fetch to TCGdex returns "Load failed". The proxy should resolve it; verify with Safari Web Inspector attached to a device once TCGdex is back.
