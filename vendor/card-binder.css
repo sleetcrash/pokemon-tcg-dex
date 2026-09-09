@@ -1,4 +1,4 @@
-/* card-binder v2.2.7 (2026-09-09) */
+/* card-binder v2.2.8 (2026-09-09) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
@@ -39,6 +39,12 @@
 .cb-host.cb-two .cb-book.cb-turning.cb-closed::before,.cb-board.cb-inside::before{width:calc(var(--cb-spine) / 2)}
 .cb-host.cb-two .cb-book.cb-turning.cb-front::before,.cb-board.cb-inside.cb-sl::before{left:0;background-position:right}
 .cb-host.cb-two .cb-book.cb-turning.cb-back::before,.cb-board.cb-inside.cb-sr::before{right:0;background-position:left}
+/* and the cover texture under it: its highlight is centred on the box that draws it, on the spine of the open book but on the middle of a
+   shut half, so the shut book while it turns and a board carrying an inside cover draw the open book's texture at double width, positioned
+   to their half; a board carrying an outside cover keeps the shut book's own texture, which it sits on and lands on */
+.cb-host.cb-two .cb-book.cb-turning.cb-closed,.cb-board.cb-inside{background-size:200% 100%}
+.cb-host.cb-two .cb-book.cb-turning.cb-front,.cb-board.cb-inside.cb-sl{background-position:right}
+.cb-host.cb-two .cb-book.cb-turning.cb-back,.cb-board.cb-inside.cb-sr{background-position:left}
 .cb-leaf{position:relative;padding:var(--cb-lpad);background:var(--cb-sheet);border-radius:3px;box-shadow:inset 0 0 0 1px oklch(1 0 0 / .07),0 1px 2px oklch(0 0 0 / .45)}
 .cb-leaf::after{content:attr(data-p);position:absolute;right:2px;top:100%;line-height:var(--cb-foot);font-family:var(--cb-mono);font-size:10px;font-weight:600;color:oklch(0.7 0.005 260)}
 .cb-leaf.cb-lp::after{right:auto;left:2px}
