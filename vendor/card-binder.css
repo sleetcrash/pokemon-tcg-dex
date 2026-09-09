@@ -1,4 +1,4 @@
-/* card-binder v2.2.4 (2026-09-09) */
+/* card-binder v2.2.5 (2026-09-09) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
@@ -69,6 +69,11 @@
 .cb-book.cb-closed{width:min(100%,calc(var(--cb-pagew,100%) + 2 * var(--cb-bpad)));cursor:pointer}
 .cb-book.cb-closed.cb-front{margin-left:auto}
 .cb-book.cb-closed.cb-back{margin-right:auto}
+/* on a spread the shut book is one half of the open book: its spine-side rim is half the spine, so a cover swinging open or shut meets
+   the other half at the spine centre with no gap */
+.cb-host.cb-two .cb-book.cb-closed{width:min(100%,calc(var(--cb-pagew,100%) + var(--cb-bpad) + var(--cb-spine) / 2))}
+.cb-host.cb-two .cb-book.cb-closed.cb-front{padding-left:calc(var(--cb-spine) / 2)}
+.cb-host.cb-two .cb-book.cb-closed.cb-back{padding-right:calc(var(--cb-spine) / 2)}
 /* a cover shown alone (the shut book, or the inside front cover one page at a time) is as tall as a filled page */
 .cb-book.cb-closed .cb-leaf,.cb-host:not(.cb-two) .cb-leaf.cb-cov{--cb-tw:calc((100cqw - 2 * var(--cb-lpad) - (var(--cb-cols) - 1) * var(--cb-gap) - var(--cb-cols) * 2 * var(--cb-ppad)) / var(--cb-cols));
   height:calc(var(--cb-rows) * (var(--cb-tw) * var(--cb-ah) / var(--cb-aw) + 2 * var(--cb-ppad)) + (var(--cb-rows) - 1) * var(--cb-gap) + 2 * var(--cb-lpad))}
@@ -110,6 +115,8 @@
 .cb-flier .cb-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .cb-flier .cb-face.cb-back{transform:rotateY(180deg)}
 .cb-board>.cb-leaf{position:absolute;left:var(--cb-bpad);right:var(--cb-bpad);top:var(--cb-bpad);bottom:calc(var(--cb-bpad) + var(--cb-foot))}
+.cb-board.cb-sl>.cb-leaf{left:calc(var(--cb-spine) / 2)}
+.cb-board.cb-sr>.cb-leaf{right:calc(var(--cb-spine) / 2)}
 .cb-flier .cb-face::after,.cb-flier .cb-face .cb-foot{display:none}
 .cb-ghost.cb-lift{transform-origin:left center;animation:cb-lift calc(var(--cb-turn) * .7) cubic-bezier(.5,0,.8,.4) both}
 .cb-ghost.cb-drop{transform-origin:left center;animation:cb-drop calc(var(--cb-turn) * .7) cubic-bezier(.2,.6,.4,1) both}

@@ -1,4 +1,4 @@
-// card-binder v2.2.4 (2026-09-09)
+// card-binder v2.2.5 (2026-09-09)
 // card-binder: a pocket-page binder as a physical object. Zero dependencies, ES module.
 // new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, cover, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, onChange})
 //   items        array of anything; renderItem(item, index) returns the element that sits in a pocket (give it the pocket aspect)
@@ -20,7 +20,7 @@
 // perspective distance for a turn, in page widths: the free edge of a swinging page grows by at most 1 / (1 - 1 / PERSP)
 const PERSP=10;
 export class CardBinder{
-  static VERSION="2.2.4";
+  static VERSION="2.2.5";
   constructor(host,o={}){
     this.host=host;this.items=o.items||[];this.renderItem=o.renderItem||(x=>{const d=document.createElement("div");d.textContent=String(x);return d});
     this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";
@@ -66,24 +66,28 @@ export class CardBinder{
   flip(snap,dir,was){
     if(this.endTurn)this.endTurn();
     const host=this.host,book=this.book,L=this.leafL,R=this.leafR,gone=[],hr=host.getBoundingClientRect();let opened=null;
-    const ghost=(el,box,dx=0,pad=0,foot=0)=>{const r=box.getBoundingClientRect();el.hidden=false;el.inert=true;el.classList.add("cb-ghost");el.style.left=r.left-hr.left-pad+dx+"px";el.style.top=r.top-hr.top-pad+"px";el.style.width=r.width+2*pad+"px";el.style.height=r.height+2*pad+foot+"px";host.appendChild(el);gone.push(el);return el};
+    const ghost=(el,r)=>{el.hidden=false;el.inert=true;el.classList.add("cb-ghost");el.style.left=r.left-hr.left+"px";el.style.top=r.top-hr.top+"px";el.style.width=r.width+"px";el.style.height=r.height+"px";host.appendChild(el);gone.push(el);return el};
+    const rect=el=>el.getBoundingClientRect();
     host.style.setProperty("--cb-persp",Math.round(L.offsetWidth*PERSP)+"px");
     if(this.spread){
       const cs=getComputedStyle(host),px=p=>parseFloat(cs.getPropertyValue(p))||0,spine=px("--cb-spine");
       const land=dir>0?L:(R.hidden?L:R),front=dir>0?(snap.R||snap.L):snap.L,under=dir>0?(snap.R?snap.L:null):snap.R;
       if(!front)return;
-      if(under)ghost(under,land);
-      // a cover turn swings the whole board: the leaf inside the cover's rim, rounded edge and shadow (.cb-board), not the leaf alone
-      const cov=front.classList.contains("cb-cov"),pad=cov?px("--cb-bpad"):0,foot=cov?px("--cb-foot"):0;
-      const face=(leaf,...cls)=>{let f=leaf;if(cov){f=document.createElement("div");f.className="cb-board";f.appendChild(leaf)}f.classList.add("cb-face",...cls);return f};
+      const lr=rect(land);
+      if(under)ghost(under,lr);
+      // a cover turn swings the whole board: the leaf inside the cover's rim, rounded edge and shadow (.cb-board), sized like a half of
+      // the open book (outer rim --cb-bpad, spine side half the spine, the foot band below), so it meets the other half at the spine centre
+      const cov=front.classList.contains("cb-cov"),pad=cov?px("--cb-bpad"):0,foot=cov?px("--cb-foot"):0,sp=cov?spine/2:0;
+      const face=(leaf,...cls)=>{let f=leaf;if(cov){f=document.createElement("div");f.className="cb-board "+(dir>0?"cb-sl":"cb-sr");f.appendChild(leaf)}f.classList.add("cb-face",...cls);return f};
       const fl=document.createElement("div"),back=land.cloneNode(true);
       fl.className="cb-flier";fl.append(face(front),face(back,"cb-back"));
-      ghost(fl,land,(land.offsetWidth+spine)*(dir>0?1:-1),pad,foot);
-      fl.style.transformOrigin=dir>0?`${pad-spine/2}px 50%`:`calc(100% - ${pad-spine/2}px) 50%`;
+      const w=sp+lr.width+pad,left=dir>0?lr.right+spine-sp:lr.left-spine+sp-w;
+      ghost(fl,{left,top:lr.top-pad,width:w,height:lr.height+2*pad+foot});
+      fl.style.transformOrigin=dir>0?`${sp-spine/2}px 50%`:`calc(100% - ${sp-spine/2}px) 50%`;
       fl.classList.add(dir>0?"cb-fwd":"cb-back");
       if(!under){opened=land;land.hidden=true;this.layout(was)}
-    }else if(dir>0){if(!snap.L)return;ghost(snap.L,L).classList.add("cb-lift")}
-    else{if(snap.L)ghost(snap.L,L);ghost(L.cloneNode(true),L).classList.add("cb-drop")}
+    }else if(dir>0){if(!snap.L)return;ghost(snap.L,rect(L)).classList.add("cb-lift")}
+    else{if(snap.L)ghost(snap.L,rect(L));ghost(L.cloneNode(true),rect(L)).classList.add("cb-drop")}
     book.classList.add("cb-turning");
     let done=false;
     const end=()=>{if(done)return;done=true;this.endTurn=null;gone.forEach(g=>g.remove());if(opened){opened.hidden=false;this.layout(this.closed)}book.classList.remove("cb-turning")};
