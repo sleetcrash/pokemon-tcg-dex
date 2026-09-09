@@ -1,25 +1,33 @@
-// card-binder v1.1.0 (2026-09-08)
+// card-binder v2.0.1 (2026-09-08)
 // card-binder: a pocket-page binder as a physical object. Zero dependencies, ES module.
-// new CardBinder(host, {items, renderItem, cols, rows, label, spreadMinWidth, fit, pager, sizePicker, startClosed, onChange})
+// new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, cover, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, onChange})
 //   items        array of anything; renderItem(item, index) returns the element that sits in a pocket (give it the pocket aspect)
-//   cols, rows   pockets per page (1 to 6 each); label {title, subtitle} prints on the covers
+//   cols, rows   pockets per page (1 to 6 each)
+//   name         stitched on the shut front cover and under every left-hand page
+//   inside       [[label, value], ...] rows for the contents card on the inside front cover (the name and progress join it)
+//   progress     0 to 1, drawn as a bar under every right-hand page and on the contents card; progressLabel prints beside it
+//   cover        a CSS colour for the cover (a #rrggbb value also picks a light or dark thread for the stitching)
 //   spreadMinWidth  viewport width from which two pages face each other (default 1000); below it one page at a time
 //   fit          on a spread, size the book from the viewport height so a whole spread shows (default true); set --cb-reserve on the host
 //   pager        render the built-in pager under the book (default true); sizePicker adds a cols x rows picker to it (default false)
 //   startClosed  begin on the shut front cover (default true); keys: arrow keys turn pages (default true; off when items handle arrows)
+//   swipe        a sideways touch or pen swipe across the book turns the page (default true); animate: page-turn motion (default true)
 //   onChange(state) fires after every render with {page, closed, pages, total, spread, cols, rows}
 // Pages pair like a real binder: inside front cover + page 1, then 2 + 3, and the last page sits alone on the left facing the
 // inside back cover; an odd page count gets one empty pocket page as its last side. `page` is the right leaf's index (0-based).
 export class CardBinder{
   constructor(host,o={}){
     this.host=host;this.items=o.items||[];this.renderItem=o.renderItem||(x=>{const d=document.createElement("div");d.textContent=String(x);return d});
-    this.cols=o.cols||3;this.rows=o.rows||3;this.label=o.label||{};this.fit=o.fit!==false;this.onChange=o.onChange||(()=>{});
-    this.page=0;this.closed=o.startClosed===false?null:"front";
+    this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";
+    this.fit=o.fit!==false;this.animate=o.animate!==false;this.onChange=o.onChange||(()=>{});
+    this.page=0;this.closed=o.startClosed===false?null:"front";this.anim=0;this.swiped=false;
     this.mq=matchMedia(`(min-width:${o.spreadMinWidth||1000}px)`);this.mq.addEventListener("change",()=>this.render());
-    host.classList.add("cb-host");host.innerHTML=`<div class="cb-book"><div class="cb-leaf"><div class="cb-grid"></div></div><div class="cb-leaf" hidden><div class="cb-grid"></div></div></div>`;
+    host.classList.add("cb-host");host.innerHTML=`<div class="cb-book"><div class="cb-leaf"><div class="cb-grid"></div><div class="cb-foot"></div></div><div class="cb-leaf" hidden><div class="cb-grid"></div><div class="cb-foot"></div></div></div>`;
     this.book=host.firstElementChild;[this.leafL,this.leafR]=this.book.children;
-    this.book.addEventListener("click",()=>{if(this.closed)this.turn(this.closed==="front"?1:-1)});
+    this.book.addEventListener("click",()=>{if(this.swiped)return;if(this.closed)this.turn(this.closed==="front"?1:-1)});
     if(o.keys!==false)host.addEventListener("keydown",e=>{if(e.target.closest("input"))return;if(e.key==="ArrowRight")this.turn(1);else if(e.key==="ArrowLeft")this.turn(-1)});
+    if(o.swipe!==false)this.armSwipe();
+    if(o.cover)this.setCover(o.cover);
     if(o.pager!==false)this.mountPager(o.sizePicker);
     this.render();
   }
@@ -31,29 +39,69 @@ export class CardBinder{
   setItems(items){this.items=items;this.page=0;this.render()}
   setGrid(cols,rows){this.cols=Math.min(6,Math.max(1,cols));this.rows=Math.min(6,Math.max(1,rows));this.page=0;this.render()}
   goTo(n){this.closed=null;this.page=Math.min(Math.max(0,n),this.pages-1);this.render()}
-  open(){if(this.closed==="back")this.page=this.last;this.closed=null;this.render()}
+  open(){this.page=this.closed==="back"?this.last:0;this.closed=null;this.render()}
   close(side="front"){this.closed=side;this.render()}
   turn(dir){
-    if(this.closed==="front"){if(dir<0)return;this.closed=null}
+    if(this.closed==="front"){if(dir<0)return;this.closed=null;this.page=0}
     else if(this.closed==="back"){if(dir>0)return;this.closed=null;this.page=this.last}
     else if(dir>0&&this.page>=this.last)this.closed="back";
     else if(dir<0&&this.page<=0)this.closed="front";
     else this.page+=dir*(this.spread?2:1);
-    this.render();
+    this.anim=dir;this.render();
   }
-  cover(cls){
-    const c=document.createElement("div");c.className="cb-incover"+(cls?" cb-"+cls:"");
-    const l=document.createElement("span");l.className="cb-lbl";l.textContent=this.label.title||"";
-    if(this.label.subtitle){const s=document.createElement("small");s.textContent=this.label.subtitle;l.appendChild(s)}
-    if(this.label.title)c.appendChild(l);return c;
+  // the name, the contents rows and the progress repaint in place; nothing in a pocket is rebuilt
+  setName(name){this.name=name||"";this.paintFeet();this.paintCovers()}
+  setInside(rows){this.inside=rows||[];this.paintCovers()}
+  setProgress(value,label){this.progress=value;this.progressLabel=label||"";this.paintFeet();this.paintCovers()}
+  setCover(c){
+    const s=this.host.style;
+    if(!c){["--cb-cover","--cb-cover-hi","--cb-thread"].forEach(p=>s.removeProperty(p));return}
+    s.setProperty("--cb-cover",c);s.setProperty("--cb-cover-hi",`color-mix(in oklch, ${c}, white 9%)`);
+    const m=/^#([0-9a-f]{6})$/i.exec(c);
+    if(m){const [r,g,b]=[0,2,4].map(i=>parseInt(m[1].slice(i,i+2),16)/255);s.setProperty("--cb-thread",.2126*r+.7152*g+.0722*b>.45?"oklch(0.24 0.02 80)":"oklch(0.86 0.02 80)")}
   }
+  stitched(text){const n=document.createElement("span");n.className="cb-name";n.textContent=text;return n}
+  prog(){
+    if(this.progress==null)return null;
+    const w=document.createElement("span");w.className="cb-prog";
+    const t=document.createElement("span"),i=document.createElement("i");i.style.width=(Math.min(1,Math.max(0,this.progress))*100).toFixed(1)+"%";t.appendChild(i);w.appendChild(t);
+    if(this.progressLabel){const l=document.createElement("small");l.textContent=this.progressLabel;w.appendChild(l)}
+    return w;
+  }
+  // the four cover faces: the shut front and back covers, and the inside of each once the book is open
+  cover(kind){
+    const c=document.createElement("div");c.className="cb-incover cb-"+kind;
+    if(kind==="front"&&this.name)c.appendChild(this.stitched(this.name));
+    if(kind==="in-front"){
+      const card=document.createElement("div");card.className="cb-contents";
+      if(this.name){const t=document.createElement("b");t.textContent=this.name;card.appendChild(t)}
+      const dl=document.createElement("dl");
+      this.inside.forEach(([k,v])=>{const dt=document.createElement("dt");dt.textContent=k;const dd=document.createElement("dd");dd.textContent=v;dl.append(dt,dd)});
+      if(dl.childElementCount)card.appendChild(dl);
+      const p=this.prog();if(p)card.appendChild(p);
+      if(card.childElementCount)c.appendChild(card);
+    }
+    return c;
+  }
+  foot(leaf){
+    const f=leaf.lastElementChild;f.replaceChildren();
+    if(leaf.classList.contains("cb-cov"))return;
+    if(leaf.classList.contains("cb-lp")){if(this.name)f.appendChild(this.stitched(this.name))}
+    else{const p=this.prog();if(p)f.appendChild(p)}
+  }
+  paintFeet(){[this.leafL,this.leafR].forEach(l=>{if(!l.hidden)this.foot(l)})}
+  paintCovers(){[this.leafL,this.leafR].forEach(l=>{if(!l.hidden&&l.dataset.cov)l.firstElementChild.replaceChildren(this.cover(l.dataset.cov))})}
   fill(leaf,p){
     const grid=leaf.firstElementChild,cov=p<0||p>=this.total;
-    leaf.classList.toggle("cb-cov",cov);leaf.dataset.p=cov?"":p+1;grid.innerHTML="";
-    if(cov){grid.appendChild(this.cover(this.closed));return}
-    const slice=p<this.pages?this.items.slice(p*this.per,p*this.per+this.per):[];
-    slice.forEach((it,i)=>{const w=document.createElement("div");w.className="cb-pkt";w.appendChild(this.renderItem(it,p*this.per+i));grid.appendChild(w)});
-    for(let i=slice.length;i<this.per;i++){const b=document.createElement("div");b.className="cb-pkt cb-empty";grid.appendChild(b)}
+    leaf.classList.toggle("cb-cov",cov);leaf.classList.toggle("cb-lp",!cov&&p%2===1);leaf.dataset.p=cov?"":p+1;grid.innerHTML="";
+    leaf.dataset.cov=cov?this.closed||(p<0?"in-front":"in-back"):"";
+    if(cov)grid.appendChild(this.cover(leaf.dataset.cov));
+    else{
+      const slice=p<this.pages?this.items.slice(p*this.per,p*this.per+this.per):[];
+      slice.forEach((it,i)=>{const w=document.createElement("div");w.className="cb-pkt";w.appendChild(this.renderItem(it,p*this.per+i));grid.appendChild(w)});
+      for(let i=slice.length;i<this.per;i++){const b=document.createElement("div");b.className="cb-pkt cb-empty";grid.appendChild(b)}
+    }
+    this.foot(leaf);
   }
   render(){
     const two=this.spread,h=this.host,s=h.style;
@@ -65,13 +113,31 @@ export class CardBinder{
     const b=this.book.classList;b.toggle("cb-spread",two&&!this.closed);b.toggle("cb-closed",!!this.closed);b.toggle("cb-front",this.closed==="front");b.toggle("cb-back",this.closed==="back");
     this.leafR.hidden=!two||!!this.closed;
     if(this.closed)this.fill(this.leafL,-1);else if(two){this.fill(this.leafL,this.page-1);this.fill(this.leafR,this.page)}else this.fill(this.leafL,this.page);
+    if(this.anim&&this.animate){
+      const leaf=this.anim>0||this.leafR.hidden?this.leafL:this.leafR,cls=this.anim>0?"cb-in-next":"cb-in-prev";
+      leaf.classList.remove("cb-in-next","cb-in-prev");void leaf.offsetWidth;leaf.classList.add(cls);
+      leaf.addEventListener("animationend",()=>leaf.classList.remove(cls),{once:true});
+    }
+    this.anim=0;
     if(this.pager)this.paintPager();
     this.onChange(this.state);
   }
   get state(){return {page:this.page,closed:this.closed,pages:this.pages,total:this.total,spread:this.spread,cols:this.cols,rows:this.rows}}
+  // a sideways swipe (touch or pen, 60px, more across than down by half again) turns the page; the click that ends it is ignored
+  armSwipe(){
+    let x0=0,y0=0,id=null;
+    this.book.addEventListener("pointerdown",e=>{this.swiped=false;if(e.pointerType==="mouse"||!e.isPrimary||e.target.closest("input,button,a"))return;x0=e.clientX;y0=e.clientY;id=e.pointerId},{passive:true});
+    this.book.addEventListener("pointerup",e=>{
+      if(e.pointerId!==id)return;id=null;
+      const dx=e.clientX-x0,dy=e.clientY-y0;
+      if(Math.abs(dx)>=60&&Math.abs(dx)>Math.abs(dy)*1.5){this.swiped=true;this.turn(dx<0?1:-1)}
+    },{passive:true});
+    this.book.addEventListener("pointercancel",()=>{id=null},{passive:true});
+  }
   mountPager(sizePicker){
     const p=document.createElement("div");p.className="cb-pager";
-    p.innerHTML=`<button type="button" data-go="first" aria-label="Front cover">&#171;</button><button type="button" data-go="prev" aria-label="Previous page">&#8249;</button><span class="cb-pgo"><input type="number" min="1" inputmode="numeric" aria-label="Page number"><span class="cb-tot"></span></span><button type="button" data-go="next" aria-label="Next page">&#8250;</button><button type="button" data-go="last" aria-label="Back cover">&#187;</button>`;
+    const ic=d=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>`;
+    p.innerHTML=`<button type="button" data-go="first" aria-label="Front cover">${ic("M11 6l-6 6 6 6M18 6l-6 6 6 6")}</button><button type="button" data-go="prev" aria-label="Previous page">${ic("M15 5l-7 7 7 7")}</button><span class="cb-pgo"><input type="number" min="1" inputmode="numeric" aria-label="Page number"><span class="cb-tot"></span></span><button type="button" data-go="next" aria-label="Next page">${ic("M9 5l7 7-7 7")}</button><button type="button" data-go="last" aria-label="Back cover">${ic("M13 6l6 6-6 6M6 6l6 6-6 6")}</button>`;
     p.addEventListener("click",e=>{const g=e.target.closest("[data-go]");if(!g)return;({first:()=>this.close("front"),prev:()=>this.turn(-1),next:()=>this.turn(1),last:()=>this.close("back")})[g.dataset.go]()});
     const inp=p.querySelector("input");inp.addEventListener("change",()=>this.goTo((parseInt(inp.value,10)||1)-1));inp.addEventListener("keydown",e=>{if(e.key==="Enter")inp.blur()});
     if(sizePicker)p.appendChild(this.sizePicker());
