@@ -36,7 +36,8 @@ Quick Reference:
 Intuitive Collection Management: 
 - Tap to Register a card to your collection.
 - Long press (touch) or long click (mouse) to mark as Pending (helpful for tracking cards purchased but not delivered).
-- View as a list or in a binder. 
+- View as a list or in a binder. The binder wears the name of the loaded list on its cover, keeps a contents card inside the front cover, and takes any cover colour from the swatch beside the size picker.
+- Right click (mouse) a card to leave a blank slot before or after it in every view, or a whole blank page in the binder, the way you would skip a pocket for a card you are still hunting.
 - Save multiple lists (I have a separate list for only AR/SIR, another for mixed rarity).
 (Note: Share lists across devices with a unique list identifier. Auto sync planned for a future update.)
 
