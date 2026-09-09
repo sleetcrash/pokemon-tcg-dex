@@ -1,4 +1,4 @@
-/* card-binder v2.2.6 (2026-09-09) */
+/* card-binder v2.2.7 (2026-09-09) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
@@ -14,6 +14,9 @@
   --cb-spine:36px;--cb-turn:.75s;      /* turn: how long one sheet takes to swing over the spine; the module sets --cb-persp per turn from the page width */
   --cb-reserve:160px;  /* reserve: viewport height taken by everything outside the book when cb-fit is on (site header, margins, this pager) */
   --cb-mono:ui-monospace,Menlo,monospace;
+  /* the cover's edge: a 1px highlight and a 1px dark line inside the rim (ring), and the shadow it casts on the page (cast) */
+  --cb-ring:inset 0 1px 0 oklch(1 0 0 / .08),inset 0 0 0 1px oklch(0 0 0 / .35);
+  --cb-cast:0 10px 24px oklch(0.2 0.02 95 / .35),0 1px 2px oklch(0.2 0.02 95 / .4);
   --cb-cols:3;--cb-rows:3;
   display:block;position:relative;margin:0 auto;max-width:100%;overflow:clip;perspective:var(--cb-persp,1600px);font-family:system-ui,-apple-system,sans-serif;color:var(--cb-ink)}
 .cb-host.cb-two{--cb-bpad:16px;--cb-lpad:var(--cb-gap);--cb-ppad:calc(var(--cb-gap) * .45)}
@@ -25,7 +28,7 @@
 .cb-book{position:relative;display:grid;container-type:inline-size;padding:var(--cb-bpad) var(--cb-bpad) calc(var(--cb-bpad) + var(--cb-foot));touch-action:pan-y}
 .cb-book,.cb-board{border-radius:6px;
   background:repeating-linear-gradient(45deg,oklch(1 0 0 / .025) 0 1px,transparent 1px 3px),repeating-linear-gradient(-45deg,oklch(1 0 0 / .025) 0 1px,transparent 1px 3px),radial-gradient(120% 90% at 50% 35%,var(--cb-cover-hi),var(--cb-cover) 75%);
-  box-shadow:inset 0 1px 0 oklch(1 0 0 / .08),inset 0 0 0 1px oklch(0 0 0 / .35),0 10px 24px oklch(0.2 0.02 95 / .35),0 1px 2px oklch(0.2 0.02 95 / .4)}
+  box-shadow:var(--cb-ring),var(--cb-cast)}
 .cb-book.cb-spread{grid-template-columns:1fr 1fr;column-gap:var(--cb-spine)}
 /* the spine shading: a strip down the centre of the open book. While a cover turns, the book is shut (one half of the spread) and the
    other half is the board in flight, so each draws its own half of the strip on its spine side (the board only when it carries an inside
@@ -81,9 +84,12 @@
 .cb-host.cb-two .cb-book.cb-closed{width:min(100%,calc(var(--cb-pagew,100%) + var(--cb-bpad) + var(--cb-spine) / 2))}
 .cb-host.cb-two .cb-book.cb-closed.cb-front{padding-left:calc(var(--cb-spine) / 2)}
 .cb-host.cb-two .cb-book.cb-closed.cb-back{padding-right:calc(var(--cb-spine) / 2)}
-/* and its spine-side corners are square, as the centre of the open book is; the board in flight matches */
-.cb-host.cb-two .cb-book.cb-closed.cb-front,.cb-board.cb-sl{border-top-left-radius:0;border-bottom-left-radius:0}
-.cb-host.cb-two .cb-book.cb-closed.cb-back,.cb-board.cb-sr{border-top-right-radius:0;border-bottom-right-radius:0}
+/* and its spine side is the centre of the open book: square corners, no edge line (the ring runs along the other three sides); the board
+   in flight matches, so the two halves meet as the open book does */
+.cb-host.cb-two .cb-book.cb-closed.cb-front,.cb-board.cb-sl{border-top-left-radius:0;border-bottom-left-radius:0;
+  --cb-ring:inset 0 1px 0 oklch(1 0 0 / .08),inset -1px 0 0 oklch(0 0 0 / .35),inset 0 1px 0 oklch(0 0 0 / .35),inset 0 -1px 0 oklch(0 0 0 / .35)}
+.cb-host.cb-two .cb-book.cb-closed.cb-back,.cb-board.cb-sr{border-top-right-radius:0;border-bottom-right-radius:0;
+  --cb-ring:inset 0 1px 0 oklch(1 0 0 / .08),inset 1px 0 0 oklch(0 0 0 / .35),inset 0 1px 0 oklch(0 0 0 / .35),inset 0 -1px 0 oklch(0 0 0 / .35)}
 /* a cover shown alone (the shut book, or the inside front cover one page at a time) is as tall as a filled page */
 .cb-book.cb-closed .cb-leaf,.cb-host:not(.cb-two) .cb-leaf.cb-cov{--cb-tw:calc((100cqw - 2 * var(--cb-lpad) - (var(--cb-cols) - 1) * var(--cb-gap) - var(--cb-cols) * 2 * var(--cb-ppad)) / var(--cb-cols));
   height:calc(var(--cb-rows) * (var(--cb-tw) * var(--cb-ah) / var(--cb-aw) + 2 * var(--cb-ppad)) + (var(--cb-rows) - 1) * var(--cb-gap) + 2 * var(--cb-lpad))}
@@ -132,7 +138,7 @@
    lifts from or lands on the shut book, which casts its own shadow, so it carries none */
 .cb-board.cb-sl{clip-path:inset(-40px -40px -40px 0)}
 .cb-board.cb-sr{clip-path:inset(-40px 0 -40px -40px)}
-.cb-board:not(.cb-inside){box-shadow:inset 0 1px 0 oklch(1 0 0 / .08),inset 0 0 0 1px oklch(0 0 0 / .35)}
+.cb-board:not(.cb-inside){--cb-cast:0 0 0 transparent}
 .cb-flier .cb-face::after,.cb-flier .cb-face .cb-foot{display:none}
 .cb-ghost.cb-lift{transform-origin:left center;animation:cb-lift calc(var(--cb-turn) * .7) cubic-bezier(.5,0,.8,.4) both}
 .cb-ghost.cb-drop{transform-origin:left center;animation:cb-drop calc(var(--cb-turn) * .7) cubic-bezier(.2,.6,.4,1) both}
