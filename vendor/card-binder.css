@@ -1,4 +1,4 @@
-/* card-binder v2.2.5 (2026-09-09) */
+/* card-binder v2.2.6 (2026-09-09) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
@@ -27,8 +27,15 @@
   background:repeating-linear-gradient(45deg,oklch(1 0 0 / .025) 0 1px,transparent 1px 3px),repeating-linear-gradient(-45deg,oklch(1 0 0 / .025) 0 1px,transparent 1px 3px),radial-gradient(120% 90% at 50% 35%,var(--cb-cover-hi),var(--cb-cover) 75%);
   box-shadow:inset 0 1px 0 oklch(1 0 0 / .08),inset 0 0 0 1px oklch(0 0 0 / .35),0 10px 24px oklch(0.2 0.02 95 / .35),0 1px 2px oklch(0.2 0.02 95 / .4)}
 .cb-book.cb-spread{grid-template-columns:1fr 1fr;column-gap:var(--cb-spine)}
-.cb-book.cb-spread::before{content:"";position:absolute;left:50%;top:6px;bottom:6px;width:var(--cb-spine);transform:translateX(-50%);pointer-events:none;
-  background:linear-gradient(90deg,transparent,oklch(0 0 0 / .3) 40%,oklch(0 0 0 / .5) 50%,oklch(0 0 0 / .3) 60%,transparent)}
+/* the spine shading: a strip down the centre of the open book. While a cover turns, the book is shut (one half of the spread) and the
+   other half is the board in flight, so each draws its own half of the strip on its spine side (the board only when it carries an inside
+   cover) and the two halves meet at the centre from the first frame to the last, the same pixels as the strip on the open book */
+.cb-book.cb-spread::before,.cb-host.cb-two .cb-book.cb-turning.cb-closed::before,.cb-board.cb-inside::before{content:"";position:absolute;top:6px;bottom:6px;width:var(--cb-spine);pointer-events:none;
+  background:linear-gradient(90deg,transparent,oklch(0 0 0 / .3) 40%,oklch(0 0 0 / .5) 50%,oklch(0 0 0 / .3) 60%,transparent) center / var(--cb-spine) 100% no-repeat}
+.cb-book.cb-spread::before{left:50%;transform:translateX(-50%)}
+.cb-host.cb-two .cb-book.cb-turning.cb-closed::before,.cb-board.cb-inside::before{width:calc(var(--cb-spine) / 2)}
+.cb-host.cb-two .cb-book.cb-turning.cb-front::before,.cb-board.cb-inside.cb-sl::before{left:0;background-position:right}
+.cb-host.cb-two .cb-book.cb-turning.cb-back::before,.cb-board.cb-inside.cb-sr::before{right:0;background-position:left}
 .cb-leaf{position:relative;padding:var(--cb-lpad);background:var(--cb-sheet);border-radius:3px;box-shadow:inset 0 0 0 1px oklch(1 0 0 / .07),0 1px 2px oklch(0 0 0 / .45)}
 .cb-leaf::after{content:attr(data-p);position:absolute;right:2px;top:100%;line-height:var(--cb-foot);font-family:var(--cb-mono);font-size:10px;font-weight:600;color:oklch(0.7 0.005 260)}
 .cb-leaf.cb-lp::after{right:auto;left:2px}
@@ -74,6 +81,9 @@
 .cb-host.cb-two .cb-book.cb-closed{width:min(100%,calc(var(--cb-pagew,100%) + var(--cb-bpad) + var(--cb-spine) / 2))}
 .cb-host.cb-two .cb-book.cb-closed.cb-front{padding-left:calc(var(--cb-spine) / 2)}
 .cb-host.cb-two .cb-book.cb-closed.cb-back{padding-right:calc(var(--cb-spine) / 2)}
+/* and its spine-side corners are square, as the centre of the open book is; the board in flight matches */
+.cb-host.cb-two .cb-book.cb-closed.cb-front,.cb-board.cb-sl{border-top-left-radius:0;border-bottom-left-radius:0}
+.cb-host.cb-two .cb-book.cb-closed.cb-back,.cb-board.cb-sr{border-top-right-radius:0;border-bottom-right-radius:0}
 /* a cover shown alone (the shut book, or the inside front cover one page at a time) is as tall as a filled page */
 .cb-book.cb-closed .cb-leaf,.cb-host:not(.cb-two) .cb-leaf.cb-cov{--cb-tw:calc((100cqw - 2 * var(--cb-lpad) - (var(--cb-cols) - 1) * var(--cb-gap) - var(--cb-cols) * 2 * var(--cb-ppad)) / var(--cb-cols));
   height:calc(var(--cb-rows) * (var(--cb-tw) * var(--cb-ah) / var(--cb-aw) + 2 * var(--cb-ppad)) + (var(--cb-rows) - 1) * var(--cb-gap) + 2 * var(--cb-lpad))}
@@ -117,6 +127,12 @@
 .cb-board>.cb-leaf{position:absolute;left:var(--cb-bpad);right:var(--cb-bpad);top:var(--cb-bpad);bottom:calc(var(--cb-bpad) + var(--cb-foot))}
 .cb-board.cb-sl>.cb-leaf{left:calc(var(--cb-spine) / 2)}
 .cb-board.cb-sr>.cb-leaf{right:calc(var(--cb-spine) / 2)}
+/* a board carrying an inside cover stands in for the missing half of the open book and casts the book's shadow, on the outer three
+   sides only (on the spine side it would fall on the other half and vanish as the turn ends); a board carrying an outside cover sits on,
+   lifts from or lands on the shut book, which casts its own shadow, so it carries none */
+.cb-board.cb-sl{clip-path:inset(-40px -40px -40px 0)}
+.cb-board.cb-sr{clip-path:inset(-40px 0 -40px -40px)}
+.cb-board:not(.cb-inside){box-shadow:inset 0 1px 0 oklch(1 0 0 / .08),inset 0 0 0 1px oklch(0 0 0 / .35)}
 .cb-flier .cb-face::after,.cb-flier .cb-face .cb-foot{display:none}
 .cb-ghost.cb-lift{transform-origin:left center;animation:cb-lift calc(var(--cb-turn) * .7) cubic-bezier(.5,0,.8,.4) both}
 .cb-ghost.cb-drop{transform-origin:left center;animation:cb-drop calc(var(--cb-turn) * .7) cubic-bezier(.2,.6,.4,1) both}

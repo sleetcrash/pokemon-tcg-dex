@@ -1,4 +1,4 @@
-// card-binder v2.2.5 (2026-09-09)
+// card-binder v2.2.6 (2026-09-09)
 // card-binder: a pocket-page binder as a physical object. Zero dependencies, ES module.
 // new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, cover, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, onChange})
 //   items        array of anything; renderItem(item, index) returns the element that sits in a pocket (give it the pocket aspect)
@@ -20,7 +20,7 @@
 // perspective distance for a turn, in page widths: the free edge of a swinging page grows by at most 1 / (1 - 1 / PERSP)
 const PERSP=10;
 export class CardBinder{
-  static VERSION="2.2.5";
+  static VERSION="2.2.6";
   constructor(host,o={}){
     this.host=host;this.items=o.items||[];this.renderItem=o.renderItem||(x=>{const d=document.createElement("div");d.textContent=String(x);return d});
     this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";
@@ -66,7 +66,8 @@ export class CardBinder{
   flip(snap,dir,was){
     if(this.endTurn)this.endTurn();
     const host=this.host,book=this.book,L=this.leafL,R=this.leafR,gone=[],hr=host.getBoundingClientRect();let opened=null;
-    const ghost=(el,r)=>{el.hidden=false;el.inert=true;el.classList.add("cb-ghost");el.style.left=r.left-hr.left+"px";el.style.top=r.top-hr.top+"px";el.style.width=r.width+"px";el.style.height=r.height+"px";host.appendChild(el);gone.push(el);return el};
+    // a ghost sits on whole screen pixels: the edge of a transformed layer is blended with the page behind it, and at the spine that read as a light line
+    const ghost=(el,r)=>{el.hidden=false;el.inert=true;el.classList.add("cb-ghost");const l=Math.round(r.left),t=Math.round(r.top);el.style.left=l-hr.left+"px";el.style.top=t-hr.top+"px";el.style.width=Math.round(r.left+r.width)-l+"px";el.style.height=Math.round(r.top+r.height)-t+"px";host.appendChild(el);gone.push(el);return el};
     const rect=el=>el.getBoundingClientRect();
     host.style.setProperty("--cb-persp",Math.round(L.offsetWidth*PERSP)+"px");
     if(this.spread){
@@ -75,17 +76,26 @@ export class CardBinder{
       if(!front)return;
       const lr=rect(land);
       if(under)ghost(under,lr);
-      // a cover turn swings the whole board: the leaf inside the cover's rim, rounded edge and shadow (.cb-board), sized like a half of
-      // the open book (outer rim --cb-bpad, spine side half the spine, the foot band below), so it meets the other half at the spine centre
-      const cov=front.classList.contains("cb-cov"),pad=cov?px("--cb-bpad"):0,foot=cov?px("--cb-foot"):0,sp=cov?spine/2:0;
-      const face=(leaf,...cls)=>{let f=leaf;if(cov){f=document.createElement("div");f.className="cb-board "+(dir>0?"cb-sl":"cb-sr");f.appendChild(leaf)}f.classList.add("cb-face",...cls);return f};
+      // a cover turn swings the whole board: the leaf inside the cover's rim, rounded edge and shadow (.cb-board), in the shut book's box
+      const cov=front.classList.contains("cb-cov");
+      // the back face is drawn mirrored (it reads right once the flier has turned), so its spine side is the opposite edge; a board
+      // carrying an inside cover (.cb-inside) draws its half of the spine shading
+      const face=(leaf,side,...cls)=>{let f=leaf;if(cov){f=document.createElement("div");f.className="cb-board "+side+(leaf.dataset.cov.startsWith("in-")?" cb-inside":"");f.appendChild(leaf)}f.classList.add("cb-face",...cls);return f};
       const fl=document.createElement("div"),back=land.cloneNode(true);
-      fl.className="cb-flier";fl.append(face(front),face(back,"cb-back"));
-      const w=sp+lr.width+pad,left=dir>0?lr.right+spine-sp:lr.left-spine+sp-w;
-      ghost(fl,{left,top:lr.top-pad,width:w,height:lr.height+2*pad+foot});
-      fl.style.transformOrigin=dir>0?`${sp-spine/2}px 50%`:`calc(100% - ${sp-spine/2}px) 50%`;
-      fl.classList.add(dir>0?"cb-fwd":"cb-back");
+      fl.className="cb-flier";fl.append(face(front,dir>0?"cb-sl":"cb-sr"),face(back,dir>0?"cb-sr":"cb-sl","cb-back"));
       if(!under){opened=land;land.hidden=true;this.layout(was)}
+      let box;
+      if(cov){
+        // the book is shut now (it stayed shut for an open, render() shut it for a close), and the board takes its box on the whole pixels
+        // the book paints on, so board and book meet at the spine with no gap and no blended edge; an open starts on the book, a shut starts
+        // on the far half and lands on the book
+        const B=rect(book),l=Math.round(B.left),W=Math.round(B.right)-l;
+        box={left:was?l:dir>0?l+W:l-W,top:B.top,width:W,height:B.height};
+      }else box={left:dir>0?lr.right+spine:lr.left-spine-lr.width,top:lr.top,width:lr.width,height:lr.height};
+      ghost(fl,box);
+      const ax=cov?0:-spine/2;
+      fl.style.transformOrigin=dir>0?`${ax}px 50%`:`calc(100% - ${ax}px) 50%`;
+      fl.classList.add(dir>0?"cb-fwd":"cb-back");
     }else if(dir>0){if(!snap.L)return;ghost(snap.L,rect(L)).classList.add("cb-lift")}
     else{if(snap.L)ghost(snap.L,rect(L));ghost(L.cloneNode(true),rect(L)).classList.add("cb-drop")}
     book.classList.add("cb-turning");
