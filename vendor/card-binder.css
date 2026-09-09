@@ -1,4 +1,4 @@
-/* card-binder v2.1.2 (2026-09-08) */
+/* card-binder v2.2.0 (2026-09-08) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
@@ -11,7 +11,8 @@
   --cb-gap:14px;                       /* between pockets; the module lowers it at four and five plus columns unless --cb-gap-fixed is set */
   --cb-bpad:6px;--cb-lpad:calc(var(--cb-gap) * .7);--cb-ppad:calc(var(--cb-gap) * .3);
   --cb-foot:18px;                      /* the cover band under each page: page number in the outer corner, name or progress in the middle */
-  --cb-spine:36px;--cb-reserve:160px;  /* reserve: viewport height taken by everything outside the book when cb-fit is on (site header, margins, this pager) */
+  --cb-spine:36px;--cb-turn:.75s;      /* turn: how long one sheet takes to swing over the spine */
+  --cb-reserve:160px;  /* reserve: viewport height taken by everything outside the book when cb-fit is on (site header, margins, this pager) */
   --cb-mono:ui-monospace,Menlo,monospace;
   --cb-cols:3;--cb-rows:3;
   display:block;margin:0 auto;max-width:100%;font-family:system-ui,-apple-system,sans-serif;color:var(--cb-ink)}
@@ -97,15 +98,19 @@
 .cb-size .cb-pop .cb-slbl{margin-top:8px;text-align:center;font-family:var(--cb-mono);font-size:12px}
 @media (max-width:600px){.cb-pager{gap:6px}.cb-pager button{width:36px;height:36px}.cb-pager button svg{width:18px;height:18px}.cb-pgo{margin:0 2px;font-size:13px}.cb-pgo input{width:46px;height:36px}.cb-size>button{width:auto;height:36px}.cb-size{position:static;flex-basis:100%;display:flex;justify-content:center;margin-top:4px}.cb-size .cb-pop{right:auto;left:50%;transform:translateX(-50%)}}
 
-/* page turns: on a spread the incoming leaf swings down from the spine; on a single page it slides in from the side it came from */
-@media (prefers-reduced-motion:no-preference){
-  .cb-book{transition:width .2s ease}
-  .cb-leaf.cb-in-next{animation:cb-slide-next .32s cubic-bezier(.2,.7,.2,1)}
-  .cb-leaf.cb-in-prev{animation:cb-slide-prev .32s cubic-bezier(.2,.7,.2,1)}
-  .cb-spread .cb-leaf.cb-in-next{transform-origin:right center;animation-name:cb-flip-next;animation-duration:.38s}
-  .cb-spread .cb-leaf.cb-in-prev{transform-origin:left center;animation-name:cb-flip-prev;animation-duration:.38s}
-  @keyframes cb-slide-next{from{transform:translateX(18%) rotateY(-18deg);opacity:0}to{transform:none;opacity:1}}
-  @keyframes cb-slide-prev{from{transform:translateX(-18%) rotateY(18deg);opacity:0}to{transform:none;opacity:1}}
-  @keyframes cb-flip-next{from{transform:rotateY(88deg)}to{transform:none}}
-  @keyframes cb-flip-prev{from{transform:rotateY(-88deg)}to{transform:none}}
-}
+/* page turns: ghosts the module stages over the leaves for one turn. On a spread the turning page (.cb-flier: the lifted page on its
+   front, the page it reveals on its back) swings over the spine and lands on the far leaf while the page it covers waits underneath;
+   one page at a time the old page lifts away from the spine, or the previous page drops back in */
+.cb-ghost{position:absolute;z-index:10;pointer-events:none;margin:0}
+.cb-flier{z-index:11;transform-style:preserve-3d;animation:var(--cb-turn) cubic-bezier(.45,.05,.3,1) both}
+.cb-flier.cb-fwd{animation-name:cb-flip-fwd}
+.cb-flier.cb-back{animation-name:cb-flip-back}
+.cb-flier .cb-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.cb-flier .cb-face.cb-back{transform:rotateY(180deg)}
+.cb-flier .cb-face::after,.cb-flier .cb-face .cb-foot{display:none}
+.cb-ghost.cb-lift{transform-origin:left center;animation:cb-lift calc(var(--cb-turn) * .7) cubic-bezier(.5,0,.8,.4) both}
+.cb-ghost.cb-drop{transform-origin:left center;animation:cb-drop calc(var(--cb-turn) * .7) cubic-bezier(.2,.6,.4,1) both}
+@keyframes cb-flip-fwd{to{transform:rotateY(-180deg)}}
+@keyframes cb-flip-back{to{transform:rotateY(180deg)}}
+@keyframes cb-lift{to{transform:rotateY(-95deg)}}
+@keyframes cb-drop{from{transform:rotateY(-95deg)}}

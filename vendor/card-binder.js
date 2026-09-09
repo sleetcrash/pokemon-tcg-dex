@@ -1,4 +1,4 @@
-// card-binder v2.1.2 (2026-09-08)
+// card-binder v2.2.0 (2026-09-08)
 // card-binder: a pocket-page binder as a physical object. Zero dependencies, ES module.
 // new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, cover, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, onChange})
 //   items        array of anything; renderItem(item, index) returns the element that sits in a pocket (give it the pocket aspect)
@@ -11,7 +11,8 @@
 //   fit          on a spread, size the book from the viewport height so a whole spread shows (default true); set --cb-reserve on the host
 //   pager        render the built-in pager under the book (default true); sizePicker adds a cols x rows picker to it (default false)
 //   startClosed  begin on the shut front cover (default true); keys: arrow keys turn pages (default true; off when items handle arrows)
-//   swipe        a sideways touch or pen swipe across the book turns the page (default true); animate: page-turn motion (default true)
+//   swipe        a sideways touch or pen swipe across the book turns the page (default true)
+//   animate      page turns move like one sheet: the turning page flips over the spine with the next page on its back (default true)
 //   onChange(state) fires after every render with {page, closed, pages, total, spread, cols, rows}
 // Pages pair like a real binder: inside front cover + page 1, then 2 + 3, and the last page sits alone on the left facing the
 // inside back cover; an odd page count gets one empty pocket page as its last side. `page` is the right leaf's index (0-based).
@@ -21,7 +22,7 @@ export class CardBinder{
     this.host=host;this.items=o.items||[];this.renderItem=o.renderItem||(x=>{const d=document.createElement("div");d.textContent=String(x);return d});
     this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";
     this.fit=o.fit!==false;this.animate=o.animate!==false;this.onChange=o.onChange||(()=>{});
-    this.page=0;this.closed=o.startClosed===false?null:"front";this.anim=0;this.swiped=false;
+    this.page=0;this.closed=o.startClosed===false?null:"front";this.swiped=false;
     this.mq=matchMedia(`(min-width:${o.spreadMinWidth||1000}px)`);this.mq.addEventListener("change",()=>this.render());
     host.classList.add("cb-host");host.innerHTML=`<div class="cb-book"><div class="cb-leaf"><div class="cb-grid"></div><div class="cb-foot"></div></div><div class="cb-leaf" hidden><div class="cb-grid"></div><div class="cb-foot"></div></div></div>`;
     this.book=host.firstElementChild;[this.leafL,this.leafR]=this.book.children;
@@ -44,12 +45,37 @@ export class CardBinder{
   open(){this.page=this.closed==="back"?this.last:this.first;this.closed=null;this.render()}
   close(side="front"){this.closed=side;this.render()}
   turn(dir){
+    const snap=this.animate&&!matchMedia("(prefers-reduced-motion: reduce)").matches?this.snapshot():null;
     if(this.closed==="front"){if(dir<0)return;this.closed=null;this.page=this.first}
     else if(this.closed==="back"){if(dir>0)return;this.closed=null;this.page=this.last}
     else if(dir>0&&this.page>=this.last)this.closed="back";
     else if(dir<0&&this.page<=this.first)this.closed="front";
     else this.page+=dir*(this.spread?2:1);
-    this.anim=dir;this.render();
+    this.render();
+    if(snap)this.flip(snap,dir);
+  }
+  snapshot(){const c=l=>l.hidden?null:l.cloneNode(true);return {L:c(this.leafL),R:c(this.leafR)}}
+  // one sheet turns: a ghost of the page that lifts, with the page it reveals printed on its back, swings over the spine and lands on
+  // the far leaf while a ghost of the page it covers stays put; one page at a time the old page lifts away (or the previous one drops in)
+  flip(snap,dir){
+    const book=this.book,L=this.leafL,R=this.leafR,gone=[];
+    const ghost=(el,box,dx=0)=>{el.hidden=false;el.inert=true;el.classList.add("cb-ghost");el.style.left=box.offsetLeft+dx+"px";el.style.top=box.offsetTop+"px";el.style.width=box.offsetWidth+"px";el.style.height=box.offsetHeight+"px";book.appendChild(el);gone.push(el);return el};
+    if(this.spread){
+      const spine=parseFloat(getComputedStyle(this.host).getPropertyValue("--cb-spine"))||0;
+      const land=dir>0?L:(R.hidden?L:R),front=dir>0?(snap.R||snap.L):snap.L,under=dir>0?(snap.R?snap.L:null):snap.R;
+      if(!front)return;
+      if(under)ghost(under,land);
+      const fl=document.createElement("div"),back=land.cloneNode(true);
+      fl.className="cb-flier";front.classList.add("cb-face");back.classList.add("cb-face","cb-back");fl.append(front,back);
+      ghost(fl,land,(land.offsetWidth+spine)*(dir>0?1:-1));
+      fl.style.transformOrigin=dir>0?`${-spine/2}px 50%`:`calc(100% + ${spine/2}px) 50%`;
+      fl.classList.add(dir>0?"cb-fwd":"cb-back");
+    }else if(dir>0){if(!snap.L)return;ghost(snap.L,L).classList.add("cb-lift")}
+    else{if(snap.L)ghost(snap.L,L);ghost(L.cloneNode(true),L).classList.add("cb-drop")}
+    book.classList.add("cb-turning");
+    const end=()=>{gone.forEach(g=>g.remove());book.classList.remove("cb-turning")};
+    gone[gone.length-1].addEventListener("animationend",end,{once:true});
+    setTimeout(end,1500);
   }
   // the name, the contents rows and the progress repaint in place; nothing in a pocket is rebuilt
   setName(name){this.name=name||"";this.paintFeet();this.paintCovers()}
@@ -117,12 +143,6 @@ export class CardBinder{
     this.leafR.hidden=!two||!!this.closed;
     if(this.leafR.hidden)this.leafR.firstElementChild.replaceChildren();
     if(this.closed)this.fill(this.leafL,-1);else if(two){this.fill(this.leafL,this.page-1);this.fill(this.leafR,this.page)}else this.fill(this.leafL,this.page);
-    if(this.anim&&this.animate&&!matchMedia("(prefers-reduced-motion: reduce)").matches){
-      const leaf=this.anim>0||this.leafR.hidden?this.leafL:this.leafR,cls=this.anim>0?"cb-in-next":"cb-in-prev";
-      leaf.classList.remove("cb-in-next","cb-in-prev");void leaf.offsetWidth;leaf.classList.add(cls);
-      leaf.addEventListener("animationend",()=>leaf.classList.remove(cls),{once:true});
-    }
-    this.anim=0;
     if(this.pager)this.paintPager();
     this.onChange(this.state);
   }
