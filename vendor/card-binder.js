@@ -1,4 +1,4 @@
-// card-binder v2.2.1 (2026-09-08)
+// card-binder v2.2.2 (2026-09-09)
 // card-binder: a pocket-page binder as a physical object. Zero dependencies, ES module.
 // new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, cover, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, onChange})
 //   items        array of anything; renderItem(item, index) returns the element that sits in a pocket (give it the pocket aspect)
@@ -20,7 +20,7 @@
 // perspective distance for a turn, in page widths: the free edge of a swinging page grows by at most 1 / (1 - 1 / PERSP)
 const PERSP=10;
 export class CardBinder{
-  static VERSION="2.2.1";
+  static VERSION="2.2.2";
   constructor(host,o={}){
     this.host=host;this.items=o.items||[];this.renderItem=o.renderItem||(x=>{const d=document.createElement("div");d.textContent=String(x);return d});
     this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";
@@ -60,10 +60,11 @@ export class CardBinder{
   snapshot(){const c=l=>l.hidden?null:l.cloneNode(true);return {L:c(this.leafL),R:c(this.leafR)}}
   // one sheet turns: a ghost of the page that lifts, with the page it reveals printed on its back, swings over the spine and lands on
   // the far leaf while a ghost of the page it covers stays put; one page at a time the old page lifts away (or the previous one drops in).
-  // A turn already in flight is flushed first, so two quick turns never stack their ghosts
+  // A turn already in flight is flushed first, so two quick turns never stack their ghosts. Opening from a cover has nothing under the
+  // landing side, so that leaf stays hidden until the sheet lands on it
   flip(snap,dir){
     if(this.endTurn)this.endTurn();
-    const book=this.book,L=this.leafL,R=this.leafR,gone=[];
+    const book=this.book,L=this.leafL,R=this.leafR,gone=[];let bare=null;
     const ghost=(el,box,dx=0)=>{el.hidden=false;el.inert=true;el.classList.add("cb-ghost");el.style.left=box.offsetLeft+dx+"px";el.style.top=box.offsetTop+"px";el.style.width=box.offsetWidth+"px";el.style.height=box.offsetHeight+"px";book.appendChild(el);gone.push(el);return el};
     book.style.setProperty("--cb-persp",Math.round(L.offsetWidth*PERSP)+"px");
     if(this.spread){
@@ -76,11 +77,12 @@ export class CardBinder{
       ghost(fl,land,(land.offsetWidth+spine)*(dir>0?1:-1));
       fl.style.transformOrigin=dir>0?`${-spine/2}px 50%`:`calc(100% + ${spine/2}px) 50%`;
       fl.classList.add(dir>0?"cb-fwd":"cb-back");
+      if(!under){bare=land;land.style.visibility="hidden"}
     }else if(dir>0){if(!snap.L)return;ghost(snap.L,L).classList.add("cb-lift")}
     else{if(snap.L)ghost(snap.L,L);ghost(L.cloneNode(true),L).classList.add("cb-drop")}
     book.classList.add("cb-turning");
     let done=false;
-    const end=()=>{if(done)return;done=true;this.endTurn=null;gone.forEach(g=>g.remove());book.classList.remove("cb-turning")};
+    const end=()=>{if(done)return;done=true;this.endTurn=null;gone.forEach(g=>g.remove());if(bare)bare.style.visibility="";book.classList.remove("cb-turning")};
     this.endTurn=end;
     gone[gone.length-1].addEventListener("animationend",end,{once:true});
     const t=getComputedStyle(book).getPropertyValue("--cb-turn").trim(),ms=t.endsWith("ms")?parseFloat(t):parseFloat(t)*1000;
