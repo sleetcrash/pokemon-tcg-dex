@@ -1140,7 +1140,7 @@ function armKeys(container,sel,cols,edge){
     const step={ArrowDown:cols(),ArrowUp:-cols(),ArrowRight:1,ArrowLeft:-1}[ev.key];
     if(step){
       ev.preventDefault();
-      const vis=[...container.querySelectorAll(sel)].filter(x=>x.style.display!=="none");
+      const vis=[...container.querySelectorAll(sel)].filter(x=>x.style.display!=="none"&&!x.closest(".cb-ghost"));
       let j=vis.indexOf(el)+step;
       while(vis[j]&&!vis[j].dataset.id)j+=Math.sign(step);
       const to=vis[j];
@@ -1160,7 +1160,7 @@ armLongPress(list,".row");armKeys(list,".row",()=>1);
 // an arrow past the edge of a binder page turns it and lands on the first (or last) tile of the new page
 armLongPress(book,".card");armKeys(book,".card",()=>prefs.bcols,dir=>{
   cb.turn(dir);
-  const t=[...book.querySelectorAll(".cb-leaf:not([hidden]) [data-id]")],f=dir>0?t[0]:t[t.length-1];
+  const t=[...book.querySelectorAll(".cb-book>.cb-leaf:not([hidden]):not(.cb-ghost) [data-id]")],f=dir>0?t[0]:t[t.length-1];
   if(f){t.forEach(x=>x.tabIndex=-1);f.tabIndex=0;f.focus({preventScroll:true})}
   else book.querySelector(`[data-go="${dir>0?"prev":"next"}"]`).focus();
 });
@@ -1431,7 +1431,7 @@ function initBinder(CardBinder){
   bItems=binderItems();indexBinder();
   cb=new CardBinder(book,{items:bItems,cols:prefs.bcols,rows:prefs.brows,keys:false,name:binderName(),
     renderItem:e=>e.blank?blankTile(e):binderTile(e,bTiles),
-    onChange:s=>{page=s.page;unpinStrip();closeCtx();for(const[id,el]of bTiles)if(!el.isConnected)bTiles.delete(id);const first=book.querySelector("[data-id]");if(first)first.tabIndex=0;keepHeader();updateCurrentJump(true)}});
+    onChange:s=>{page=s.page;unpinStrip();closeCtx();for(const[id,el]of bTiles)if(!el.isConnected)bTiles.delete(id);const first=book.querySelector(".cb-book>.cb-leaf:not(.cb-ghost) [data-id]");if(first)first.tabIndex=0;keepHeader();updateCurrentJump(true)}});
   applyCover();tally();
 }
 // blank slots and pages: a blank sits before or after the entry it was added on and follows that entry through filters
