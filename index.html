@@ -627,11 +627,12 @@ function setState(id,st){
   if(prefs.entries==="col")refreshChip(e[0]);
   if(!gone)return;
   const row=rowMap.get(id);
-  row.style.display="none";
+  row.style.display="none";placeBlankRows();
   if(row===tabRow){row.tabIndex=-1;tabRow=dispArr.length?rowMap.get(dispArr[0][1]):null;if(tabRow)tabRow.tabIndex=0}
   if(prefs.view==="binder")renderBinder();
   else if(prefs.view==="pocket"){
     const t=pTiles.get(id);
+    pgrid.querySelectorAll(".card.blank").forEach(b=>{if(blankOf.get(b).b===id)b.remove()});
     if(t){const stop=t.tabIndex===0;t.remove();pTiles.delete(id);if(stop&&pgrid.firstElementChild)pgrid.firstElementChild.tabIndex=0}
   }
   renderJumps();
@@ -1125,13 +1126,13 @@ function armLongPress(container,sel){
   // a mouse right click on a row or tile opens the blank-slot menu (Pending stays the long press only); the native menu
   // stays suppressed so a touch long press cannot pop a callout; links and buttons keep theirs
   container.addEventListener("contextmenu",ev=>{
-    const el=ev.target.closest(sel);
-    if(!el||ev.target.closest("a,button"))return;
+    if(ev.target.closest("a,button,input"))return;
     ev.preventDefault();
-    if(ptype==="mouse")openCtx(ev.clientX,ev.clientY,ctxFor(el));
+    const el=ev.target.closest(sel);
+    if(el&&ptype==="mouse")openCtx(ev.clientX,ev.clientY,ctxFor(el));
   });
 }
-function armKeys(container,cols,edge){
+function armKeys(container,sel,cols,edge){
   container.addEventListener("keydown",ev=>{
     const el=ev.target.closest("[data-id]");
     if(!el||ev.target.closest("a,button")||ev.metaKey||ev.ctrlKey||ev.altKey)return;
@@ -1139,8 +1140,10 @@ function armKeys(container,cols,edge){
     const step={ArrowDown:cols(),ArrowUp:-cols(),ArrowRight:1,ArrowLeft:-1}[ev.key];
     if(step){
       ev.preventDefault();
-      const vis=[...container.querySelectorAll("[data-id]")].filter(x=>x.style.display!=="none");
-      const to=vis[vis.indexOf(el)+step];
+      const vis=[...container.querySelectorAll(sel)].filter(x=>x.style.display!=="none");
+      let j=vis.indexOf(el)+step;
+      while(vis[j]&&!vis[j].dataset.id)j+=Math.sign(step);
+      const to=vis[j];
       if(to){el.tabIndex=-1;to.tabIndex=0;to.focus({preventScroll:true});to.scrollIntoView({block:"nearest"})}
       else if(edge)edge(step>0?1:-1);
     }else if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();ev.shiftKey?togglePending(id):handleTap(id)}
@@ -1153,15 +1156,15 @@ function pinStrip(el){unpinStrip();pinned=el;el.classList.add("pin")}
 function unpinStrip(){if(pinned){pinned.classList.remove("pin");pinned=null}}
 document.addEventListener("pointerdown",ev=>{if(pinned&&!pinned.contains(ev.target))unpinStrip()},{passive:true});
 document.addEventListener("scroll",unpinStrip,{passive:true});
-armLongPress(list,".row");armKeys(list,()=>1);
+armLongPress(list,".row");armKeys(list,".row",()=>1);
 // an arrow past the edge of a binder page turns it and lands on the first (or last) tile of the new page
-armLongPress(book,".card");armKeys(book,()=>prefs.bcols,dir=>{
+armLongPress(book,".card");armKeys(book,".card",()=>prefs.bcols,dir=>{
   cb.turn(dir);
-  const t=[...book.querySelectorAll("[data-id]")],f=dir>0?t[0]:t[t.length-1];
+  const t=[...book.querySelectorAll(".cb-leaf:not([hidden]) [data-id]")],f=dir>0?t[0]:t[t.length-1];
   if(f){t.forEach(x=>x.tabIndex=-1);f.tabIndex=0;f.focus({preventScroll:true})}
+  else book.querySelector(`[data-go="${dir>0?"prev":"next"}"]`).focus();
 });
-document.addEventListener("scroll",closeCtx,{passive:true});
-armLongPress(pgrid,".card");armKeys(pgrid,()=>prefs.pcols);
+armLongPress(pgrid,".card");armKeys(pgrid,".card",()=>prefs.pcols);
 function tally(){
   const vals=Object.values(owned);
   const reg=vals.filter(v=>v===true).length,pen=vals.filter(v=>v==="p").length;
@@ -1348,7 +1351,7 @@ function clearCards(){
 }
 const optClear=$("optClearCards");
 armConfirm(optClear,"Tap again to clear all cards",clearCards);
-armConfirm($("optReset"),"Tap again to reset everything",()=>{clearCards();applyOwned({});setListName(null)});
+armConfirm($("optReset"),"Tap again to reset everything",()=>{clearCards();applyOwned({});setListName(null);BLANKS=[];rerenderBlanks()});
 
 
 // one binder tile. Every slot is a full-width 63/88 face (drawn sprite card, or
@@ -1402,10 +1405,15 @@ function removeArt(id){
 // binder view: paginated pocket pages
 // the binder view is the vendored card-binder module: renderBinder syncs the list, grid size and page into it, initBinder builds it
 // once the module has loaded (module scripts run after this one), and the module reports every render back through onChange
-let bItems=visArr;
+let bItems=visArr,bPos=new Map(),bCum=[];
+function indexBinder(){
+  bPos=new Map();bCum=[];const per=perNow();let n=0;
+  bItems.forEach((x,i)=>{if(!x.blank){bPos.set(x[1],i);n++}if((i+1)%per===0)bCum.push(n)});
+  if(bItems.length%per)bCum.push(n);
+}
 function renderBinder(){
   if(!cb)return;
-  bItems=binderItems();cb.items=bItems;cb.cols=prefs.bcols;cb.rows=prefs.brows;cb.page=page;cb.render();
+  bItems=binderItems();indexBinder();cb.items=bItems;cb.cols=prefs.bcols;cb.rows=prefs.brows;cb.page=page;cb.render();
 }
 // the binder carries the loaded list's name (stitched on the cover) and the collection's numbers (inside the front cover)
 const binderName=()=>prefs.listName||"National Card Dex";
@@ -1420,10 +1428,10 @@ function syncBinderMeta(reg,pen,pct){
   cb.setProgress(reg/DEX.length,pct);
 }
 function initBinder(CardBinder){
-  bItems=binderItems();
-  cb=new CardBinder(book,{items:bItems,cols:prefs.bcols,rows:prefs.brows,keys:false,name:binderName(),cover:prefs.cover||null,
+  bItems=binderItems();indexBinder();
+  cb=new CardBinder(book,{items:bItems,cols:prefs.bcols,rows:prefs.brows,keys:false,name:binderName(),
     renderItem:e=>e.blank?blankTile(e):binderTile(e,bTiles),
-    onChange:s=>{page=s.page;for(const[id,el]of bTiles)if(!el.isConnected)bTiles.delete(id);const first=book.querySelector("[data-id]");if(first)first.tabIndex=0;keepHeader();updateCurrentJump(true)}});
+    onChange:s=>{page=s.page;unpinStrip();closeCtx();for(const[id,el]of bTiles)if(!el.isConnected)bTiles.delete(id);const first=book.querySelector("[data-id]");if(first)first.tabIndex=0;keepHeader();updateCurrentJump(true)}});
   applyCover();tally();
 }
 // blank slots and pages: a blank sits before or after the entry it was added on and follows that entry through filters
@@ -1432,10 +1440,11 @@ let BLANKS=store.load("dex-il-blanks");
 BLANKS=Array.isArray(BLANKS)?BLANKS.filter(m=>m&&m.blank===true&&(m.k==="slot"||m.k==="page")&&(m.at==="before"||m.at==="after")&&byId.has(m.b)):[];
 const blankOf=new WeakMap(),blankRows=new Set();
 function slotItems(arr){
-  const slots=BLANKS.filter(m=>m.k==="slot");
-  if(!slots.length)return arr;
+  const before=new Map(),after=new Map();
+  BLANKS.forEach(m=>{if(m.k!=="slot")return;const box=m.at==="before"?before:after;box.set(m.b,[...(box.get(m.b)||[]),m])});
+  if(!before.size&&!after.size)return arr;
   const out=[];
-  arr.forEach(e=>{slots.forEach(m=>{if(m.b===e[1]&&m.at==="before")out.push(m)});out.push(e);slots.forEach(m=>{if(m.b===e[1]&&m.at==="after")out.push(m)})});
+  arr.forEach(e=>out.push(...(before.get(e[1])||[]),e,...(after.get(e[1])||[])));
   return out;
 }
 function binderItems(){
@@ -1444,13 +1453,15 @@ function binderItems(){
     if(m.k!=="page")return;
     const i=out.findIndex(x=>!x.blank&&x[1]===m.b);if(i<0)return;
     if(out===visArr)out=[...out];
-    out.splice(Math.floor(i/per)*per+(m.at==="after"?per:0),0,...Array(per).fill(m));
+    let at=Math.floor(i/per)*per;
+    if(m.at==="after"){at+=per;while(out.length<at)out.push(m)}
+    out.splice(at,0,...Array(per).fill(m));
   });
   return out;
 }
-const pageOfEntry=id=>Math.max(0,Math.floor(bItems.findIndex(x=>!x.blank&&x[1]===id)/perNow()));
-const entriesThrough=p=>bItems.slice(0,(p+1)*perNow()).filter(x=>!x.blank).length;
-function blankTile(m){const c=document.createElement("div");c.className="card blank";blankOf.set(c,m);return c}
+const pageOfEntry=id=>Math.floor((bPos.get(id)||0)/perNow());
+const entriesThrough=p=>p<0?0:bCum[Math.min(p,bCum.length-1)]||0;
+function blankTile(m){const c=document.createElement("div");c.className="card blank";c.setAttribute("aria-label","Empty slot");blankOf.set(c,m);return c}
 function blankRow(m){
   const r=document.createElement("div");r.className="row blank";
   r.innerHTML='<span class="lz"></span><span class="spr"></span><span class="who"><span class="name">Empty slot</span></span>';
@@ -1476,9 +1487,10 @@ const ctx=$("ctx");
 function openCtx(x,y,items){
   ctx.replaceChildren(...items.map(([label,act])=>{const b=document.createElement("button");b.type="button";b.textContent=label;b.addEventListener("click",()=>{closeCtx();act()});return b}));
   ctx.hidden=false;
-  ctx.style.left=Math.min(x,innerWidth-ctx.offsetWidth-8)+"px";ctx.style.top=Math.min(y,innerHeight-ctx.offsetHeight-8)+"px";
+  ctx.style.left=Math.max(8,Math.min(x,innerWidth-ctx.offsetWidth-8))+"px";ctx.style.top=Math.max(8,Math.min(y,innerHeight-ctx.offsetHeight-8))+"px";
 }
 function closeCtx(){ctx.hidden=true}
+document.addEventListener("scroll",closeCtx,{passive:true});
 function ctxFor(el){
   const m=blankOf.get(el);
   if(m)return [[m.k==="page"?"Remove blank page":"Remove blank slot",()=>removeBlank(m)]];
@@ -1559,7 +1571,7 @@ function setView(v){
   binder.hidden=v!=="binder";
   pocketEl.hidden=v!=="pocket";
   $("gpick").hidden=$("cpick").hidden=v!=="binder";$("ppick").hidden=v!=="pocket";
-  if(v==="binder"){if(cb&&prev!=="binder")cb.close("front");else renderBinder()}
+  if(v==="binder"){renderBinder();if(cb&&prev!=="binder")cb.close("front")}
   if(v==="pocket")renderPocket();
   renderJumps();
   if(prev!==v){keepHeader();requestAnimationFrame(()=>window.scrollTo({top:scrollMem[v],behavior:"instant"}))}
@@ -1586,7 +1598,8 @@ function setGrid(c,r){
 }
 const coverIn=$("coverIn"),cpick=$("cpick");
 function applyCover(){
-  const c=prefs.cover||null;
+  const c=/^#[0-9a-f]{6}$/i.test(prefs.cover||"")?prefs.cover:null;
+  if(!c&&prefs.cover){delete prefs.cover;store.save("dex-il-ui",prefs)}
   if(cb)cb.setCover(c);
   cpick.style.setProperty("--cover",c||"#34363c");coverIn.value=c||"#34363c";
 }
@@ -1752,6 +1765,7 @@ function renderLists(){
     const del=document.createElement("button");del.textContent="Delete";
     del.addEventListener("click",()=>{
       delete LISTS[name];store.save("dex-il-lists",LISTS);renderLists();
+      if(prefs.listName===name)setListName(null);
     });
     row.append(load,del);
     mLists.appendChild(row);
@@ -1776,7 +1790,7 @@ $("mCopy").addEventListener("click",async()=>{
 $("mApply").addEventListener("click",()=>{
   const next=decodeOwned($("mIn").value);
   if(!next){mMsg.textContent="That code is not valid for this dex.";return}
-  applyOwned(next);
+  applyOwned(next);setListName(null);
   $("mIn").value="";mCode.value=encodeOwned();
   mMsg.textContent=`Applied: ${Object.keys(owned).length} checked.`;
 });
@@ -1891,7 +1905,7 @@ jumps.addEventListener("pointercancel",jRelease);
 let rsRaf=false;
 window.addEventListener("resize",()=>{
   if(rsRaf)return;rsRaf=true;
-  requestAnimationFrame(()=>{rsRaf=false;placeJumps();cjDirty=true;if(prefs.view==="pocket")layoutPocket();updateJumpBtns()});
+  requestAnimationFrame(()=>{rsRaf=false;closeCtx();placeJumps();cjDirty=true;if(prefs.view==="pocket")layoutPocket();updateJumpBtns()});
 });
 
 // the header slides away on a downward scroll and returns on the first upward nudge;
