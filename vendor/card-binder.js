@@ -1,4 +1,4 @@
-// card-binder v2.2.3 (2026-09-09)
+// card-binder v2.2.4 (2026-09-09)
 // card-binder: a pocket-page binder as a physical object. Zero dependencies, ES module.
 // new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, cover, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, onChange})
 //   items        array of anything; renderItem(item, index) returns the element that sits in a pocket (give it the pocket aspect)
@@ -20,7 +20,7 @@
 // perspective distance for a turn, in page widths: the free edge of a swinging page grows by at most 1 / (1 - 1 / PERSP)
 const PERSP=10;
 export class CardBinder{
-  static VERSION="2.2.3";
+  static VERSION="2.2.4";
   constructor(host,o={}){
     this.host=host;this.items=o.items||[];this.renderItem=o.renderItem||(x=>{const d=document.createElement("div");d.textContent=String(x);return d});
     this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";
@@ -48,41 +48,45 @@ export class CardBinder{
   open(){this.page=this.closed==="back"?this.last:this.first;this.closed=null;this.render()}
   close(side="front"){this.closed=side;this.render()}
   turn(dir){
-    const snap=this.animate&&!matchMedia("(prefers-reduced-motion: reduce)").matches?this.snapshot():null;
+    const was=this.closed,snap=this.animate&&!matchMedia("(prefers-reduced-motion: reduce)").matches?this.snapshot():null;
     if(this.closed==="front"){if(dir<0)return;this.closed=null;this.page=this.first}
     else if(this.closed==="back"){if(dir>0)return;this.closed=null;this.page=this.last}
     else if(dir>0&&this.page>=this.last)this.closed="back";
     else if(dir<0&&this.page<=this.first)this.closed="front";
     else this.page+=dir*(this.spread?2:1);
     this.render();
-    if(snap)this.flip(snap,dir);
+    if(snap)this.flip(snap,dir,was);
   }
   snapshot(){const c=l=>l.hidden?null:l.cloneNode(true);return {L:c(this.leafL),R:c(this.leafR)}}
   // one sheet turns: a ghost of the page that lifts, with the page it reveals printed on its back, swings over the spine and lands on
   // the far leaf while a ghost of the page it covers stays put; one page at a time the old page lifts away (or the previous one drops in).
-  // A turn already in flight is flushed first, so two quick turns never stack their ghosts. Opening from a cover has nothing under the
-  // landing side, so that leaf stays hidden until the sheet lands on it
-  flip(snap,dir){
+  // A turn already in flight is flushed first, so two quick turns never stack their ghosts. The ghosts live in the host (which keeps
+  // its shape) at the positions the leaves have after the render; a cover opening keeps the book in its shut shape, with the landing
+  // leaf out of the layout, until the board lands, so the far half of the cover does not appear before the board gets there
+  flip(snap,dir,was){
     if(this.endTurn)this.endTurn();
-    const book=this.book,L=this.leafL,R=this.leafR,gone=[];let bare=null;
-    const ghost=(el,box,dx=0)=>{el.hidden=false;el.inert=true;el.classList.add("cb-ghost");el.style.left=box.offsetLeft+dx+"px";el.style.top=box.offsetTop+"px";el.style.width=box.offsetWidth+"px";el.style.height=box.offsetHeight+"px";book.appendChild(el);gone.push(el);return el};
-    book.style.setProperty("--cb-persp",Math.round(L.offsetWidth*PERSP)+"px");
+    const host=this.host,book=this.book,L=this.leafL,R=this.leafR,gone=[],hr=host.getBoundingClientRect();let opened=null;
+    const ghost=(el,box,dx=0,pad=0,foot=0)=>{const r=box.getBoundingClientRect();el.hidden=false;el.inert=true;el.classList.add("cb-ghost");el.style.left=r.left-hr.left-pad+dx+"px";el.style.top=r.top-hr.top-pad+"px";el.style.width=r.width+2*pad+"px";el.style.height=r.height+2*pad+foot+"px";host.appendChild(el);gone.push(el);return el};
+    host.style.setProperty("--cb-persp",Math.round(L.offsetWidth*PERSP)+"px");
     if(this.spread){
-      const spine=parseFloat(getComputedStyle(this.host).getPropertyValue("--cb-spine"))||0;
+      const cs=getComputedStyle(host),px=p=>parseFloat(cs.getPropertyValue(p))||0,spine=px("--cb-spine");
       const land=dir>0?L:(R.hidden?L:R),front=dir>0?(snap.R||snap.L):snap.L,under=dir>0?(snap.R?snap.L:null):snap.R;
       if(!front)return;
       if(under)ghost(under,land);
+      // a cover turn swings the whole board: the leaf inside the cover's rim, rounded edge and shadow (.cb-board), not the leaf alone
+      const cov=front.classList.contains("cb-cov"),pad=cov?px("--cb-bpad"):0,foot=cov?px("--cb-foot"):0;
+      const face=(leaf,...cls)=>{let f=leaf;if(cov){f=document.createElement("div");f.className="cb-board";f.appendChild(leaf)}f.classList.add("cb-face",...cls);return f};
       const fl=document.createElement("div"),back=land.cloneNode(true);
-      fl.className="cb-flier";front.classList.add("cb-face");back.classList.add("cb-face","cb-back");fl.append(front,back);
-      ghost(fl,land,(land.offsetWidth+spine)*(dir>0?1:-1));
-      fl.style.transformOrigin=dir>0?`${-spine/2}px 50%`:`calc(100% + ${spine/2}px) 50%`;
+      fl.className="cb-flier";fl.append(face(front),face(back,"cb-back"));
+      ghost(fl,land,(land.offsetWidth+spine)*(dir>0?1:-1),pad,foot);
+      fl.style.transformOrigin=dir>0?`${pad-spine/2}px 50%`:`calc(100% - ${pad-spine/2}px) 50%`;
       fl.classList.add(dir>0?"cb-fwd":"cb-back");
-      if(!under){bare=land;land.style.visibility="hidden"}
+      if(!under){opened=land;land.hidden=true;this.layout(was)}
     }else if(dir>0){if(!snap.L)return;ghost(snap.L,L).classList.add("cb-lift")}
     else{if(snap.L)ghost(snap.L,L);ghost(L.cloneNode(true),L).classList.add("cb-drop")}
     book.classList.add("cb-turning");
     let done=false;
-    const end=()=>{if(done)return;done=true;this.endTurn=null;gone.forEach(g=>g.remove());if(bare)bare.style.visibility="";book.classList.remove("cb-turning")};
+    const end=()=>{if(done)return;done=true;this.endTurn=null;gone.forEach(g=>g.remove());if(opened){opened.hidden=false;this.layout(this.closed)}book.classList.remove("cb-turning")};
     this.endTurn=end;
     gone[gone.length-1].addEventListener("animationend",end,{once:true});
     const t=getComputedStyle(book).getPropertyValue("--cb-turn").trim(),ms=t.endsWith("ms")?parseFloat(t):parseFloat(t)*1000;
@@ -143,6 +147,7 @@ export class CardBinder{
     }
     this.foot(leaf);
   }
+  layout(closed){const b=this.book.classList;b.toggle("cb-spread",this.spread&&!closed);b.toggle("cb-closed",!!closed);b.toggle("cb-front",closed==="front");b.toggle("cb-back",closed==="back")}
   render(){
     const two=this.spread,h=this.host,s=h.style;
     s.setProperty("--cb-cols",this.cols);s.setProperty("--cb-rows",this.rows);
@@ -150,7 +155,7 @@ export class CardBinder{
     h.classList.toggle("cb-two",two);h.classList.toggle("cb-fit",two&&this.fit);
     this.page=Math.min(Math.max(this.first,this.page),this.last);
     if(two&&this.page%2)this.page++;
-    const b=this.book.classList;b.toggle("cb-spread",two&&!this.closed);b.toggle("cb-closed",!!this.closed);b.toggle("cb-front",this.closed==="front");b.toggle("cb-back",this.closed==="back");
+    this.layout(this.closed);
     this.leafR.hidden=!two||!!this.closed;
     if(this.leafR.hidden)this.leafR.firstElementChild.replaceChildren();
     if(this.closed)this.fill(this.leafL,-1);else if(two){this.fill(this.leafL,this.page-1);this.fill(this.leafR,this.page)}else this.fill(this.leafL,this.page);

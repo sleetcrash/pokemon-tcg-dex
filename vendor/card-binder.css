@@ -1,4 +1,4 @@
-/* card-binder v2.2.3 (2026-09-09) */
+/* card-binder v2.2.4 (2026-09-09) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
@@ -15,14 +15,15 @@
   --cb-reserve:160px;  /* reserve: viewport height taken by everything outside the book when cb-fit is on (site header, margins, this pager) */
   --cb-mono:ui-monospace,Menlo,monospace;
   --cb-cols:3;--cb-rows:3;
-  display:block;margin:0 auto;max-width:100%;overflow:clip;font-family:system-ui,-apple-system,sans-serif;color:var(--cb-ink)}
+  display:block;position:relative;margin:0 auto;max-width:100%;overflow:clip;perspective:var(--cb-persp,1600px);font-family:system-ui,-apple-system,sans-serif;color:var(--cb-ink)}
 .cb-host.cb-two{--cb-bpad:16px;--cb-lpad:var(--cb-gap);--cb-ppad:calc(var(--cb-gap) * .45)}
 .cb-host.cb-two.cb-fit{
   --cb-tileh:calc((100svh - var(--cb-reserve) - 2 * var(--cb-bpad) - var(--cb-foot) - 2 * var(--cb-lpad) - (var(--cb-rows) - 1) * var(--cb-gap) - var(--cb-rows) * 2 * var(--cb-ppad)) / var(--cb-rows));
   --cb-pagew:calc(var(--cb-cols) * (var(--cb-tileh) * var(--cb-aw) / var(--cb-ah) + 2 * var(--cb-ppad)) + (var(--cb-cols) - 1) * var(--cb-gap) + 2 * var(--cb-lpad));
   max-width:min(100%,max(360px,calc(2 * var(--cb-pagew) + var(--cb-spine) + 2 * var(--cb-bpad))))}
 
-.cb-book{position:relative;display:grid;container-type:inline-size;padding:var(--cb-bpad) var(--cb-bpad) calc(var(--cb-bpad) + var(--cb-foot));border-radius:6px;touch-action:pan-y;perspective:var(--cb-persp,1600px);
+.cb-book{position:relative;display:grid;container-type:inline-size;padding:var(--cb-bpad) var(--cb-bpad) calc(var(--cb-bpad) + var(--cb-foot));touch-action:pan-y}
+.cb-book,.cb-board{border-radius:6px;
   background:repeating-linear-gradient(45deg,oklch(1 0 0 / .025) 0 1px,transparent 1px 3px),repeating-linear-gradient(-45deg,oklch(1 0 0 / .025) 0 1px,transparent 1px 3px),radial-gradient(120% 90% at 50% 35%,var(--cb-cover-hi),var(--cb-cover) 75%);
   box-shadow:inset 0 1px 0 oklch(1 0 0 / .08),inset 0 0 0 1px oklch(0 0 0 / .35),0 10px 24px oklch(0.2 0.02 95 / .35),0 1px 2px oklch(0.2 0.02 95 / .4)}
 .cb-book.cb-spread{grid-template-columns:1fr 1fr;column-gap:var(--cb-spine)}
@@ -98,8 +99,9 @@
 .cb-size .cb-pop .cb-slbl{margin-top:8px;text-align:center;font-family:var(--cb-mono);font-size:12px}
 @media (max-width:600px){.cb-pager{gap:6px}.cb-pager button{width:36px;height:36px}.cb-pager button svg{width:18px;height:18px}.cb-pgo{margin:0 2px;font-size:13px}.cb-pgo input{width:46px;height:36px}.cb-size>button{width:auto;height:36px}.cb-size{position:static;flex-basis:100%;display:flex;justify-content:center;margin-top:4px}.cb-size .cb-pop{right:auto;left:50%;transform:translateX(-50%)}}
 
-/* page turns: ghosts the module stages over the leaves for one turn. On a spread the turning page (.cb-flier: the lifted page on its
-   front, the page it reveals on its back) swings over the spine and lands on the far leaf while the page it covers waits underneath;
+/* page turns: ghosts the module stages in the host over the leaves for one turn. On a spread the turning page (.cb-flier: the lifted page on its
+   front, the page it reveals on its back) swings over the spine and lands on the far leaf while the page it covers waits underneath; a cover
+   turn swings the whole board (.cb-board: the leaf inside the cover's rim, edge and shadow);
    one page at a time the old page lifts away from the spine, or the previous page drops back in */
 .cb-ghost{position:absolute;z-index:10;pointer-events:none;margin:0}
 .cb-flier{z-index:11;transform-style:preserve-3d;animation:var(--cb-turn) cubic-bezier(.45,.05,.3,1) both}
@@ -107,6 +109,7 @@
 .cb-flier.cb-back{animation-name:cb-flip-back}
 .cb-flier .cb-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .cb-flier .cb-face.cb-back{transform:rotateY(180deg)}
+.cb-board>.cb-leaf{position:absolute;left:var(--cb-bpad);right:var(--cb-bpad);top:var(--cb-bpad);bottom:calc(var(--cb-bpad) + var(--cb-foot))}
 .cb-flier .cb-face::after,.cb-flier .cb-face .cb-foot{display:none}
 .cb-ghost.cb-lift{transform-origin:left center;animation:cb-lift calc(var(--cb-turn) * .7) cubic-bezier(.5,0,.8,.4) both}
 .cb-ghost.cb-drop{transform-origin:left center;animation:cb-drop calc(var(--cb-turn) * .7) cubic-bezier(.2,.6,.4,1) both}
