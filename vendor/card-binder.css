@@ -1,4 +1,4 @@
-/* card-binder v2.0.1 (2026-09-08) */
+/* card-binder v2.1.2 (2026-09-08) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
@@ -21,7 +21,7 @@
   --cb-pagew:calc(var(--cb-cols) * (var(--cb-tileh) * var(--cb-aw) / var(--cb-ah) + 2 * var(--cb-ppad)) + (var(--cb-cols) - 1) * var(--cb-gap) + 2 * var(--cb-lpad));
   max-width:min(100%,max(360px,calc(2 * var(--cb-pagew) + var(--cb-spine) + 2 * var(--cb-bpad))))}
 
-.cb-book{position:relative;display:grid;padding:var(--cb-bpad) var(--cb-bpad) calc(var(--cb-bpad) + var(--cb-foot));border-radius:6px;touch-action:pan-y;perspective:1600px;
+.cb-book{position:relative;display:grid;container-type:inline-size;padding:var(--cb-bpad) var(--cb-bpad) calc(var(--cb-bpad) + var(--cb-foot));border-radius:6px;touch-action:pan-y;perspective:1600px;
   background:repeating-linear-gradient(45deg,oklch(1 0 0 / .025) 0 1px,transparent 1px 3px),repeating-linear-gradient(-45deg,oklch(1 0 0 / .025) 0 1px,transparent 1px 3px),radial-gradient(120% 90% at 50% 35%,var(--cb-cover-hi),var(--cb-cover) 75%);
   box-shadow:inset 0 1px 0 oklch(1 0 0 / .08),inset 0 0 0 1px oklch(0 0 0 / .35),0 10px 24px oklch(0.2 0.02 95 / .35),0 1px 2px oklch(0.2 0.02 95 / .4)}
 .cb-book.cb-spread{grid-template-columns:1fr 1fr;column-gap:var(--cb-spine)}
@@ -44,6 +44,7 @@
 .cb-name{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--cb-mono);font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
   color:transparent;background:repeating-linear-gradient(180deg,var(--cb-thread) 0 1px,color-mix(in oklch, var(--cb-thread), black 40%) 1px 2px);-webkit-background-clip:text;background-clip:text;
   filter:drop-shadow(0 1px 0 oklch(0 0 0 / .55))}
+@supports not ((-webkit-background-clip:text) or (background-clip:text)){.cb-name{color:var(--cb-thread);background:none}}
 .cb-prog{display:inline-flex;align-items:center;gap:8px;width:min(60%,240px)}
 .cb-prog>span{flex:1;height:4px;border-radius:2px;background:oklch(0 0 0 / .35);box-shadow:inset 0 0 0 1px oklch(1 0 0 / .1);overflow:hidden}
 .cb-prog>span>i{display:block;height:100%;border-radius:2px;background:var(--cb-thread)}
@@ -63,10 +64,11 @@
 .cb-contents .cb-prog>span{background:oklch(0 0 0 / .08);box-shadow:none}
 .cb-contents .cb-prog>span>i{background:var(--cb-ink)}
 .cb-contents .cb-prog small{color:var(--cb-ink-dim)}
-.cb-book.cb-closed{width:min(100%,calc(var(--cb-pagew,100%) + 2 * var(--cb-bpad)));container-type:inline-size;cursor:pointer}
+.cb-book.cb-closed{width:min(100%,calc(var(--cb-pagew,100%) + 2 * var(--cb-bpad)));cursor:pointer}
 .cb-book.cb-closed.cb-front{margin-left:auto}
 .cb-book.cb-closed.cb-back{margin-right:auto}
-.cb-book.cb-closed .cb-leaf{--cb-tw:calc((100cqw - 2 * var(--cb-lpad) - (var(--cb-cols) - 1) * var(--cb-gap) - var(--cb-cols) * 2 * var(--cb-ppad)) / var(--cb-cols));
+/* a cover shown alone (the shut book, or the inside front cover one page at a time) is as tall as a filled page */
+.cb-book.cb-closed .cb-leaf,.cb-host:not(.cb-two) .cb-leaf.cb-cov{--cb-tw:calc((100cqw - 2 * var(--cb-lpad) - (var(--cb-cols) - 1) * var(--cb-gap) - var(--cb-cols) * 2 * var(--cb-ppad)) / var(--cb-cols));
   height:calc(var(--cb-rows) * (var(--cb-tw) * var(--cb-ah) / var(--cb-aw) + 2 * var(--cb-ppad)) + (var(--cb-rows) - 1) * var(--cb-gap) + 2 * var(--cb-lpad))}
 .cb-incover.cb-front,.cb-incover.cb-back{background:radial-gradient(120% 90% at 50% 35%,var(--cb-cover-hi),var(--cb-cover) 75%)}
 .cb-incover.cb-front::before,.cb-incover.cb-back::before{inset:12px;border-style:solid;border-color:oklch(0.5 0.006 260 / .35)}
@@ -93,7 +95,7 @@
 .cb-size .cb-pop>div button{width:22px;height:22px;min-width:0;padding:0;border:1px solid var(--cb-line);border-radius:2px}
 .cb-size .cb-pop>div button.cb-hi{background:var(--cb-ink);border-color:var(--cb-ink)}
 .cb-size .cb-pop .cb-slbl{margin-top:8px;text-align:center;font-family:var(--cb-mono);font-size:12px}
-@media (max-width:600px){.cb-pager{gap:6px}.cb-pager button{width:36px;height:36px}.cb-pager button svg{width:18px;height:18px}.cb-pgo{margin:0 2px;font-size:13px}.cb-pgo input{width:46px;height:36px}.cb-size{position:static;flex-basis:100%;display:flex;justify-content:center;margin-top:4px}.cb-size .cb-pop{right:auto;left:50%;transform:translateX(-50%)}}
+@media (max-width:600px){.cb-pager{gap:6px}.cb-pager button{width:36px;height:36px}.cb-pager button svg{width:18px;height:18px}.cb-pgo{margin:0 2px;font-size:13px}.cb-pgo input{width:46px;height:36px}.cb-size>button{width:auto;height:36px}.cb-size{position:static;flex-basis:100%;display:flex;justify-content:center;margin-top:4px}.cb-size .cb-pop{right:auto;left:50%;transform:translateX(-50%)}}
 
 /* page turns: on a spread the incoming leaf swings down from the spine; on a single page it slides in from the side it came from */
 @media (prefers-reduced-motion:no-preference){

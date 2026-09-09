@@ -1,4 +1,4 @@
-// card-binder v2.0.1 (2026-09-08)
+// card-binder v2.1.2 (2026-09-08)
 // card-binder: a pocket-page binder as a physical object. Zero dependencies, ES module.
 // new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, cover, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, onChange})
 //   items        array of anything; renderItem(item, index) returns the element that sits in a pocket (give it the pocket aspect)
@@ -15,6 +15,7 @@
 //   onChange(state) fires after every render with {page, closed, pages, total, spread, cols, rows}
 // Pages pair like a real binder: inside front cover + page 1, then 2 + 3, and the last page sits alone on the left facing the
 // inside back cover; an odd page count gets one empty pocket page as its last side. `page` is the right leaf's index (0-based).
+// One page at a time (below spreadMinWidth) the inside front cover is its own page, index -1, so the contents card is reachable.
 export class CardBinder{
   constructor(host,o={}){
     this.host=host;this.items=o.items||[];this.renderItem=o.renderItem||(x=>{const d=document.createElement("div");d.textContent=String(x);return d});
@@ -36,16 +37,17 @@ export class CardBinder{
   get pages(){return Math.max(1,Math.ceil(this.items.length/this.per))}
   get total(){return this.spread&&this.pages%2?this.pages+1:this.pages}
   get last(){return this.spread?this.total:this.pages-1}
+  get first(){return this.spread?0:-1}
   setItems(items){this.items=items;this.page=0;this.render()}
   setGrid(cols,rows){this.cols=Math.min(6,Math.max(1,cols));this.rows=Math.min(6,Math.max(1,rows));this.page=0;this.render()}
   goTo(n){this.closed=null;this.page=Math.min(Math.max(0,n),this.pages-1);this.render()}
-  open(){this.page=this.closed==="back"?this.last:0;this.closed=null;this.render()}
+  open(){this.page=this.closed==="back"?this.last:this.first;this.closed=null;this.render()}
   close(side="front"){this.closed=side;this.render()}
   turn(dir){
-    if(this.closed==="front"){if(dir<0)return;this.closed=null;this.page=0}
+    if(this.closed==="front"){if(dir<0)return;this.closed=null;this.page=this.first}
     else if(this.closed==="back"){if(dir>0)return;this.closed=null;this.page=this.last}
     else if(dir>0&&this.page>=this.last)this.closed="back";
-    else if(dir<0&&this.page<=0)this.closed="front";
+    else if(dir<0&&this.page<=this.first)this.closed="front";
     else this.page+=dir*(this.spread?2:1);
     this.anim=dir;this.render();
   }
@@ -59,6 +61,7 @@ export class CardBinder{
     s.setProperty("--cb-cover",c);s.setProperty("--cb-cover-hi",`color-mix(in oklch, ${c}, white 9%)`);
     const m=/^#([0-9a-f]{6})$/i.exec(c);
     if(m){const [r,g,b]=[0,2,4].map(i=>parseInt(m[1].slice(i,i+2),16)/255);s.setProperty("--cb-thread",.2126*r+.7152*g+.0722*b>.45?"oklch(0.24 0.02 80)":"oklch(0.86 0.02 80)")}
+    else s.removeProperty("--cb-thread");
   }
   stitched(text){const n=document.createElement("span");n.className="cb-name";n.textContent=text;return n}
   prog(){
@@ -69,7 +72,7 @@ export class CardBinder{
     return w;
   }
   // the four cover faces: the shut front and back covers, and the inside of each once the book is open
-  cover(kind){
+  face(kind){
     const c=document.createElement("div");c.className="cb-incover cb-"+kind;
     if(kind==="front"&&this.name)c.appendChild(this.stitched(this.name));
     if(kind==="in-front"){
@@ -90,12 +93,12 @@ export class CardBinder{
     else{const p=this.prog();if(p)f.appendChild(p)}
   }
   paintFeet(){[this.leafL,this.leafR].forEach(l=>{if(!l.hidden)this.foot(l)})}
-  paintCovers(){[this.leafL,this.leafR].forEach(l=>{if(!l.hidden&&l.dataset.cov)l.firstElementChild.replaceChildren(this.cover(l.dataset.cov))})}
+  paintCovers(){[this.leafL,this.leafR].forEach(l=>{if(!l.hidden&&l.dataset.cov)l.firstElementChild.replaceChildren(this.face(l.dataset.cov))})}
   fill(leaf,p){
     const grid=leaf.firstElementChild,cov=p<0||p>=this.total;
     leaf.classList.toggle("cb-cov",cov);leaf.classList.toggle("cb-lp",!cov&&p%2===1);leaf.dataset.p=cov?"":p+1;grid.innerHTML="";
     leaf.dataset.cov=cov?this.closed||(p<0?"in-front":"in-back"):"";
-    if(cov)grid.appendChild(this.cover(leaf.dataset.cov));
+    if(cov)grid.appendChild(this.face(leaf.dataset.cov));
     else{
       const slice=p<this.pages?this.items.slice(p*this.per,p*this.per+this.per):[];
       slice.forEach((it,i)=>{const w=document.createElement("div");w.className="cb-pkt";w.appendChild(this.renderItem(it,p*this.per+i));grid.appendChild(w)});
@@ -108,12 +111,13 @@ export class CardBinder{
     s.setProperty("--cb-cols",this.cols);s.setProperty("--cb-rows",this.rows);
     if(!h.style.getPropertyValue("--cb-gap-fixed"))s.setProperty("--cb-gap",this.cols>=5?"8px":this.cols===4?"10px":"14px");
     h.classList.toggle("cb-two",two);h.classList.toggle("cb-fit",two&&this.fit);
-    this.page=Math.min(Math.max(0,this.page),two?this.total:this.pages-1);
+    this.page=Math.min(Math.max(this.first,this.page),this.last);
     if(two&&this.page%2)this.page++;
     const b=this.book.classList;b.toggle("cb-spread",two&&!this.closed);b.toggle("cb-closed",!!this.closed);b.toggle("cb-front",this.closed==="front");b.toggle("cb-back",this.closed==="back");
     this.leafR.hidden=!two||!!this.closed;
+    if(this.leafR.hidden)this.leafR.firstElementChild.replaceChildren();
     if(this.closed)this.fill(this.leafL,-1);else if(two){this.fill(this.leafL,this.page-1);this.fill(this.leafR,this.page)}else this.fill(this.leafL,this.page);
-    if(this.anim&&this.animate){
+    if(this.anim&&this.animate&&!matchMedia("(prefers-reduced-motion: reduce)").matches){
       const leaf=this.anim>0||this.leafR.hidden?this.leafL:this.leafR,cls=this.anim>0?"cb-in-next":"cb-in-prev";
       leaf.classList.remove("cb-in-next","cb-in-prev");void leaf.offsetWidth;leaf.classList.add(cls);
       leaf.addEventListener("animationend",()=>leaf.classList.remove(cls),{once:true});
@@ -126,7 +130,7 @@ export class CardBinder{
   // a sideways swipe (touch or pen, 60px, more across than down by half again) turns the page; the click that ends it is ignored
   armSwipe(){
     let x0=0,y0=0,id=null;
-    this.book.addEventListener("pointerdown",e=>{this.swiped=false;if(e.pointerType==="mouse"||!e.isPrimary||e.target.closest("input,button,a"))return;x0=e.clientX;y0=e.clientY;id=e.pointerId},{passive:true});
+    this.book.addEventListener("pointerdown",e=>{this.swiped=false;if(e.pointerType==="mouse"||!e.isPrimary||e.target.closest("input,button,a"))return;x0=e.clientX;y0=e.clientY;id=e.pointerId;try{this.book.setPointerCapture(id)}catch(x){}},{passive:true});
     this.book.addEventListener("pointerup",e=>{
       if(e.pointerId!==id)return;id=null;
       const dx=e.clientX-x0,dy=e.clientY-y0;
@@ -145,8 +149,9 @@ export class CardBinder{
   }
   paintPager(){
     const p=this.pager,inp=p.querySelector("input"),tot=p.querySelector(".cb-tot"),two=this.spread,c=this.closed;
-    inp.max=this.total;inp.hidden=!!c;
+    inp.max=this.pages;inp.hidden=!!c||this.page<0;
     if(c){inp.value="";tot.textContent=c==="front"?"Front cover":"Back cover"}
+    else if(this.page<0){inp.value="";tot.textContent="Inside cover"}
     else{const left=two?this.page:this.page+1;inp.value=two&&this.page>=this.total?this.total:Math.max(1,left);tot.textContent=two&&this.page>0&&this.page<this.total?`+ ${this.page+1} / ${this.total}`:`/ ${this.total}`}
     p.querySelector('[data-go="first"]').disabled=p.querySelector('[data-go="prev"]').disabled=c==="front";
     p.querySelector('[data-go="next"]').disabled=p.querySelector('[data-go="last"]').disabled=c==="back";
