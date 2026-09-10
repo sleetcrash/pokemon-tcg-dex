@@ -166,7 +166,9 @@
   .views #ddOrder{margin-left:auto}
   .views #ddOpt .ddbtn{padding-right:0}
   #ddOrder .ddpanel{left:auto;right:0}
-  .views .cust{margin:0 4px 0 -8px}
+  .views{position:relative}
+  .views .cust{position:static;margin:0 4px 0 -8px}
+  .views .cust .ddpanel{left:0;max-width:calc(100vw - 32px)}
   .views .cust .ddbtn{padding:6px 2px}
   .views .cust svg{width:14px;height:14px}
   .views .cust.open .ddbtn svg{transform:rotate(180deg)}
@@ -1079,10 +1081,13 @@ function showCard(c){
 const curBtns=[...document.querySelectorAll(".curs button")];
 curBtns.forEach(b=>{b.classList.toggle("on",b.dataset.cur===prefs.cur);b.addEventListener("click",()=>{
   prefs.cur=b.dataset.cur;store.save("dex-il-ui",prefs);curBtns.forEach(x=>x.classList.toggle("on",x===b));
-  if(cCards)cCards.forEach(updateCell);rowMap.forEach(fillRowPrice);
-  if(prefs.view==="binder")renderBinder();else if(prefs.view==="pocket")renderPocket();
+  if(cCards)cCards.forEach(updateCell);repaintPrices();
 })});
-ensureRate();
+function repaintPrices(){
+  Object.keys(CARDART).forEach(id=>fillRowPrice(rowMap.get(+id)));
+  if(prefs.view==="binder")renderBinder();else if(prefs.view==="pocket")renderPocket();
+}
+ensureRate().then(r=>{if(r&&prefs.cur!=="USD")repaintPrices()});
 function backToGrid(){
   if(!cCards){openCards(cEntry);return}
   cback.hidden=true;cfilters.hidden=false;cbody.classList.remove("detail");renderGrid();
