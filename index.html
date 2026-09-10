@@ -162,21 +162,31 @@
   .views>button.on::after{content:"";position:absolute;left:8px;right:8px;bottom:0;height:2px;background:var(--shell)}
   .views>button:first-child.on::after{left:0;right:10px}
   .views>button:first-child{padding-left:0}
-  .views .dd{flex:none;margin-left:auto}
-  .views .ddbtn{padding-right:0}
+  .views .dd{flex:none}
+  .views #ddOrder{margin-left:auto}
+  .views #ddOpt .ddbtn{padding-right:0}
+  #ddOrder .ddpanel{left:auto;right:0}
+  .views .cust{margin:0 4px 0 -8px}
+  .views .cust .ddbtn{padding:6px 2px}
+  .views .cust svg{width:14px;height:14px}
+  .views .cust.open .ddbtn svg{transform:rotate(180deg)}
   .views>button.on,.views .dd.has .ddbtn,.views .dd.open .ddbtn{color:var(--ink)}
   .views svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-  .gpick{position:relative;margin-left:auto}
-  .gpick:not([hidden])~.dd{margin-left:0}
-  .gpick>button{padding:4px 8px;border:0;background:none;color:var(--ink-dim);cursor:pointer;display:flex;align-items:center;-webkit-tap-highlight-color:transparent}
-  .gpick .pop{position:absolute;right:0;top:calc(100% + 2px);z-index:40;background:var(--card);border:1px solid var(--line-soft);border-radius:4px;padding:10px;box-shadow:0 4px 14px oklch(0.25 0.02 95 / .12)}
-  .gpick .pop[hidden]{display:none}
-  .gpick .pop>div:first-child{display:grid;gap:4px}
-  #gpGrid{grid-template-columns:repeat(6,22px);grid-auto-rows:22px}
-  #ppGrid{grid-template-columns:repeat(6,22px);grid-auto-rows:30px}
-  .gpick .pop button{border:1px solid var(--line);background:var(--card);padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
-  .gpick .pop button.hi{background:var(--ink);border-color:var(--ink)}
-  .gpick .lbl{margin-top:8px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink)}
+  #custBinder .ddpanel{min-width:300px}
+  #ddOpt .ddpanel{min-width:364px}
+  .crow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line-soft);font-size:13.5px;color:var(--ink)}
+  .crow>span:first-child{width:92px;flex:none;font-weight:600}
+  #gpGrid,#ppGrid{display:grid;gap:4px}
+  #gpGrid{grid-template-columns:repeat(6,20px);grid-auto-rows:20px}
+  #ppGrid{grid-template-columns:repeat(6,20px);grid-auto-rows:28px}
+  .crow button{border:1px solid var(--line);background:var(--card);padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .crow button.hi{background:var(--ink);border-color:var(--ink)}
+  .crow .lbl{margin-left:auto;white-space:nowrap;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink)}
+  .curs{flex-wrap:wrap;gap:6px}
+  .curs>span:first-child{width:auto;margin-right:2px}
+  .curs button{height:28px;padding:0 9px;border-radius:14px;font:inherit;font-size:13px;font-weight:700;color:var(--ink-dim);background:none;border:1px solid var(--line)}
+  .curs button small{font-size:10px;font-weight:600;margin-left:3px;letter-spacing:.04em}
+  .curs button.on{color:var(--card);background:var(--ink);border-color:var(--ink)}
 
   #pocket{--cols:3;--gap:8px;padding:10px calc(var(--gutter) + 64px) 60px var(--gutter);max-width:min(100%,max(var(--col),calc(var(--cols) * 132px)));margin:0 auto}
   /* the binder view hosts the vendored card-binder module (vendor/card-binder.js and .css from sleetcrash/components); the tiles are its items,
@@ -192,10 +202,9 @@
   .ctx{position:fixed;z-index:60;min-width:180px;padding:4px 0;background:var(--card);border:1px solid var(--line-soft);border-radius:4px;box-shadow:0 4px 14px oklch(0.25 0.02 95 / .12)}
   .ctx button{display:block;width:100%;height:38px;padding:0 14px;border:0;background:none;color:var(--ink);font-size:13px;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
   @media (hover:hover){.ctx button:hover{background:var(--card-hi)}}
-  .cpick{margin-left:0;padding:4px 8px;align-items:center;cursor:pointer}
-  .cpick:not([hidden]){display:flex}
-  .cpick input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-  .cpick .sw{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--ink-dim);background:var(--cover,#34363c)}
+  .cpick{position:relative}
+  .cpick input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;margin:0}
+  .cpick .sw{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--ink-dim);margin-left:auto;background:var(--sw,#34363c)}
   /* desktop: the shell widens to 960px and the pocket grid follows it, with tiles capped near 260px so a three-column run does not balloon */
   @media(min-width:1000px){
     :root{--col:960px}
@@ -430,35 +439,42 @@
   </div>
   <div class="views">
     <button id="vList" class="on" type="button" aria-label="List view"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="9" y1="6.5" x2="20" y2="6.5"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="17.5" x2="20" y2="17.5"/><circle cx="4.8" cy="6.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="4.8" cy="12" r="1.1" fill="currentColor" stroke="none"/><circle cx="4.8" cy="17.5" r="1.1" fill="currentColor" stroke="none"/></svg></button>
+    <div class="dd cust" id="custList" hidden><button class="ddbtn" type="button" aria-label="List options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddpanel">
+      <label><input type="radio" name="entries" value="sep" checked>Separate entries</label>
+      <label><input type="radio" name="entries" value="col">Collapsible entries</label>
+    </div></div>
     <button id="vBinder" type="button" aria-label="Binder view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="15" height="17" rx="2"/><line x1="9.5" y1="3.5" x2="9.5" y2="20.5"/><line x1="3" y1="8" x2="6.5" y2="8"/><line x1="3" y1="12" x2="6.5" y2="12"/><line x1="3" y1="16" x2="6.5" y2="16"/></svg></button>
+    <div class="dd cust" id="custBinder" hidden><button class="ddbtn" type="button" aria-label="Binder options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddpanel">
+      <div class="crow"><span>Size</span><div id="gpGrid"></div><span id="gpLbl" class="lbl">3 &#215; 3</span></div>
+      <label class="cpick"><span>Binder colour</span><input id="coverIn" type="color" value="#34363c" aria-label="Binder colour"><span class="sw" id="coverSw"></span></label>
+      <label class="cpick"><span>Font colour</span><input id="fontIn" type="color" value="#6b6d75" aria-label="Font colour"><span class="sw" id="fontSw"></span></label>
+      <button id="optCover" class="plabel" type="button">Reset colours</button>
+    </div></div>
     <button id="vPocket" type="button" aria-label="Pocket view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="3.5" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="3.5" y="15.9" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="15.9" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="15.9" width="4.6" height="4.6" rx="1"/></svg></button>
-    <div class="gpick" id="gpick" hidden>
-      <button id="gpBtn" type="button" aria-label="Binder size"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2"/><line x1="12" y1="3.5" x2="12" y2="20.5"/><line x1="3.5" y1="12" x2="20.5" y2="12"/><rect x="5" y="5" width="5.5" height="5.5" fill="currentColor" stroke="none"/></svg></button>
-      <div id="gpPop" class="pop" hidden><div id="gpGrid"></div><div id="gpLbl" class="lbl">3 &#215; 3</div></div>
-    </div>
-    <label class="gpick cpick" id="cpick" hidden title="Binder colour"><input id="coverIn" type="color" value="#34363c" aria-label="Binder colour"><span class="sw"></span></label>
-    <div class="gpick" id="ppick" hidden>
-      <button id="ppBtn" type="button" aria-label="Columns"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2"/><line x1="9.2" y1="3.5" x2="9.2" y2="20.5"/><line x1="14.8" y1="3.5" x2="14.8" y2="20.5"/><rect x="5" y="5" width="2.7" height="14" fill="currentColor" stroke="none"/></svg></button>
-      <div id="ppPop" class="pop" hidden><div id="ppGrid"></div><div id="ppLbl" class="lbl">3 columns</div></div>
+    <div class="dd cust" id="custPocket" hidden><button class="ddbtn" type="button" aria-label="Pocket options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddpanel">
+      <div class="crow"><span>Columns</span><div id="ppGrid"></div><span id="ppLbl" class="lbl">3 columns</span></div>
+    </div></div>
+    <div class="dd" id="ddOrder">
+      <button class="ddbtn" type="button" aria-label="Sort"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 4v16M4.5 17l3 3 3-3"/><path d="M16.5 20V4M13.5 7l3-3 3 3"/></svg></button>
+      <div class="ddpanel">
+        <label><input type="radio" name="placement" value="dex" checked>National Dex (0001-1025)</label>
+        <label><input type="radio" name="placement" value="dex-desc">National Dex (1025-0001)</label>
+        <label><input type="radio" name="placement" value="regional">Regional Dex (Kanto first)</label>
+        <label><input type="radio" name="placement" value="regional-desc">Regional Dex (Paldea first)</label>
+        <div class="pdiv"></div>
+        <label><input type="radio" name="placement" value="group">Type: Base-Form</label>
+      </div>
     </div>
     <div class="dd" id="ddOpt">
       <button class="ddbtn" type="button" aria-label="Options"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M10.3 3.2h3.4l.5 2.3 1.6.8 2.1-1.2 2.4 2.4-1.2 2.1.8 1.6 2.3.5v3.4l-2.3.5-.8 1.6 1.2 2.1-2.4 2.4-2.1-1.2-1.6.8-.5 2.3h-3.4l-.5-2.3-1.6-.8-2.1 1.2-2.4-2.4 1.2-2.1-.8-1.6-2.3-.5v-3.4l2.3-.5.8-1.6-1.2-2.1 2.4-2.4 2.1 1.2 1.6-.8.5-2.3Z"/></svg></button>
       <div class="ddpanel">
-        <label><input type="radio" name="entries" value="sep" checked>Separate entries</label>
-        <label><input type="radio" name="entries" value="col">Collapsible entries</label>
+        <label><input type="radio" name="sprites" value="origin">Sprites: Original Game</label>
+        <label><input type="radio" name="sprites" value="game" checked>Sprites: Original Game (+FRLG/HGSS)</label>
+        <label><input type="radio" name="sprites" value="home">Sprites: Pokemon Home</label>
         <div class="pdiv"></div>
-        <label><input type="radio" name="placement" value="dex" checked>National Dex order</label>
-        <label><input type="radio" name="placement" value="regional">Regional Dex order</label>
-        <label><input type="radio" name="placement" value="group">Grouped at end</label>
-        <div class="pdiv"></div>
-        <label><input type="radio" name="sprites" value="game" checked>Game sprites</label>
-        <label><input type="radio" name="sprites" value="home">HOME renders</label>
-        <div class="pdiv"></div>
-        <label><input type="radio" name="cur" value="USD" checked>Prices in USD</label>
-        <label><input type="radio" name="cur" value="EUR">Prices in EUR</label>
+        <div class="crow curs"><span>Currency</span><button type="button" data-cur="USD">$<small>USD</small></button><button type="button" data-cur="CAD">$<small>CAD</small></button><button type="button" data-cur="EUR">&euro;<small>EUR</small></button><button type="button" data-cur="GBP">&pound;<small>GBP</small></button></div>
         <div class="pdiv"></div>
         <button id="optLists" class="plabel" type="button">Manage lists</button>
-        <button id="optCover" class="plabel" type="button">Reset binder colour</button>
         <button id="optClearCards" class="plabel" type="button">Clear all cards</button>
         <button id="optReset" class="plabel" type="button">Reset list</button>
       </div>
@@ -530,7 +546,7 @@ const store={
 };
 let owned=store.load("dex-il");
 let prefs=Object.assign({view:"list",per:9,placement:"dex",entries:"sep",clang:["en"],csort:"new",cur:"USD",cgame:["tcg","pocket"]},store.load("dex-il-ui"));
-const sprSrc=id=>`sprites/${prefs.sprites==="home"?"home":"game"}/${id}.webp`;
+const sprSrc=id=>`sprites/${prefs.sprites==="home"?"home":prefs.sprites==="origin"&&genOf.get(id)<=2?"origin":"game"}/${id}.webp`;
 const genOf=new Map(DEX.map(e=>[e[1],e[4]]));
 const sprImg=sid=>`<img loading="lazy" decoding="async" src="${sprSrc(sid)}" alt=""${prefs.sprites==="home"||genOf.get(sid)>5||SPRSMOOTH.has(sid)?' class="sm"':""}>`;
 if(!prefs.bcols){prefs.bcols=prefs.per===16?4:3;prefs.brows=prefs.bcols}
@@ -538,6 +554,8 @@ if(!prefs.pcols)prefs.pcols=3;
 const perNow=()=>prefs.bcols*prefs.brows;
 if(prefs.entries!=="col")prefs.entries="sep";
 if(!["group","regional"].includes(prefs.placement))prefs.placement="dex";
+if(prefs.dir!=="desc")prefs.dir="asc";
+const placeValue=()=>prefs.placement+(prefs.dir==="desc"&&prefs.placement!=="group"?"-desc":"");
 delete prefs.sort;delete prefs.sortBy;delete prefs.group;delete prefs.incBase;
 
 const $=id=>document.getElementById(id);
@@ -552,7 +570,7 @@ const rowMap=new Map(),expMap=new Map();
 // market price of the chosen binder card, filled into the row's empty middle when visible
 function priceLink(p){
   const a=document.createElement("a");
-  a.href=p.url;a.target="_blank";a.rel="noopener";a.textContent="$"+p.rows[0][1].toFixed(2);
+  a.href=p.url;a.target="_blank";a.rel="noopener";a.textContent=fmtPrice(conv({unit:"USD",v:p.rows[0][1]}));
   return a;
 }
 function fillRowPrice(row){
@@ -792,11 +810,19 @@ function ensureSetDates(){return SETDP||(SETDP=fetch("data/sets.json").then(r=>r
 const setDate=c=>(c.set&&c.set.releaseDate)||(SETDATES[c.lang]||{})[setIdOf(c.id)]||"";
 const isPocket=c=>(POCKET[c.lang]||NOSETS).has(setIdOf(c.id))||/\/tcgp\//.test(c.image||"");
 // Cardmarket prices are EUR, TCGplayer USD; the price line shows one currency, converting at the ECB rate of the day
-let RATE=null;
+const SYM={USD:"$",CAD:"CA$",EUR:"\u20ac",GBP:"\u00a3"};
+if(!SYM[prefs.cur])prefs.cur="USD";
+let RATES=null;
 function ensureRate(){
-  if(RATE)return Promise.resolve(RATE);
-  try{const c=JSON.parse(localStorage.getItem("fx:eurusd")||"null");if(c&&Date.now()-c.t<864e5){RATE=c.v;return Promise.resolve(RATE)}}catch(e){}
-  return fetch("https://api.frankfurter.app/latest?from=EUR&to=USD").then(r=>r.json()).then(j=>{RATE=j.rates.USD;try{localStorage.setItem("fx:eurusd",JSON.stringify({t:Date.now(),v:RATE}))}catch(e){}return RATE}).catch(()=>null);
+  if(RATES)return Promise.resolve(RATES);
+  try{const c=JSON.parse(localStorage.getItem("fx:usd")||"null");if(c&&Date.now()-c.t<864e5){RATES=c.v;return Promise.resolve(RATES)}}catch(e){}
+  return fetch("https://api.frankfurter.app/latest?from=USD&to=EUR,CAD,GBP").then(r=>r.json()).then(j=>{RATES={USD:1,...j.rates};try{localStorage.setItem("fx:usd",JSON.stringify({t:Date.now(),v:RATES}))}catch(e){}return RATES}).catch(()=>null);
+}
+// a price in the chosen currency; rates are USD-based, Cardmarket's EUR goes through USD
+function conv(p){
+  if(!p||p.unit===prefs.cur||!RATES||!RATES[prefs.cur])return p;
+  const usd=p.unit==="USD"?p.v:p.v/RATES[p.unit];
+  return {unit:prefs.cur,v:usd*RATES[prefs.cur],approx:true};
 }
 function fillSetDates(cards){
   const miss=[...new Set(cards.filter(c=>!setDate(c)).map(c=>c.lang+" "+setIdOf(c.id)))];
@@ -811,12 +837,8 @@ function priceOf(c){
   if(cm&&cm.trend)return{unit:"EUR",v:cm.trend};
   return null;
 }
-const fmtPrice=p=>(p.approx?"≈":"")+(p.unit==="USD"?"$":"€")+(p.v>=1000?Math.round(p.v).toLocaleString("en-US"):p.v.toFixed(2));
-function shownPrice(c){
-  const p=priceOf(c);
-  if(!p||p.unit===prefs.cur||!RATE)return p;
-  return prefs.cur==="USD"?{unit:"USD",v:p.v*RATE,approx:true}:{unit:"EUR",v:p.v/RATE,approx:true};
-}
+const fmtPrice=p=>(p.approx?"≈":"")+SYM[p.unit]+(p.v>=1000?Math.round(p.v).toLocaleString("en-US"):p.v.toFixed(2));
+const shownPrice=c=>conv(priceOf(c));
 // six card details in flight at a time; a sheet change (cSeq) stops the run
 function hydrate(cards,seq,onCard,onProg){
   const q=cards.filter(c=>!c.full);let i=0,active=0,done=0;
@@ -1054,7 +1076,13 @@ function showCard(c){
   paint(c);
   tget("cards/"+c.id,c.lang).then(d=>{if(!d||!box.isConnected)return;absorb(c,d);paint(d)}).catch(()=>{});
 }
-document.querySelectorAll('input[name="cur"]').forEach(r=>{r.checked=r.value===prefs.cur;r.addEventListener("change",()=>{prefs.cur=r.value;store.save("dex-il-ui",prefs);if(cCards)cCards.forEach(updateCell)})});
+const curBtns=[...document.querySelectorAll(".curs button")];
+curBtns.forEach(b=>{b.classList.toggle("on",b.dataset.cur===prefs.cur);b.addEventListener("click",()=>{
+  prefs.cur=b.dataset.cur;store.save("dex-il-ui",prefs);curBtns.forEach(x=>x.classList.toggle("on",x===b));
+  if(cCards)cCards.forEach(updateCell);rowMap.forEach(fillRowPrice);
+  if(prefs.view==="binder")renderBinder();else if(prefs.view==="pocket")renderPocket();
+})});
+ensureRate();
 function backToGrid(){
   if(!cCards){openCards(cEntry);return}
   cback.hidden=true;cfilters.hidden=false;cbody.classList.remove("detail");renderGrid();
@@ -1187,6 +1215,10 @@ const GENREG=["Kanto","Johto","Hoenn","Sinnoh","Unova","Kalos","Alola","Galar","
 const speciesRegion=n=>(n>=899&&n<=905)?"Hisui":(n===808||n===809)?"POGO":GENREG[baseGen(n)-1];
 let ORDERED=DEX;
 function computeOrder(){
+  const out=orderAsc();
+  return prefs.dir==="desc"&&prefs.placement!=="group"?[...out].reverse():out;
+}
+function orderAsc(){
   if(prefs.placement==="dex")return DEX;
   const rank=e=>({"":0,Other:1,Regional:2,Mega:3,Gmax:4,Dynamax:5,Tera:6})[e[5]];
   const key=prefs.placement==="regional"
@@ -1319,19 +1351,19 @@ function setEntries(v){
   entryRadios.forEach(r=>r.checked=r.value===v);
   if(v==="col"&&formShown().size===1){formBoxes.forEach(b=>b.checked=true);updateFormBtn()}
   placeRadios.forEach(r=>{if(r.value!=="dex")r.disabled=v==="col"});
-  if(v==="col"&&prefs.placement!=="dex"){setPlacement("dex");return}
+  if(v==="col"&&placeValue()!=="dex"){setPlacement("dex");return}
   applyFilters();
 }
 entryRadios.forEach(r=>r.addEventListener("change",()=>{if(r.checked)setEntries(r.value)}));
 function setPlacement(v){
-  prefs.placement=v;store.save("dex-il-ui",prefs);
-  placeRadios.forEach(r=>r.checked=r.value===v);
+  const [p,d]=v.split("-");prefs.placement=p;prefs.dir=d==="desc"?"desc":"asc";store.save("dex-il-ui",prefs);
+  placeRadios.forEach(r=>r.checked=r.value===placeValue());
   updateFormBtn();
   resort();
 }
 placeRadios.forEach(r=>r.addEventListener("change",()=>{if(r.checked)setPlacement(r.value)}));
 const ddOpt=$("ddOpt");
-wireDropdown(ddOpt);
+[ddOpt,$("ddOrder"),$("custList"),$("custBinder"),$("custPocket")].forEach(wireDropdown);
 // destructive options arm on the first tap and act on the second; any other click disarms
 const confirms=[];
 function armConfirm(btn,armedLabel,action){
@@ -1502,23 +1534,21 @@ function ctxFor(el){
 }
 // pocket view: one continuous vertical run of binder tiles, column count selectable
 // via a one-row picker (mouse) or pinch (touch, and ctrl+wheel trackpad pinch)
-const ppBtn=$("ppBtn"),ppPop=$("ppPop"),ppGrid=$("ppGrid"),ppLbl=$("ppLbl");
+const ppGrid=$("ppGrid"),ppLbl=$("ppLbl"),custPocket=$("custPocket");
 for(let cc=1;cc<=6;cc++){
   const b=document.createElement("button");b.type="button";b.dataset.c=cc;
   b.addEventListener("mouseenter",()=>ppHi(cc));
-  b.addEventListener("click",()=>{setPCols(cc);ppPop.hidden=true});
+  b.addEventListener("click",()=>{setPCols(cc);closeMenus()});
   ppGrid.appendChild(b);
 }
+custPocket.querySelector(".ddbtn").addEventListener("click",()=>{if(custPocket.classList.contains("open"))ppHi(prefs.pcols)});
 function ppHi(c){[...ppGrid.children].forEach(el=>el.classList.toggle("hi",+el.dataset.c<=c));ppLbl.textContent=c===1?"1 column":`${c} columns`}
 function setPCols(c){
   c=Math.min(6,Math.max(1,c));
   if(c===prefs.pcols)return;
   prefs.pcols=c;store.save("dex-il-ui",prefs);
-  ppBtn.title=`${c} columns`;
   layoutPocket();
 }
-ppBtn.title=`${prefs.pcols} columns`;
-ppBtn.addEventListener("click",()=>{ppPop.hidden=!ppPop.hidden;if(!ppPop.hidden)ppHi(prefs.pcols)});
 let pinchD=0;
 pgrid.addEventListener("touchstart",ev=>{
   if(ev.touches.length===2)pinchD=Math.hypot(ev.touches[0].clientX-ev.touches[1].clientX,ev.touches[0].clientY-ev.touches[1].clientY);
@@ -1571,7 +1601,7 @@ function setView(v){
   list.hidden=v!=="list";
   binder.hidden=v!=="binder";
   pocketEl.hidden=v!=="pocket";
-  $("gpick").hidden=$("cpick").hidden=v!=="binder";$("ppick").hidden=v!=="pocket";
+  $("custList").hidden=v!=="list";$("custBinder").hidden=v!=="binder";custPocket.hidden=v!=="pocket";closeMenus();
   if(v==="binder"){renderBinder();if(cb&&prev!=="binder")cb.close("front")}
   if(v==="pocket")renderPocket();
   renderJumps();
@@ -1581,33 +1611,35 @@ $("vList").addEventListener("click",()=>setView("list"));
 $("vBinder").addEventListener("click",()=>setView("binder"));
 $("vPocket").addEventListener("click",()=>setView("pocket"));
 // binder size: hover-to-preview grid picker, up to 6x6
-const gpBtn=$("gpBtn"),gpPop=$("gpPop"),gpGrid=$("gpGrid"),gpLbl=$("gpLbl");
+const gpGrid=$("gpGrid"),gpLbl=$("gpLbl"),custBinder=$("custBinder");
 for(let r=1;r<=6;r++)for(let cc=1;cc<=6;cc++){
   const b=document.createElement("button");b.type="button";b.dataset.c=cc;b.dataset.r=r;
   b.addEventListener("mouseenter",()=>gpHi(cc,r));
-  b.addEventListener("click",()=>{setGrid(cc,r);gpPop.hidden=true});
+  b.addEventListener("click",()=>{setGrid(cc,r);closeMenus()});
   gpGrid.appendChild(b);
 }
+custBinder.querySelector(".ddbtn").addEventListener("click",()=>{if(custBinder.classList.contains("open"))gpHi(prefs.bcols,prefs.brows)});
 function gpHi(c,r){
   [...gpGrid.children].forEach(el=>el.classList.toggle("hi",+el.dataset.c<=c&&+el.dataset.r<=r));
   gpLbl.textContent=`${c} × ${r}`;
 }
 function setGrid(c,r){
   prefs.bcols=c;prefs.brows=r;store.save("dex-il-ui",prefs);
-  gpBtn.title=`${c}×${r}`;
   page=0;renderBinder();
 }
-const coverIn=$("coverIn"),cpick=$("cpick");
+// binder colours: the cover, and the font (the pressed title and the progress fill); both hex or unset
+const coverIn=$("coverIn"),fontIn=$("fontIn"),coverSw=$("coverSw"),fontSw=$("fontSw");
+const hex=v=>/^#[0-9a-f]{6}$/i.test(v||"")?v:null;
 function applyCover(){
-  const c=/^#[0-9a-f]{6}$/i.test(prefs.cover||"")?prefs.cover:null;
-  if(!c&&prefs.cover){delete prefs.cover;store.save("dex-il-ui",prefs)}
-  if(cb)cb.setCover(c);
-  cpick.style.setProperty("--cover",c||"#34363c");coverIn.value=c||"#34363c";
+  const c=hex(prefs.cover),fc=hex(prefs.font);
+  if(!c)delete prefs.cover;if(!fc)delete prefs.font;store.save("dex-il-ui",prefs);
+  if(cb){cb.setCover(c);cb.setFont(fc)}
+  coverSw.style.setProperty("--sw",c||"#34363c");coverIn.value=c||"#34363c";
+  fontSw.style.setProperty("--sw",fc||"#6b6d75");fontIn.value=fc||"#6b6d75";
 }
-coverIn.addEventListener("input",()=>{prefs.cover=coverIn.value;store.save("dex-il-ui",prefs);applyCover()});
-$("optCover").addEventListener("click",()=>{delete prefs.cover;store.save("dex-il-ui",prefs);applyCover();closeMenus()});
-gpBtn.title=`${prefs.bcols}×${prefs.brows}`;
-gpBtn.addEventListener("click",()=>{gpPop.hidden=!gpPop.hidden;if(!gpPop.hidden)gpHi(prefs.bcols,prefs.brows)});
+coverIn.addEventListener("input",()=>{prefs.cover=coverIn.value;applyCover()});
+fontIn.addEventListener("input",()=>{prefs.font=fontIn.value;applyCover()});
+$("optCover").addEventListener("click",()=>{delete prefs.cover;delete prefs.font;applyCover();closeMenus()});
 
 // search: jump to the entry in whichever view is active
 const q=$("q"),sugg=$("sugg");
@@ -1696,10 +1728,9 @@ q.addEventListener("keydown",ev=>{
 });
 document.addEventListener("keydown",e=>{
   if(e.key!=="Escape")return;
-  gpPop.hidden=ppPop.hidden=true;sugg.style.display="none";closeMenus();disarmClear();closeCtx();
+  sugg.style.display="none";closeMenus();disarmClear();closeCtx();
 });
 document.addEventListener("click",e=>{
-  if(!e.target.closest(".gpick")){gpPop.hidden=true;ppPop.hidden=true}
   if(!e.target.closest(".search"))sugg.style.display="none";
   if(!e.target.closest(".dd"))closeMenus();
   if(!e.target.closest(".plabel.danger"))disarmClear();
@@ -1917,7 +1948,7 @@ const hoverMq=matchMedia("(hover:hover)");
 function keepHeader(){hdrHold=performance.now()+600;headerEl.classList.remove("away")}
 function slideHeader(){
   const y=window.scrollY,dy=y-lastY;lastY=y;
-  if(y<=headH||performance.now()<hdrHold||headerEl.matches(":focus-within")||(hoverMq.matches&&headerEl.matches(":hover"))||headerEl.querySelector(".dd.open,.gpick .pop:not([hidden])")){headerEl.classList.remove("away");return}
+  if(y<=headH||performance.now()<hdrHold||headerEl.matches(":focus-within")||(hoverMq.matches&&headerEl.matches(":hover"))||headerEl.querySelector(".dd.open")){headerEl.classList.remove("away");return}
   if(dy>6)headerEl.classList.add("away");else if(dy<-6)headerEl.classList.remove("away");
 }
 document.addEventListener("mousemove",ev=>{if(hoverMq.matches&&ev.clientY<16)headerEl.classList.remove("away")},{passive:true});
@@ -1935,7 +1966,7 @@ toEnd.addEventListener("click",()=>window.scrollTo({top:document.documentElement
 
 entryRadios.forEach(r=>r.checked=r.value===prefs.entries);
 placeRadios.forEach(r=>{if(r.value!=="dex")r.disabled=prefs.entries==="col"});
-setPlacement(prefs.placement);
+setPlacement(placeValue());
 setView(prefs.view);
 </script>
 <script type="module">
