@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Build sprites/game and sprites/home from the official PokeAPI sprite sets.
+"""Build sprites/game, sprites/origin and sprites/home from the official PokeAPI sprite sets.
 
 Game set: each generation is drawn by the fullest game set of its own era
 (Kanto and Johto by their pixel-era remakes). A form missing from its own set
 walks forward through later official sets before falling back to HOME, so
-nothing fan-made is ever picked. HOME set: Pokemon HOME renders for everything.
+nothing fan-made is ever picked. Origin set: only Gen 1 and 2 entries, drawn by
+the games that introduced them (Red/Blue, Crystal) before the same walk; the app
+reads every later generation from the game set. HOME set: Pokemon HOME renders
+for everything.
 
-Usage: python3 scripts/build-sprites.py [--only game|home]
+Usage: python3 scripts/build-sprites.py [--only game|origin|home]
 Needs Pillow with WebP. Downloads are cached in scripts/.sprite-cache/.
 Set GITHUB_TOKEN to lift the unauthenticated GitHub API limit (16 calls needed).
 """
@@ -23,6 +26,8 @@ API = "https://api.github.com/repos/PokeAPI/sprites/"
 CSV = "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/"
 
 FOLDERS = {
+    "rb": "versions/generation-i/red-blue/transparent",
+    "crystal": "versions/generation-ii/crystal/transparent",
     "frlg": "versions/generation-iii/firered-leafgreen",
     "hgss": "versions/generation-iv/heartgold-soulsilver",
     "emerald": "versions/generation-iii/emerald",
@@ -32,7 +37,7 @@ FOLDERS = {
     "usum": "versions/generation-vii/ultra-sun-ultra-moon",
     "home": "other/home",
 }
-PIXEL = {"frlg", "hgss", "emerald", "platinum", "bw"}
+PIXEL = {"rb", "crystal", "frlg", "hgss", "emerald", "platinum", "bw"}
 # Walk-forward chain per generation of introduction. Only sets from the same or a
 # later generation are eligible, which is what keeps the BW folder's fan sprites
 # (ids above 649) out of reach: no entry introduced after Gen 5 ever reaches it.
@@ -47,6 +52,7 @@ CHAIN = {
     8: ["home"],
     9: ["home"],
 }
+ORIGIN = {1: ["rb"] + CHAIN[1], 2: ["crystal"] + CHAIN[2]}
 HOME_PX = 160
 
 
@@ -130,9 +136,11 @@ def main():
     own = [e for e in dex if len(e) < 7 or not e[6]]
     jobs = []
     for e in own:
-        if only != "home":
+        if only in (None, "game"):
             jobs.append((e, CHAIN[e[4]], OUT / "game"))
-        if only != "game":
+        if only in (None, "origin") and e[4] in ORIGIN:
+            jobs.append((e, ORIGIN[e[4]], OUT / "origin"))
+        if only in (None, "home"):
             jobs.append((e, ["home"], OUT / "home"))
     for _, _, d in jobs:
         d.mkdir(parents=True, exist_ok=True)
