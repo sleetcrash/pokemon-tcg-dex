@@ -50,8 +50,6 @@
   .count b{color:var(--card);font-weight:600}
   #pend{color:var(--pend-lite);font-weight:600}
   .pct{color:var(--shell-dim)}
-  .bar{position:absolute;left:0;right:0;bottom:-1px;height:2px;pointer-events:none}
-  .bar i{display:block;height:100%;width:0;background:var(--shell);transition:width .3s ease}
 
   .search{position:relative}
   .search::before{content:"";position:absolute;left:2px;top:50%;translate:0 -50%;width:18px;height:18px;background:var(--ink-dim);-webkit-mask:var(--icon-find) center/contain no-repeat;mask:var(--icon-find) center/contain no-repeat;pointer-events:none}
@@ -483,7 +481,6 @@
     </div>
   </div>
  </div>
- <div class="bar"><i id="fill"></i></div>
 </header>
 
 <main id="list"></main>
@@ -1205,7 +1202,6 @@ function tally(){
   $("pend").textContent=pen?` +${pen}`:"";
   const pct=reg/DEX.length*100;
   $("pct").textContent=pct.toFixed(pct&&pct<10?1:0)+"%";
-  $("fill").style.width=pct+"%";
   syncBinderMeta(reg,pen,$("pct").textContent);
 }
 tally();
@@ -1467,7 +1463,7 @@ function syncBinderMeta(reg,pen,pct){
 }
 function initBinder(CardBinder){
   bItems=binderItems();indexBinder();
-  cb=new CardBinder(book,{items:bItems,cols:prefs.bcols,rows:prefs.brows,keys:false,name:binderName(),
+  cb=new CardBinder(book,{items:bItems,cols:prefs.bcols,rows:prefs.brows,keys:false,name:binderName(),itemDone:e=>e.blank?null:owned[e[1]]===true,
     renderItem:e=>e.blank?blankTile(e):binderTile(e,bTiles),
     onChange:s=>{page=s.page;unpinStrip();closeCtx();for(const[id,el]of bTiles)if(!el.isConnected)bTiles.delete(id);const first=book.querySelector(".cb-book>.cb-leaf:not(.cb-ghost) [data-id]");if(first)first.tabIndex=0;keepHeader();updateCurrentJump(true)}});
   applyCover();tally();
