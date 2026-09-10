@@ -1,11 +1,12 @@
-// card-binder v2.4.1 (2026-09-10)
+// card-binder v2.5.0 (2026-09-10)
 // card-binder: a pocket-page binder as a physical object. Zero dependencies, ES module.
-// new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, cover, font, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, onChange})
+// new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, itemDone, cover, font, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, onChange})
 //   items        array of anything; renderItem(item, index) returns the element that sits in a pocket (give it the pocket aspect)
 //   cols, rows   pockets per page (1 to 6 each)
 //   name         pressed into the shut front cover and printed on the contents card
 //   inside       [[label, value], ...] rows for the contents card on the inside front cover (the name and progress join it)
-//   progress     0 to 1, drawn as a bar under every page and on the contents card; progressLabel prints beside it
+//   progress     0 to 1, the total: a bar centred above the pager and on the contents card; progressLabel prints beside it
+//   itemDone(item) true, false, or null (not counted): with it, the band under each page carries that page's own bar and count
 //   cover        a CSS colour for the cover (a #rrggbb value also picks a light or dark progress fill and imprint direction)
 //   font         a CSS colour for the pressed title's groove and the progress fill; unset, both derive from the cover
 //   spreadMinWidth  viewport width from which two pages face each other (default 1000); below it one page at a time
@@ -21,10 +22,10 @@
 // perspective distance for a turn, in page widths: the free edge of a swinging page grows by at most 1 / (1 - 1 / PERSP)
 const PERSP=10;
 export class CardBinder{
-  static VERSION="2.4.1";
+  static VERSION="2.5.0";
   constructor(host,o={}){
     this.host=host;this.items=o.items||[];this.renderItem=o.renderItem||(x=>{const d=document.createElement("div");d.textContent=String(x);return d});
-    this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";
+    this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";this.itemDone=o.itemDone||null;
     this.fit=o.fit!==false;this.animate=o.animate!==false;this.onChange=o.onChange||(()=>{});
     this.page=0;this.closed=o.startClosed===false?null:"front";this.swiped=false;
     this.mq=matchMedia(`(min-width:${o.spreadMinWidth||1000}px)`);this.mq.addEventListener("change",()=>this.render());
@@ -35,6 +36,7 @@ export class CardBinder{
     if(o.swipe!==false)this.armSwipe();
     if(o.cover)this.setCover(o.cover);
     if(o.font)this.setFont(o.font);
+    this.totalBar=document.createElement("div");this.totalBar.className="cb-total";this.host.appendChild(this.totalBar);this.paintTotal();
     if(o.pager!==false)this.mountPager(o.sizePicker);
     this.render();
   }
@@ -50,6 +52,7 @@ export class CardBinder{
   open(){this.page=this.closed==="back"?this.last:this.first;this.closed=null;this.render()}
   close(side="front"){this.closed=side;this.render()}
   turn(dir){
+    if(this.endTurn)this.endTurn();
     const was=this.closed,snap=this.animate&&!matchMedia("(prefers-reduced-motion: reduce)").matches?this.snapshot():null;
     if(this.closed==="front"){if(dir<0)return;this.closed=null;this.page=this.first}
     else if(this.closed==="back"){if(dir>0)return;this.closed=null;this.page=this.last}
@@ -66,8 +69,7 @@ export class CardBinder{
   // its shape) at the positions the leaves have after the render; a cover opening keeps the book in its shut shape, with the landing
   // leaf out of the layout, until the board lands, so the far half of the cover does not appear before the board gets there
   flip(snap,dir,was){
-    if(this.endTurn)this.endTurn();
-    const host=this.host,book=this.book,L=this.leafL,R=this.leafR,gone=[],hr=host.getBoundingClientRect();let opened=null;
+    const host=this.host,book=this.book,L=this.leafL,R=this.leafR,gone=[],hr=host.getBoundingClientRect();let opened=null,unhold=null;
     // a ghost sits on whole screen pixels: the edge of a transformed layer is blended with the page behind it, and at the spine that read as a light line
     const ghost=(el,r)=>{el.hidden=false;el.inert=true;el.classList.add("cb-ghost");const l=Math.round(r.left),t=Math.round(r.top);el.style.left=l-hr.left+"px";el.style.top=t-hr.top+"px";el.style.width=Math.round(r.left+r.width)-l+"px";el.style.height=Math.round(r.top+r.height)-t+"px";host.appendChild(el);gone.push(el);return el};
     const rect=el=>el.getBoundingClientRect();
@@ -86,6 +88,9 @@ export class CardBinder{
       const fl=document.createElement("div"),back=land.cloneNode(true);
       fl.className="cb-flier";fl.append(face(front,dir>0?"cb-sl":"cb-sr"),face(back,dir>0?"cb-sr":"cb-sl","cb-back"));
       if(!under){opened=land;land.hidden=true;this.layout(was)}
+      // the landing leaf keeps its old band (page number and page bar) until the sheet lands; the new band would show before the page did
+      const held=land===L?snap.L:snap.R;
+      if(held){const f=land.lastElementChild,np=land.dataset.p;land.dataset.p=held.dataset.p;f.replaceChildren(...[...held.lastElementChild.childNodes].map(n=>n.cloneNode(true)));unhold=()=>{land.dataset.p=np;this.foot(land)}}
       let box;
       if(cov){
         // the book is shut now (it stayed shut for an open, render() shut it for a close), and the board takes its box on the whole pixels
@@ -102,7 +107,7 @@ export class CardBinder{
     else{if(snap.L)ghost(snap.L,rect(L));ghost(L.cloneNode(true),rect(L)).classList.add("cb-drop")}
     book.classList.add("cb-turning");
     let done=false;
-    const end=()=>{if(done)return;done=true;this.endTurn=null;gone.forEach(g=>g.remove());if(opened){opened.hidden=false;this.layout(this.closed)}book.classList.remove("cb-turning")};
+    const end=()=>{if(done)return;done=true;this.endTurn=null;gone.forEach(g=>g.remove());if(unhold)unhold();if(opened){opened.hidden=false;this.layout(this.closed)}book.classList.remove("cb-turning")};
     this.endTurn=end;
     gone[gone.length-1].addEventListener("animationend",end,{once:true});
     const t=getComputedStyle(book).getPropertyValue("--cb-turn").trim(),ms=t.endsWith("ms")?parseFloat(t):parseFloat(t)*1000;
@@ -111,7 +116,8 @@ export class CardBinder{
   // the name, the contents rows and the progress repaint in place; nothing in a pocket is rebuilt
   setName(name){this.name=name||"";this.paintFeet();this.paintCovers()}
   setInside(rows){this.inside=rows||[];this.paintCovers()}
-  setProgress(value,label){this.progress=value;this.progressLabel=label||"";this.paintFeet();this.paintCovers()}
+  setProgress(value,label){this.progress=value;this.progressLabel=label||"";this.paintFeet();this.paintCovers();this.paintTotal()}
+  paintTotal(){const p=this.prog();this.totalBar.replaceChildren(...(p?[p]:[]))}
   setCover(c){
     const s=this.host.style;
     if(!c){["--cb-cover","--cb-cover-hi","--cb-thread","--cb-press"].forEach(p=>s.removeProperty(p));return}
@@ -123,11 +129,11 @@ export class CardBinder{
   // the font colour: the pressed title's groove and the progress fill; pass nothing to go back to the cover-derived tones
   setFont(c){if(c)this.host.style.setProperty("--cb-font",c);else this.host.style.removeProperty("--cb-font")}
   pressed(text){const n=document.createElement("span");n.className="cb-press";n.textContent=text;n.dataset.t=text;return n}
-  prog(){
-    if(this.progress==null)return null;
+  prog(value=this.progress,label=this.progressLabel){
+    if(value==null)return null;
     const w=document.createElement("span");w.className="cb-prog";
-    const t=document.createElement("span"),i=document.createElement("i");i.style.width=(Math.min(1,Math.max(0,this.progress))*100).toFixed(1)+"%";t.appendChild(i);w.appendChild(t);
-    if(this.progressLabel){const l=document.createElement("small");l.textContent=this.progressLabel;w.appendChild(l)}
+    const t=document.createElement("span"),i=document.createElement("i");i.style.width=(Math.min(1,Math.max(0,value))*100).toFixed(1)+"%";t.appendChild(i);w.appendChild(t);
+    if(label){const l=document.createElement("small");l.textContent=label;w.appendChild(l)}
     return w;
   }
   // the four cover faces: the shut front and back covers, and the inside of each once the book is open
@@ -145,10 +151,14 @@ export class CardBinder{
     }
     return c;
   }
+  // the band under a page: that page's own bar and count, from itemDone over the items on it
   foot(leaf){
     const f=leaf.lastElementChild;f.replaceChildren();
-    if(leaf.classList.contains("cb-cov"))return;
-    const p=this.prog();if(p)f.appendChild(p);
+    if(leaf.classList.contains("cb-cov")||!this.itemDone)return;
+    const p=leaf.dataset.p-1,seen=this.items.slice(p*this.per,p*this.per+this.per).map(this.itemDone).filter(v=>v!=null);
+    if(!seen.length)return;
+    const done=seen.filter(Boolean).length;
+    f.appendChild(this.prog(done/seen.length,`${done} / ${seen.length}`));
   }
   paintFeet(){[this.leafL,this.leafR].forEach(l=>{if(!l.hidden)this.foot(l)})}
   paintCovers(){[this.leafL,this.leafR].forEach(l=>{if(!l.hidden&&l.dataset.cov)l.firstElementChild.replaceChildren(this.face(l.dataset.cov))})}

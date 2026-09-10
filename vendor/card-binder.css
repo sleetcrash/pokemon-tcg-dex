@@ -1,4 +1,4 @@
-/* card-binder v2.4.1 (2026-09-10) */
+/* card-binder v2.5.0 (2026-09-10) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
@@ -11,7 +11,7 @@
   --cb-gap:14px;                       /* between pockets; the module lowers it at four and five plus columns unless --cb-gap-fixed is set */
   --cb-bpad:6px;--cb-lpad:calc(var(--cb-gap) * .7);--cb-ppad:calc(var(--cb-gap) * .3);
   --cb-press:1;                        /* the imprint on the shut front cover: 1 lifts the groove floor off a dark cover, -1 sinks it into a light one; setCover sets it for hex colours */
-  --cb-foot:18px;                      /* the cover band under each page: page number in the outer corner, the progress bar in the middle */
+  --cb-foot:18px;                      /* the cover band under each page (this plus --cb-bpad): page number in the outer corner, that page's bar in the middle */
   --cb-spine:36px;--cb-turn:.75s;      /* turn: how long one sheet takes to swing over the spine; the module sets --cb-persp per turn from the page width */
   --cb-reserve:160px;  /* reserve: viewport height taken by everything outside the book when cb-fit is on (site header, margins, this pager) */
   --cb-mono:ui-monospace,Menlo,monospace;
@@ -47,7 +47,7 @@
 .cb-host.cb-two .cb-book.cb-turning.cb-front,.cb-board.cb-inside.cb-sl{background-position:right}
 .cb-host.cb-two .cb-book.cb-turning.cb-back,.cb-board.cb-inside.cb-sr{background-position:left}
 .cb-leaf{position:relative;padding:var(--cb-lpad);background:var(--cb-sheet);border-radius:3px;box-shadow:inset 0 0 0 1px oklch(1 0 0 / .07),0 1px 2px oklch(0 0 0 / .45)}
-.cb-leaf::after{content:attr(data-p);position:absolute;right:2px;top:100%;line-height:var(--cb-foot);font-family:var(--cb-mono);font-size:10px;font-weight:600;color:oklch(0.7 0.005 260)}
+.cb-leaf::after{content:attr(data-p);position:absolute;right:2px;top:100%;line-height:calc(var(--cb-bpad) + var(--cb-foot));font-family:var(--cb-mono);font-size:10px;font-weight:600;color:oklch(0.7 0.005 260)}
 .cb-leaf.cb-lp::after{right:auto;left:2px}
 .cb-grid{display:grid;grid-template-columns:repeat(var(--cb-cols),1fr);gap:var(--cb-gap)}
 /* a pocket is welded on three sides (dashed seam); the top is the open mouth, its opaque film lip covers the seam there */
@@ -59,12 +59,19 @@
 .cb-pkt::after{content:"";position:absolute;left:0;right:0;top:0;height:8%;border-radius:2px 2px 0 0;z-index:7;pointer-events:none;
   border-top:1.5px solid color-mix(in oklch, var(--cb-pocket), white 45%);box-shadow:inset 0 4px 5px -2px oklch(0 0 0 / .4)}
 
-/* the cover band under each page: the progress bar centred under every page */
-.cb-foot{position:absolute;left:0;right:0;top:100%;height:var(--cb-foot);display:flex;align-items:center;justify-content:center;padding:0 24px;pointer-events:none}
+/* the cover band under each page, centred in the cover margin below it: that page's own bar and count */
+.cb-foot{position:absolute;left:0;right:0;top:100%;height:calc(var(--cb-bpad) + var(--cb-foot));display:flex;align-items:center;justify-content:center;padding:0 24px;pointer-events:none}
 .cb-prog{display:inline-flex;align-items:center;gap:8px;width:min(60%,240px)}
 .cb-prog>span{flex:1;height:4px;border-radius:2px;background:oklch(0 0 0 / .35);box-shadow:inset 0 0 0 1px oklch(1 0 0 / .1);overflow:hidden}
 .cb-prog>span>i{display:block;height:100%;border-radius:2px;background:var(--cb-font,var(--cb-thread))}
 .cb-prog small{font-family:var(--cb-mono);font-size:9px;font-weight:600;color:oklch(0.7 0.005 260)}
+/* the total, centred between the book and the pager */
+.cb-total{display:flex;justify-content:center;margin-top:12px}
+.cb-total:empty{display:none}
+.cb-total .cb-prog{width:min(70%,320px)}
+.cb-total .cb-prog>span{background:oklch(0 0 0 / .1);box-shadow:none}
+.cb-total .cb-prog>span>i{background:var(--cb-ink)}
+.cb-total .cb-prog small{font-size:11px;color:var(--cb-ink-dim)}
 
 /* the inside of a cover, and the closed covers */
 .cb-leaf.cb-cov{padding:0;background:none;box-shadow:none}
