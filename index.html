@@ -1393,6 +1393,7 @@ document.addEventListener("load",ev=>{
 },true);
 document.addEventListener("error",ev=>{
   const img=ev.target;if(!(img instanceof HTMLImageElement)||!img.closest(".spr,.part,.lbl"))return;
+  if(!img.dataset.retry){img.dataset.retry="1";const src=img.src;img.removeAttribute("src");setTimeout(()=>{img.src=src},1200);return}
   const fb=document.createElement("span");fb.className=img.closest(".part,.lbl")?"fbc":"fb";fb.textContent="#"+img.closest("[data-id]").dataset.id;img.replaceWith(fb);
 },true);
 function refreshTile(id){
