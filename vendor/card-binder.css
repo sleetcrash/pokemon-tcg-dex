@@ -1,4 +1,4 @@
-/* card-binder v2.2.8 (2026-09-09) */
+/* card-binder v2.3.0 (2026-09-10) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
@@ -10,6 +10,7 @@
   --cb-aw:63;--cb-ah:88;               /* pocket aspect, width and height units of whatever sits in a pocket */
   --cb-gap:14px;                       /* between pockets; the module lowers it at four and five plus columns unless --cb-gap-fixed is set */
   --cb-bpad:6px;--cb-lpad:calc(var(--cb-gap) * .7);--cb-ppad:calc(var(--cb-gap) * .3);
+  --cb-press:1;                        /* the imprint on the shut front cover: 1 lifts the groove floor off a dark cover, -1 sinks it into a light one; setCover sets it for hex colours */
   --cb-foot:18px;                      /* the cover band under each page: page number in the outer corner, name or progress in the middle */
   --cb-spine:36px;--cb-turn:.75s;      /* turn: how long one sheet takes to swing over the spine; the module sets --cb-persp per turn from the page width */
   --cb-reserve:160px;  /* reserve: viewport height taken by everything outside the book when cb-fit is on (site header, margins, this pager) */
@@ -104,7 +105,13 @@
 .cb-incover.cb-front::after,.cb-incover.cb-back::after{content:"";position:absolute;top:0;bottom:0;width:10px;pointer-events:none}
 .cb-incover.cb-front::after{left:0;background:linear-gradient(90deg,oklch(0 0 0 / .4),transparent)}
 .cb-incover.cb-back::after{right:0;background:linear-gradient(-90deg,oklch(0 0 0 / .4),transparent)}
-.cb-incover.cb-front .cb-name{position:absolute;left:50%;top:22%;transform:translateX(-50%);max-width:80%;font-size:clamp(12px,3.2cqw,22px);letter-spacing:.28em}
+/* the name on the shut front cover is pressed into the leather, line art tone on tone: the groove floor a shade off the cover, its upper-left wall in shadow, its lower-right wall catching the light */
+.cb-press{position:absolute;left:50%;top:22%;transform:translateX(-50%);max-width:80%;font-size:clamp(14px,4.4cqw,30px);letter-spacing:.28em;
+  background:none;filter:none;color:transparent;-webkit-text-stroke:1px oklch(from var(--cb-cover) calc(l + .2 * var(--cb-press)) c h)}
+.cb-press::before,.cb-press::after{content:attr(data-t);position:absolute;inset:0;z-index:-1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:transparent;pointer-events:none}
+.cb-press::before{transform:translate(-.75px,-.75px);-webkit-text-stroke:1px oklch(from var(--cb-cover) calc(l - .1) c h)}
+.cb-press::after{transform:translate(.75px,.75px);-webkit-text-stroke:1px oklch(from var(--cb-cover) calc(l + .1) c h)}
+@supports not (color:oklch(from red l c h)){.cb-press{-webkit-text-stroke-color:var(--cb-stitch)}.cb-press::before,.cb-press::after{display:none}}
 
 /* pager: first, previous, page box, next, last, and the optional size picker, centred under the book */
 .cb-pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin-top:12px;position:relative}

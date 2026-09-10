@@ -1,4 +1,4 @@
-// card-binder v2.2.8 (2026-09-09)
+// card-binder v2.3.0 (2026-09-10)
 // card-binder: a pocket-page binder as a physical object. Zero dependencies, ES module.
 // new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, cover, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, onChange})
 //   items        array of anything; renderItem(item, index) returns the element that sits in a pocket (give it the pocket aspect)
@@ -20,7 +20,7 @@
 // perspective distance for a turn, in page widths: the free edge of a swinging page grows by at most 1 / (1 - 1 / PERSP)
 const PERSP=10;
 export class CardBinder{
-  static VERSION="2.2.8";
+  static VERSION="2.3.0";
   constructor(host,o={}){
     this.host=host;this.items=o.items||[];this.renderItem=o.renderItem||(x=>{const d=document.createElement("div");d.textContent=String(x);return d});
     this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";
@@ -112,13 +112,14 @@ export class CardBinder{
   setProgress(value,label){this.progress=value;this.progressLabel=label||"";this.paintFeet();this.paintCovers()}
   setCover(c){
     const s=this.host.style;
-    if(!c){["--cb-cover","--cb-cover-hi","--cb-thread"].forEach(p=>s.removeProperty(p));return}
+    if(!c){["--cb-cover","--cb-cover-hi","--cb-thread","--cb-press"].forEach(p=>s.removeProperty(p));return}
     s.setProperty("--cb-cover",c);s.setProperty("--cb-cover-hi",`color-mix(in oklch, ${c}, white 9%)`);
     const m=/^#([0-9a-f]{6})$/i.exec(c);
-    if(m){const [r,g,b]=[0,2,4].map(i=>parseInt(m[1].slice(i,i+2),16)/255);s.setProperty("--cb-thread",.2126*r+.7152*g+.0722*b>.45?"oklch(0.24 0.02 80)":"oklch(0.86 0.02 80)")}
-    else s.removeProperty("--cb-thread");
+    if(m){const [r,g,b]=[0,2,4].map(i=>parseInt(m[1].slice(i,i+2),16)/255);const light=.2126*r+.7152*g+.0722*b>.45;s.setProperty("--cb-thread",light?"oklch(0.24 0.02 80)":"oklch(0.86 0.02 80)");s.setProperty("--cb-press",light?"-1":"1")}
+    else{s.removeProperty("--cb-thread");s.removeProperty("--cb-press")}
   }
   stitched(text){const n=document.createElement("span");n.className="cb-name";n.textContent=text;return n}
+  pressed(text){const n=this.stitched(text);n.classList.add("cb-press");n.dataset.t=text;return n}
   prog(){
     if(this.progress==null)return null;
     const w=document.createElement("span");w.className="cb-prog";
@@ -129,7 +130,7 @@ export class CardBinder{
   // the four cover faces: the shut front and back covers, and the inside of each once the book is open
   face(kind){
     const c=document.createElement("div");c.className="cb-incover cb-"+kind;
-    if(kind==="front"&&this.name)c.appendChild(this.stitched(this.name));
+    if(kind==="front"&&this.name)c.appendChild(this.pressed(this.name));
     if(kind==="in-front"){
       const card=document.createElement("div");card.className="cb-contents";
       if(this.name){const t=document.createElement("b");t.textContent=this.name;card.appendChild(t)}
