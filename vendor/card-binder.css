@@ -1,10 +1,10 @@
-/* card-binder v2.4.0 (2026-09-10) */
+/* card-binder v2.4.1 (2026-09-10) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
 .cb-host{
   --cb-cover:oklch(0.3 0.006 260);--cb-cover-hi:oklch(0.345 0.006 260);--cb-sheet:oklch(0.37 0.004 260);--cb-pocket:oklch(0.335 0.004 260);
-  --cb-seam:oklch(0.66 0.005 260 / .5);--cb-thread:oklch(0.86 0.02 80);   /* thread: the progress fill; setFont sets it and --cb-font, the pressed title's groove */--cb-stitch:color-mix(in oklch, var(--cb-thread), transparent 55%);
+  --cb-seam:oklch(0.66 0.005 260 / .5);--cb-thread:oklch(0.86 0.02 80);   /* thread: the progress fill and the stitch line; --cb-font (setFont) overrides it for the pressed title and the fill */--cb-stitch:color-mix(in oklch, var(--cb-thread), transparent 55%);
   --cb-paper:oklch(0.98 0.004 95);--cb-ink:oklch(0.22 0.012 95);--cb-ink-dim:oklch(0.47 0.012 95);
   --cb-line:oklch(0.6 0.01 95);--cb-line-soft:oklch(0.8 0.01 95);
   --cb-aw:63;--cb-ah:88;               /* pocket aspect, width and height units of whatever sits in a pocket */
@@ -50,20 +50,20 @@
 .cb-leaf::after{content:attr(data-p);position:absolute;right:2px;top:100%;line-height:var(--cb-foot);font-family:var(--cb-mono);font-size:10px;font-weight:600;color:oklch(0.7 0.005 260)}
 .cb-leaf.cb-lp::after{right:auto;left:2px}
 .cb-grid{display:grid;grid-template-columns:repeat(var(--cb-cols),1fr);gap:var(--cb-gap)}
-/* a pocket is welded on three sides (dashed seam); the top is the open mouth, its film lip a light line */
-.cb-pkt{position:relative;padding:var(--cb-ppad);border-radius:2px;background:var(--cb-pocket);border:1px dashed var(--cb-seam);border-top:0}
+/* a pocket is welded on three sides (dashed seam); the top is the open mouth, its opaque film lip covers the seam there */
+.cb-pkt{position:relative;padding:var(--cb-ppad);border-radius:2px;background:var(--cb-pocket);outline:1px dashed var(--cb-seam);outline-offset:-1px}
 .cb-pkt.cb-empty{box-sizing:content-box;aspect-ratio:var(--cb-aw) / var(--cb-ah)}
 .cb-pkt>*{display:block;width:100%}
 .cb-pkt::before{content:"";position:absolute;inset:0;border-radius:2px;z-index:6;pointer-events:none;
   background:radial-gradient(60% 40% at 18% 12%,oklch(1 0 0 / .22),transparent 70%),linear-gradient(158deg,oklch(1 0 0 / .2) 0%,oklch(1 0 0 / .07) 24%,transparent 46%,oklch(1 0 0 / .06) 72%,transparent 100%)}
 .cb-pkt::after{content:"";position:absolute;left:0;right:0;top:0;height:8%;border-radius:2px 2px 0 0;z-index:7;pointer-events:none;
-  border-top:1.5px solid oklch(1 0 0 / .55);box-shadow:inset 0 4px 5px -2px oklch(0 0 0 / .4)}
+  border-top:1.5px solid color-mix(in oklch, var(--cb-pocket), white 45%);box-shadow:inset 0 4px 5px -2px oklch(0 0 0 / .4)}
 
 /* the cover band under each page: the progress bar centred under every page */
 .cb-foot{position:absolute;left:0;right:0;top:100%;height:var(--cb-foot);display:flex;align-items:center;justify-content:center;padding:0 24px;pointer-events:none}
 .cb-prog{display:inline-flex;align-items:center;gap:8px;width:min(60%,240px)}
 .cb-prog>span{flex:1;height:4px;border-radius:2px;background:oklch(0 0 0 / .35);box-shadow:inset 0 0 0 1px oklch(1 0 0 / .1);overflow:hidden}
-.cb-prog>span>i{display:block;height:100%;border-radius:2px;background:var(--cb-thread)}
+.cb-prog>span>i{display:block;height:100%;border-radius:2px;background:var(--cb-font,var(--cb-thread))}
 .cb-prog small{font-family:var(--cb-mono);font-size:9px;font-weight:600;color:oklch(0.7 0.005 260)}
 
 /* the inside of a cover, and the closed covers */

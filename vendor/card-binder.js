@@ -1,4 +1,4 @@
-// card-binder v2.4.0 (2026-09-10)
+// card-binder v2.4.1 (2026-09-10)
 // card-binder: a pocket-page binder as a physical object. Zero dependencies, ES module.
 // new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, cover, font, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, onChange})
 //   items        array of anything; renderItem(item, index) returns the element that sits in a pocket (give it the pocket aspect)
@@ -21,10 +21,10 @@
 // perspective distance for a turn, in page widths: the free edge of a swinging page grows by at most 1 / (1 - 1 / PERSP)
 const PERSP=10;
 export class CardBinder{
-  static VERSION="2.4.0";
+  static VERSION="2.4.1";
   constructor(host,o={}){
     this.host=host;this.items=o.items||[];this.renderItem=o.renderItem||(x=>{const d=document.createElement("div");d.textContent=String(x);return d});
-    this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.font="";this.cover="";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";
+    this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";
     this.fit=o.fit!==false;this.animate=o.animate!==false;this.onChange=o.onChange||(()=>{});
     this.page=0;this.closed=o.startClosed===false?null:"front";this.swiped=false;
     this.mq=matchMedia(`(min-width:${o.spreadMinWidth||1000}px)`);this.mq.addEventListener("change",()=>this.render());
@@ -113,20 +113,15 @@ export class CardBinder{
   setInside(rows){this.inside=rows||[];this.paintCovers()}
   setProgress(value,label){this.progress=value;this.progressLabel=label||"";this.paintFeet();this.paintCovers()}
   setCover(c){
-    const s=this.host.style;this.cover=c||"";
-    const thread=v=>{if(!this.font){if(v)s.setProperty("--cb-thread",v);else s.removeProperty("--cb-thread")}};
-    if(!c){["--cb-cover","--cb-cover-hi","--cb-press"].forEach(p=>s.removeProperty(p));thread(null);return}
+    const s=this.host.style;
+    if(!c){["--cb-cover","--cb-cover-hi","--cb-thread","--cb-press"].forEach(p=>s.removeProperty(p));return}
     s.setProperty("--cb-cover",c);s.setProperty("--cb-cover-hi",`color-mix(in oklch, ${c}, white 9%)`);
     const m=/^#([0-9a-f]{6})$/i.exec(c);
-    if(m){const [r,g,b]=[0,2,4].map(i=>parseInt(m[1].slice(i,i+2),16)/255);const light=.2126*r+.7152*g+.0722*b>.45;thread(light?"oklch(0.24 0.02 80)":"oklch(0.86 0.02 80)");s.setProperty("--cb-press",light?"-1":"1")}
-    else{thread(null);s.removeProperty("--cb-press")}
+    if(m){const [r,g,b]=[0,2,4].map(i=>parseInt(m[1].slice(i,i+2),16)/255);const light=.2126*r+.7152*g+.0722*b>.45;s.setProperty("--cb-thread",light?"oklch(0.24 0.02 80)":"oklch(0.86 0.02 80)");s.setProperty("--cb-press",light?"-1":"1")}
+    else{s.removeProperty("--cb-thread");s.removeProperty("--cb-press")}
   }
   // the font colour: the pressed title's groove and the progress fill; pass nothing to go back to the cover-derived tones
-  setFont(c){
-    const s=this.host.style;this.font=c||"";
-    if(c){s.setProperty("--cb-font",c);s.setProperty("--cb-thread",c)}
-    else{s.removeProperty("--cb-font");this.setCover(this.cover)}
-  }
+  setFont(c){if(c)this.host.style.setProperty("--cb-font",c);else this.host.style.removeProperty("--cb-font")}
   pressed(text){const n=document.createElement("span");n.className="cb-press";n.textContent=text;n.dataset.t=text;return n}
   prog(){
     if(this.progress==null)return null;
