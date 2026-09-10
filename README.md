@@ -36,7 +36,7 @@ Quick Reference:
 Intuitive Collection Management: 
 - Tap to Register a card to your collection.
 - Long press (touch) or long click (mouse) to mark as Pending (helpful for tracking cards purchased but not delivered).
-- View as a list or in a binder. The binder wears the name of the loaded list on its cover, keeps a contents card inside the front cover, and takes any cover colour from the swatch beside the size picker.
+- View as a list or in a binder. The binder wears the name of the loaded list on its cover, keeps a contents card inside the front cover, and takes a cover colour and a font colour from the binder's own menu (the chevron beside the active view icon), where the page size lives too.
 - Right click (mouse) a card to leave a blank slot before or after it in every view, or a whole blank page in the binder, the way you would skip a pocket for a card you are still hunting.
 - Save multiple lists (I have a separate list for only AR/SIR, another for mixed rarity).
 (Note: Share lists across devices with a unique list identifier. Auto sync planned for a future update.)
@@ -59,4 +59,4 @@ I built this for me to use personally, but figured I would keep it available in 
 
 This would not be possible without PokeAPI: https://github.com/PokeAPI/pokeapi
 
-Sprites are the official game sprites served by the PokeAPI sprites repository (https://github.com/PokeAPI/sprites): FireRed/LeafGreen for Kanto, HeartGold/SoulSilver for Johto, Emerald for Hoenn, Platinum for Sinnoh, Black/White for Unova, Omega Ruby/Alpha Sapphire for Kalos, Ultra Sun/Ultra Moon for Alola, and Pokemon HOME renders for Galar, Paldea, and everything newer. A HOME-renders-everywhere option lives in the gear menu. No fan-made sprites are used. The colour behind a registered sprite is the TCG energy of its first type, from PokeAPI type data.
+Sprites are the official game sprites served by the PokeAPI sprites repository (https://github.com/PokeAPI/sprites): FireRed/LeafGreen for Kanto, HeartGold/SoulSilver for Johto, Emerald for Hoenn, Platinum for Sinnoh, Black/White for Unova, Omega Ruby/Alpha Sapphire for Kalos, Ultra Sun/Ultra Moon for Alola, and Pokemon HOME renders for Galar, Paldea, and everything newer. The gear menu offers three sprite sets: Original Game (Kanto from Red/Blue and Johto from Crystal, the rest as above), Original Game with FRLG/HGSS (the default described above), and Pokemon HOME renders everywhere. No fan-made sprites are used. The colour behind a registered sprite is the TCG energy of its first type, from PokeAPI type data.
