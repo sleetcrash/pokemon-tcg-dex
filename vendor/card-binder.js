@@ -1,12 +1,13 @@
-// card-binder v2.3.0 (2026-09-10)
+// card-binder v2.4.0 (2026-09-10)
 // card-binder: a pocket-page binder as a physical object. Zero dependencies, ES module.
-// new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, cover, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, onChange})
+// new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, cover, font, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, onChange})
 //   items        array of anything; renderItem(item, index) returns the element that sits in a pocket (give it the pocket aspect)
 //   cols, rows   pockets per page (1 to 6 each)
-//   name         stitched on the shut front cover and under every left-hand page
+//   name         pressed into the shut front cover and printed on the contents card
 //   inside       [[label, value], ...] rows for the contents card on the inside front cover (the name and progress join it)
-//   progress     0 to 1, drawn as a bar under every right-hand page and on the contents card; progressLabel prints beside it
-//   cover        a CSS colour for the cover (a #rrggbb value also picks a light or dark thread for the stitching)
+//   progress     0 to 1, drawn as a bar under every page and on the contents card; progressLabel prints beside it
+//   cover        a CSS colour for the cover (a #rrggbb value also picks a light or dark progress fill and imprint direction)
+//   font         a CSS colour for the pressed title's groove and the progress fill; unset, both derive from the cover
 //   spreadMinWidth  viewport width from which two pages face each other (default 1000); below it one page at a time
 //   fit          on a spread, size the book from the viewport height so a whole spread shows (default true); set --cb-reserve on the host
 //   pager        render the built-in pager under the book (default true); sizePicker adds a cols x rows picker to it (default false)
@@ -20,10 +21,10 @@
 // perspective distance for a turn, in page widths: the free edge of a swinging page grows by at most 1 / (1 - 1 / PERSP)
 const PERSP=10;
 export class CardBinder{
-  static VERSION="2.3.0";
+  static VERSION="2.4.0";
   constructor(host,o={}){
     this.host=host;this.items=o.items||[];this.renderItem=o.renderItem||(x=>{const d=document.createElement("div");d.textContent=String(x);return d});
-    this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";
+    this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.font="";this.cover="";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";
     this.fit=o.fit!==false;this.animate=o.animate!==false;this.onChange=o.onChange||(()=>{});
     this.page=0;this.closed=o.startClosed===false?null:"front";this.swiped=false;
     this.mq=matchMedia(`(min-width:${o.spreadMinWidth||1000}px)`);this.mq.addEventListener("change",()=>this.render());
@@ -33,6 +34,7 @@ export class CardBinder{
     if(o.keys!==false)host.addEventListener("keydown",e=>{if(e.target.closest("input"))return;if(e.key==="ArrowRight")this.turn(1);else if(e.key==="ArrowLeft")this.turn(-1)});
     if(o.swipe!==false)this.armSwipe();
     if(o.cover)this.setCover(o.cover);
+    if(o.font)this.setFont(o.font);
     if(o.pager!==false)this.mountPager(o.sizePicker);
     this.render();
   }
@@ -111,15 +113,21 @@ export class CardBinder{
   setInside(rows){this.inside=rows||[];this.paintCovers()}
   setProgress(value,label){this.progress=value;this.progressLabel=label||"";this.paintFeet();this.paintCovers()}
   setCover(c){
-    const s=this.host.style;
-    if(!c){["--cb-cover","--cb-cover-hi","--cb-thread","--cb-press"].forEach(p=>s.removeProperty(p));return}
+    const s=this.host.style;this.cover=c||"";
+    const thread=v=>{if(!this.font){if(v)s.setProperty("--cb-thread",v);else s.removeProperty("--cb-thread")}};
+    if(!c){["--cb-cover","--cb-cover-hi","--cb-press"].forEach(p=>s.removeProperty(p));thread(null);return}
     s.setProperty("--cb-cover",c);s.setProperty("--cb-cover-hi",`color-mix(in oklch, ${c}, white 9%)`);
     const m=/^#([0-9a-f]{6})$/i.exec(c);
-    if(m){const [r,g,b]=[0,2,4].map(i=>parseInt(m[1].slice(i,i+2),16)/255);const light=.2126*r+.7152*g+.0722*b>.45;s.setProperty("--cb-thread",light?"oklch(0.24 0.02 80)":"oklch(0.86 0.02 80)");s.setProperty("--cb-press",light?"-1":"1")}
-    else{s.removeProperty("--cb-thread");s.removeProperty("--cb-press")}
+    if(m){const [r,g,b]=[0,2,4].map(i=>parseInt(m[1].slice(i,i+2),16)/255);const light=.2126*r+.7152*g+.0722*b>.45;thread(light?"oklch(0.24 0.02 80)":"oklch(0.86 0.02 80)");s.setProperty("--cb-press",light?"-1":"1")}
+    else{thread(null);s.removeProperty("--cb-press")}
   }
-  stitched(text){const n=document.createElement("span");n.className="cb-name";n.textContent=text;return n}
-  pressed(text){const n=this.stitched(text);n.classList.add("cb-press");n.dataset.t=text;return n}
+  // the font colour: the pressed title's groove and the progress fill; pass nothing to go back to the cover-derived tones
+  setFont(c){
+    const s=this.host.style;this.font=c||"";
+    if(c){s.setProperty("--cb-font",c);s.setProperty("--cb-thread",c)}
+    else{s.removeProperty("--cb-font");this.setCover(this.cover)}
+  }
+  pressed(text){const n=document.createElement("span");n.className="cb-press";n.textContent=text;n.dataset.t=text;return n}
   prog(){
     if(this.progress==null)return null;
     const w=document.createElement("span");w.className="cb-prog";
@@ -145,8 +153,7 @@ export class CardBinder{
   foot(leaf){
     const f=leaf.lastElementChild;f.replaceChildren();
     if(leaf.classList.contains("cb-cov"))return;
-    if(leaf.classList.contains("cb-lp")){if(this.name)f.appendChild(this.stitched(this.name))}
-    else{const p=this.prog();if(p)f.appendChild(p)}
+    const p=this.prog();if(p)f.appendChild(p);
   }
   paintFeet(){[this.leafL,this.leafR].forEach(l=>{if(!l.hidden)this.foot(l)})}
   paintCovers(){[this.leafL,this.leafR].forEach(l=>{if(!l.hidden&&l.dataset.cov)l.firstElementChild.replaceChildren(this.face(l.dataset.cov))})}
