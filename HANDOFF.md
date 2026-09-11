@@ -8,8 +8,7 @@ Single-file web app (`index.html`) tracking a Pokemon TCG National Card Dex: 1,6
 
 ## Repo state at handoff
 
-- `main`: last known-good build before Dynamax/Tera and the card lookup.
-- `MAX-forms` branch (open pull request): adds Gigantamax, Dynamax, Tera, Surfing/Flying Pikachu, the card lookup sheet, the same-origin proxy (`api/tcg.js`), and a pokemontcg.io fallback provider (see below). Everything is committed; nothing lives only in a local build.
+- `main` and `MAX-forms` are the same commit as of 2026-09-11: `main` fast-forwarded to the whole `MAX-forms` line (Gigantamax, Dynamax, Tera, Surfing/Flying Pikachu, the card lookup sheet, the same-origin proxy `api/tcg.js`, the pokemontcg.io fallback provider, the vendored card-binder, and everything below). Work continues on `MAX-forms`; `main` is production. Everything is committed; nothing lives only in a local build.
 
 ## Architecture (as built)
 
