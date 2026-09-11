@@ -230,6 +230,14 @@
   .card .fbc{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-dim)}
   .card.flash{animation:flashcard 1.6s ease}
   @keyframes flashcard{0%,60%{outline:2px solid oklch(0.55 0.19 25 / .5)}100%{outline:2px solid transparent}}
+  /* the searched entry floats out of its slot: it springs up onto a cast shadow with a red rim, then bobs until a tap lands it (.land) */
+  .row.found,.card.found{z-index:9;animation:lift .6s cubic-bezier(.2,1.5,.4,1) both,bob 2.6s ease-in-out .6s infinite alternate}
+  .row.land,.card.land{z-index:9;animation:land .4s cubic-bezier(.3,.8,.3,1) both}
+  .row.found,.row.land{--lift:-5px;--rise:-9px;--grow:1.015;--float:0 0 0 2px oklch(0.55 0.19 25 / .4),0 12px 22px -8px oklch(0 0 0 / .5)}
+  .card.found,.card.land{--lift:-4%;--rise:-7.5%;--grow:1.06;--float:0 0 0 1px oklch(0.25 0.02 95 / .25),0 0 0 3px oklch(0.55 0.19 25 / .4),0 16px 26px -6px oklch(0 0 0 / .6)}
+  @keyframes lift{to{transform:translateY(var(--lift)) scale(var(--grow));box-shadow:var(--float)}}
+  @keyframes bob{from{transform:translateY(var(--lift)) scale(var(--grow))}to{transform:translateY(var(--rise)) scale(var(--grow))}}
+  @keyframes land{from{transform:translateY(var(--lift)) scale(var(--grow));box-shadow:var(--float)}}
   .card .face{width:100%;aspect-ratio:63/88;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--art);transition:background-color .3s}
   .card.pk .ph{flex:none;height:max(18px,11cqw);display:flex;justify-content:space-between;align-items:center;gap:3cqw;padding:0 3cqw;background:var(--card);border-bottom:1px solid var(--line)}
   .card.pk .pname{font-size:max(8px,min(7.5cqw,calc(140cqw / var(--nl,9))));font-weight:700;color:var(--ink-dim);line-height:1.1;min-width:0}
@@ -405,7 +413,7 @@
   .cact{flex-wrap:wrap}
   .cact .as{flex-basis:100%;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-dim)}
 
-  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.row.flash,.card.flash,.row.hold .slot,.card.hold{animation:none}.card,.card .strip{transition:none}.row.pend .slot::before{animation:none;opacity:.6}.star{display:none}}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.row.flash,.card.flash,.row.hold .slot,.card.hold,.row.land,.card.land{animation:none}.row.found,.card.found{animation:none;transform:translateY(var(--lift)) scale(var(--grow));box-shadow:var(--float)}.card,.card .strip{transition:none}.row.pend .slot::before{animation:none;opacity:.6}.star{display:none}}
 </style>
 </head>
 <body>
@@ -635,6 +643,7 @@ function refreshChip(n){
 }
 // under a Status filter an entry that stops matching leaves in place; nothing else re-renders
 function setState(id,st){
+  if(id===foundId)landFound();
   if(st===undefined)delete owned[id];else owned[id]=st;
   store.save("dex-il",owned);
   syncEntryUI(id);tally();
@@ -1117,12 +1126,23 @@ function burstAt(id){
 }
 // long press toggles Pending; only the click that ends that hold is swallowed, a new pointerdown clears it
 let holdId=null;
+// the searched entry floats (.found) until a tap lands it; that tap only lands it, any status change lands it too
+let foundId=null;
+function landFound(){
+  if(foundId===null)return;
+  const id=foundId;foundId=null;
+  [rowMap.get(id),bTiles.get(id),pTiles.get(id)].forEach(el=>{
+    if(!el||!el.classList.replace("found","land"))return;
+    setTimeout(()=>el.classList.remove("land"),450);
+  });
+}
 function togglePending(id){
   document.querySelectorAll(".star").forEach(s=>s.remove());
   setState(id,owned[id]==="p"?undefined:"p");
 }
 function handleTap(id){
   if(id===holdId){holdId=null;return}
+  if(id===foundId){landFound();return}
   const next=owned[id]===undefined?true:owned[id]===true?undefined:true;
   if(next===true)burstAt(id);
   setState(id,next);
@@ -1399,7 +1419,7 @@ function binderTile([n,id,name,region,gen,form,sref],map){
   const art=cardArt(id);
   const chips=`${form?`<span class="chip f">${form==="Other"?"Form":form}</span>`:""}<span class="chip">Gen ${gen}</span><span class="chip r ${region}">${region}</span>`;
   const foot=`<div class="strip"><button class="setc" type="button" tabindex="-1" aria-label="Cards" title="Find cards"></button>${art?'<button class="rmx" type="button" tabindex="-1" aria-label="Remove card" title="Remove card">&#215;</button>':""}<span class="ptag">${chips}</span><span class="pball"></span></div>`;
-  c.className="card e-"+energyOf.get(id)+(art?" scan":" pk")+(owned[id]===true?" own":owned[id]==="p"?" pend":"")+(region==="Hisui"?" hs":"")+(form?" ft-"+form:"");
+  c.className="card e-"+energyOf.get(id)+(art?" scan":" pk")+(owned[id]===true?" own":owned[id]==="p"?" pend":"")+(region==="Hisui"?" hs":"")+(form?" ft-"+form:"")+(id===foundId?" found":"");
   c.dataset.id=id;c.tabIndex=-1;
   if(art){
     c.innerHTML=`<div class="face"><img class="cardart" loading="lazy" src="${cimg(art,"low")}" alt="${name}"><span class="pprice"></span></div>`+foot;
@@ -1685,6 +1705,7 @@ function searchHits(raw){
 function jumpToEntry(entry){
   const id=entry[1];keepHeader();
   sugg.style.display="none";q.value="";q.blur();
+  landFound();foundId=id;
   if(!pred(entry)){
     const fb=formBoxes.find(b=>b.value===entry[5]);
     if(!fb.checked){fb.checked=true;updateFormBtn()}
@@ -1696,9 +1717,11 @@ function jumpToEntry(entry){
   if(prefs.entries==="col"&&entry[5]&&!expanded.has(entry[0])){expanded.add(entry[0]);refreshDisplay()}
   if(prefs.view==="binder"){
     goTo(pageOfEntry(id));
-  }else window.scrollTo({top:docTop(jumpEl(id))-headH-6,behavior:"instant"});
-  const el=jumpEl(id);
-  el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");
+  }else{
+    const el=jumpEl(id),room=innerHeight-headH-el.offsetHeight;
+    window.scrollTo({top:docTop(el)-headH-Math.max(6,room/2),behavior:"instant"});
+  }
+  [rowMap.get(id),bTiles.get(id),pTiles.get(id)].forEach(el=>el&&el.classList.add("found"));
 }
 let sIdx=0;
 function paintPick(){[...sugg.children].forEach((b,i)=>b.classList.toggle("hi",i===sIdx))}
