@@ -231,13 +231,12 @@
   .card.flash{animation:flashcard 1.6s ease}
   @keyframes flashcard{0%,60%{outline:2px solid oklch(0.55 0.19 25 / .5)}100%{outline:2px solid transparent}}
   /* the searched entry floats out of its slot: it springs up onto a cast shadow with a red rim, then bobs until a tap lands it (.land) */
-  .row.found,.card.found{z-index:9;animation:lift .6s cubic-bezier(.2,1.5,.4,1) both,bob 2.6s ease-in-out .6s infinite alternate}
-  .row.land,.card.land{z-index:9;animation:land .4s cubic-bezier(.3,.8,.3,1) both}
-  .row.found,.row.land{--lift:-5px;--rise:-9px;--grow:1.015;--float:0 0 0 2px oklch(0.55 0.19 25 / .4),0 12px 22px -8px oklch(0 0 0 / .5)}
-  .card.found,.card.land{--lift:-4%;--rise:-7.5%;--grow:1.06;--float:0 0 0 1px oklch(0.25 0.02 95 / .25),0 0 0 3px oklch(0.55 0.19 25 / .4),0 16px 26px -6px oklch(0 0 0 / .6)}
+  .row.found,.card.found{z-index:9;animation:lift .6s cubic-bezier(.2,1.5,.4,1) both,bob 1.8s ease-in-out .6s infinite alternate}
+  .row.land,.card.land{z-index:9;transition:transform .35s cubic-bezier(.3,.8,.3,1),box-shadow .35s}
+  .row.found{--lift:-6px;--rise:-12px;--grow:1.015;--float:0 0 0 2px oklch(0.55 0.19 25 / .5),0 0 12px 2px oklch(0.55 0.19 25 / .3),0 12px 22px -8px oklch(0 0 0 / .5);--float-hi:0 0 0 2px oklch(0.55 0.19 25 / .75),0 0 18px 4px oklch(0.55 0.19 25 / .45),0 20px 28px -10px oklch(0 0 0 / .45)}
+  .card.found{--lift:-6%;--rise:-13%;--grow:1.06;--float:0 0 0 1px oklch(0.25 0.02 95 / .25),0 0 0 3px oklch(0.55 0.19 25 / .5),0 0 14px 3px oklch(0.55 0.19 25 / .35),0 16px 26px -6px oklch(0 0 0 / .6);--float-hi:0 0 0 1px oklch(0.25 0.02 95 / .25),0 0 0 3px oklch(0.55 0.19 25 / .8),0 0 24px 7px oklch(0.55 0.19 25 / .5),0 28px 34px -10px oklch(0 0 0 / .5)}
   @keyframes lift{to{transform:translateY(var(--lift)) scale(var(--grow));box-shadow:var(--float)}}
-  @keyframes bob{from{transform:translateY(var(--lift)) scale(var(--grow))}to{transform:translateY(var(--rise)) scale(var(--grow))}}
-  @keyframes land{from{transform:translateY(var(--lift)) scale(var(--grow));box-shadow:var(--float)}}
+  @keyframes bob{from{transform:translateY(var(--lift)) scale(var(--grow));box-shadow:var(--float)}to{transform:translateY(var(--rise)) scale(var(--grow));box-shadow:var(--float-hi)}}
   .card .face{width:100%;aspect-ratio:63/88;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--art);transition:background-color .3s}
   .card.pk .ph{flex:none;height:max(18px,11cqw);display:flex;justify-content:space-between;align-items:center;gap:3cqw;padding:0 3cqw;background:var(--card);border-bottom:1px solid var(--line)}
   .card.pk .pname{font-size:max(8px,min(7.5cqw,calc(140cqw / var(--nl,9))));font-weight:700;color:var(--ink-dim);line-height:1.1;min-width:0}
@@ -413,7 +412,7 @@
   .cact{flex-wrap:wrap}
   .cact .as{flex-basis:100%;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-dim)}
 
-  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.row.flash,.card.flash,.row.hold .slot,.card.hold,.row.land,.card.land{animation:none}.row.found,.card.found{animation:none;transform:translateY(var(--lift)) scale(var(--grow));box-shadow:var(--float)}.card,.card .strip{transition:none}.row.pend .slot::before{animation:none;opacity:.6}.star{display:none}}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.row.flash,.card.flash,.row.hold .slot,.card.hold,.row.land,.card.land{transition:none}.row.found,.card.found{animation:none;transform:translateY(var(--lift)) scale(var(--grow));box-shadow:var(--float-hi)}.card,.card .strip{transition:none}.row.pend .slot::before{animation:none;opacity:.6}.star{display:none}}
 </style>
 </head>
 <body>
@@ -1132,7 +1131,11 @@ function landFound(){
   if(foundId===null)return;
   const id=foundId;foundId=null;
   [rowMap.get(id),bTiles.get(id),pTiles.get(id)].forEach(el=>{
-    if(!el||!el.classList.replace("found","land"))return;
+    if(!el||!el.classList.contains("found"))return;
+    // a transition cannot start from a removed animation: hold the bob's current values inline for one style pass, then release them
+    const cs=getComputedStyle(el);el.style.transform=cs.transform;el.style.boxShadow=cs.boxShadow;
+    el.classList.replace("found","land");void el.offsetWidth;
+    el.style.transform="";el.style.boxShadow="";
     setTimeout(()=>el.classList.remove("land"),450);
   });
 }
