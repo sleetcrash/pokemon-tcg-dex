@@ -233,8 +233,10 @@
   /* the searched entry floats out of its slot: it springs up onto a cast shadow with a red rim, then bobs until a tap lands it (.land) */
   .row.found,.card.found{z-index:9;animation:lift .6s cubic-bezier(.2,1.5,.4,1) both,bob 1.8s ease-in-out .6s infinite alternate}
   .row.land,.card.land{z-index:9;transition:transform .35s cubic-bezier(.3,.8,.3,1),box-shadow .35s}
-  .row.found{--lift:-6px;--rise:-12px;--grow:1.015;--float:0 0 0 2px oklch(0.55 0.19 25 / .5),0 0 12px 2px oklch(0.55 0.19 25 / .3),0 12px 22px -8px oklch(0 0 0 / .5);--float-hi:0 0 0 2px oklch(0.55 0.19 25 / .75),0 0 18px 4px oklch(0.55 0.19 25 / .45),0 20px 28px -10px oklch(0 0 0 / .45)}
-  .card.found{--lift:-6%;--rise:-13%;--grow:1.06;--float:0 0 0 1px oklch(0.25 0.02 95 / .25),0 0 0 3px oklch(0.55 0.19 25 / .5),0 0 14px 3px oklch(0.55 0.19 25 / .35),0 16px 26px -6px oklch(0 0 0 / .6);--float-hi:0 0 0 1px oklch(0.25 0.02 95 / .25),0 0 0 3px oklch(0.55 0.19 25 / .8),0 0 24px 7px oklch(0.55 0.19 25 / .5),0 28px 34px -10px oklch(0 0 0 / .5)}
+  /* the glow takes the entry's energy colour (--e, the registered ground), deepened so the pastel reads as light; the accent when an entry has none */
+  .row.found,.card.found{--gc:oklch(from var(--e,oklch(0.55 0.19 25)) calc(l - .12) min(c * 2.2,.2) h)}
+  .row.found{--lift:-6px;--rise:-12px;--grow:1.015;--float:0 0 0 2px oklch(from var(--gc) l c h / .55),0 0 12px 2px oklch(from var(--gc) l c h / .35),0 12px 22px -8px oklch(0 0 0 / .5);--float-hi:0 0 0 2px oklch(from var(--gc) l c h / .85),0 0 18px 4px oklch(from var(--gc) l c h / .5),0 20px 28px -10px oklch(0 0 0 / .45)}
+  .card.found{--lift:-6%;--rise:-13%;--grow:1.06;--float:0 0 0 1px oklch(0.25 0.02 95 / .25),0 0 0 3px oklch(from var(--gc) l c h / .55),0 0 14px 3px oklch(from var(--gc) l c h / .4),0 16px 26px -6px oklch(0 0 0 / .6);--float-hi:0 0 0 1px oklch(0.25 0.02 95 / .25),0 0 0 3px oklch(from var(--gc) l c h / .9),0 0 24px 7px oklch(from var(--gc) l c h / .6),0 28px 34px -10px oklch(0 0 0 / .5)}
   @keyframes lift{to{transform:translateY(var(--lift)) scale(var(--grow));box-shadow:var(--float)}}
   @keyframes bob{from{transform:translateY(var(--lift)) scale(var(--grow));box-shadow:var(--float)}to{transform:translateY(var(--rise)) scale(var(--grow));box-shadow:var(--float-hi)}}
   .card .face{width:100%;aspect-ratio:63/88;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--art);transition:background-color .3s}
