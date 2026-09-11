@@ -5,3 +5,6 @@
 node_modules/
 .DS_Store
 scripts/.sprite-cache/
+
+# local-only design and plan docs (carry personal context; never committed)
+docs/superpowers/
