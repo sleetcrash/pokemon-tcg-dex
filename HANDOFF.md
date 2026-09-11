@@ -8,7 +8,7 @@ Single-file web app (`index.html`) tracking a Pokemon TCG National Card Dex: 1,6
 
 ## Repo state at handoff
 
-- `main` and `MAX-forms` are the same commit as of 2026-09-11: `main` fast-forwarded to the whole `MAX-forms` line (Gigantamax, Dynamax, Tera, Surfing/Flying Pikachu, the card lookup sheet, the same-origin proxy `api/tcg.js`, the pokemontcg.io fallback provider, the vendored card-binder, and everything below). Work continues on `MAX-forms`; `main` is production. Everything is committed; nothing lives only in a local build.
+- `main` and `dev` are the same commit as of 2026-09-11 (`dev` is the work branch, renamed from `MAX-forms` that day; older sections below use the old name): `main` fast-forwarded to the whole `dev` line (Gigantamax, Dynamax, Tera, Surfing/Flying Pikachu, the card lookup sheet, the same-origin proxy `api/tcg.js`, the pokemontcg.io fallback provider, the vendored card-binder, and everything below). Work continues on `dev`; `main` is production. Everything is committed; nothing lives only in a local build.
 
 ## Architecture (as built)
 
