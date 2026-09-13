@@ -1,4 +1,4 @@
-/* card-binder v2.5.0 (2026-09-10) */
+/* card-binder v2.6.0 (2026-09-13) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
@@ -119,16 +119,17 @@
 
 /* pager: first, previous, page box, next, last, and the optional size picker, centred under the book */
 .cb-pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin-top:12px;position:relative}
-.cb-pager button{width:40px;height:40px;padding:0;border:1px solid var(--cb-line-soft);border-radius:50%;background:var(--cb-paper);color:var(--cb-ink);display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .15s,background-color .15s}
+.cb-pager button{width:40px;height:40px;padding:0;border:0;border-radius:50%;background:none;color:var(--cb-ink-dim);display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .15s}
 .cb-pager button svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
 .cb-pager button:disabled{opacity:.35;cursor:default}
 .cb-pager button:focus-visible{outline:2px solid var(--cb-ink);outline-offset:1px}
-@media (hover:hover){.cb-pager button:not(:disabled):hover{border-color:var(--cb-ink)}}
+@media (hover:hover){.cb-pager button:not(:disabled):hover{color:var(--cb-ink)}}
+.cb-pager button:not(:disabled):active{color:var(--cb-ink)}
 .cb-pgo{display:flex;align-items:center;gap:6px;margin:0 8px;font-family:var(--cb-mono);font-size:14px}
 .cb-pgo input{width:52px;height:38px;border:1px solid var(--cb-line-soft);background:var(--cb-paper);color:var(--cb-ink);font:inherit;text-align:center}
 .cb-pgo input[hidden]{display:none}
 .cb-size{position:absolute;right:0;top:0}
-.cb-size>button{width:auto;min-width:40px;padding:0 10px;border-radius:20px;font-size:13px;font-family:var(--cb-mono)}
+.cb-size>button{width:auto;min-width:40px;padding:0 10px;border:1px solid var(--cb-line-soft);border-radius:20px;background:var(--cb-paper);color:var(--cb-ink);font-size:13px;font-family:var(--cb-mono)}
 .cb-size .cb-pop{position:absolute;right:0;bottom:calc(100% + 4px);z-index:40;background:var(--cb-paper);border:1px solid var(--cb-line-soft);border-radius:4px;padding:10px;box-shadow:0 4px 14px oklch(0.25 0.02 95 / .12)}
 .cb-size .cb-pop[hidden]{display:none}
 .cb-size .cb-pop>div{display:grid;grid-template-columns:repeat(6,22px);gap:4px}
