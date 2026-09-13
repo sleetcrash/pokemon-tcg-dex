@@ -151,8 +151,8 @@
   /* the tile's ball glow holds still: its infinite pulse ran inside the hidden strip and stalled the tile's repaint on iOS Safari when the entry left pending */
   .card.pend .pball::before{animation:none;opacity:.6}
   .row.hs.pend .slot::before,.card.hs.pend .pball::before{background-image:var(--hball);inset:-30%}
-  .star{position:fixed;width:10px;height:10px;pointer-events:none;z-index:60;background:var(--pend-lite);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:starfly .6s ease-out forwards;opacity:0}
-  .star.w{background:#f4f2ec;width:7px;height:7px}
+  .star{position:fixed;width:12px;height:12px;pointer-events:none;z-index:60;background:var(--pend-lite);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:starfly .6s ease-out forwards;opacity:0}
+  .star.w{background:#f4f2ec;width:8px;height:8px}
   @keyframes starfly{0%{transform:translate(0,0) scale(1) rotate(0deg);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0) rotate(120deg);opacity:0}}
   @keyframes catchpulse{0%,100%{opacity:.35}50%{opacity:.95}}
 
@@ -230,6 +230,9 @@
   .row.pend{--art:var(--pend-lite)}
   .card .fbc{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-dim)}
   .card.flash{animation:flashcard 1.6s ease}
+  /* the track the sparks run on: an energy-colour outline that fades as the ring sweeps round */
+  .card.ringed::after{content:"";position:absolute;inset:-2px;border-radius:inherit;outline:2px solid var(--e,var(--accent));pointer-events:none;animation:ringfade .8s ease-out forwards}
+  @keyframes ringfade{to{opacity:0}}
   @keyframes flashcard{0%,60%{outline:2px solid oklch(0.55 0.19 25 / .5)}100%{outline:2px solid transparent}}
   /* the searched entry floats out of its slot: it springs up onto a cast shadow with a red rim, then bobs until a tap lands it (.land) */
   .row.found,.card.found{z-index:9;animation:lift .6s cubic-bezier(.2,1.5,.4,1) both,bob 1.8s ease-in-out .6s infinite alternate}
@@ -240,7 +243,7 @@
   .card.found{--lift:-6%;--rise:-13%;--grow:1.06;--float:0 0 0 1px oklch(0.25 0.02 95 / .25),0 0 0 3px oklch(from var(--gc) l c h / .55),0 0 14px 3px oklch(from var(--gc) l c h / .4),0 16px 26px -6px oklch(0 0 0 / .6);--float-hi:0 0 0 1px oklch(0.25 0.02 95 / .25),0 0 0 3px oklch(from var(--gc) l c h / .9),0 0 24px 7px oklch(from var(--gc) l c h / .6),0 28px 34px -10px oklch(0 0 0 / .5)}
   @keyframes lift{to{transform:translateY(var(--lift)) scale(var(--grow));box-shadow:var(--float)}}
   @keyframes bob{from{transform:translateY(var(--lift)) scale(var(--grow));box-shadow:var(--float)}to{transform:translateY(var(--rise)) scale(var(--grow));box-shadow:var(--float-hi)}}
-  .card .face{width:100%;aspect-ratio:63/88;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--art);transition:background-color .3s}
+  .card .face{width:100%;aspect-ratio:63/88;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--art);transition:background-color .45s}
   .card.pk .ph{flex:none;min-height:max(18px,11cqw);display:flex;justify-content:space-between;align-items:center;gap:3cqw;padding:1.2cqw 3cqw;background:var(--card);border-bottom:1px solid var(--line)}
   .card.pk .pname{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:max(8px,min(7cqw,calc(150cqw / var(--nl,9))));font-weight:700;color:var(--ink-dim);line-height:1.1;min-width:0}
   .card.pk.own .pname{color:var(--ink)}
@@ -416,7 +419,7 @@
   .cact{flex-wrap:wrap}
   .cact .as{flex-basis:100%;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-dim)}
 
-  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.row.flash,.card.flash,.row.hold .slot,.card.hold,.row.land,.card.land{transition:none}.row.found,.card.found{animation:none;transform:translateY(var(--lift)) scale(var(--grow));box-shadow:var(--float-hi)}.card,.card .strip{transition:none}.row.pend .slot::before{animation:none;opacity:.6}.star{display:none}}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.row.flash,.card.flash,.row.hold .slot,.card.hold,.row.land,.card.land{transition:none}.row.found,.card.found{animation:none;transform:translateY(var(--lift)) scale(var(--grow));box-shadow:var(--float-hi)}.card,.card .strip{transition:none}.row.pend .slot::before{animation:none;opacity:.6}.star,.card.ringed::after{display:none}}
 </style>
 </head>
 <body>
@@ -625,8 +628,10 @@ function syncEntryUI(id){
   const row=rowMap.get(id);
   row.classList.toggle("done",owned[id]===true);
   row.classList.toggle("pend",owned[id]==="p");
-  [bTiles.get(id),pTiles.get(id)].forEach(card=>{
-    if(card){card.classList.toggle("own",owned[id]===true);card.classList.toggle("pend",owned[id]==="p");syncMailer(card,id)}});
+  [["binder",bTiles.get(id)],["pocket",pTiles.get(id)]].forEach(([view,card])=>{
+    if(!card)return;
+    if(owned[id]===true&&!card.classList.contains("own")&&prefs.view===view){card.classList.add("ringed");card.addEventListener("animationend",function h(ev){if(ev.animationName!=="ringfade")return;card.classList.remove("ringed");card.removeEventListener("animationend",h)})}
+    card.classList.toggle("own",owned[id]===true);card.classList.toggle("pend",owned[id]==="p");syncMailer(card,id)});
 }
 // a pending entry is in the post: its face holds the mailer it ships in, added or removed as the state changes
 function mailerHTML([n,id,name,,,,sref],scan){
@@ -1117,25 +1122,26 @@ $("cclose").addEventListener("click",closeSheet);
 csheet.addEventListener("click",ev=>{if(ev.target===csheet)closeSheet()});
 
 // catch sparkle: stars shoot up from the ball when an entry completes
-function burst(x,y){
-  for(let i=0;i<6;i++){
-    const s=document.createElement("span");
-    s.className="star"+(i%2?" w":"");
-    s.style.left=(x-5)+"px";
-    s.style.top=(y-5)+"px";
-    s.style.setProperty("--dx",(Math.random()*44-22)+"px");
-    s.style.setProperty("--dy",-(16+Math.random()*30)+"px");
-    s.style.animationDelay=(i*45)+"ms";
-    s.addEventListener("animationend",()=>s.remove());
-    setTimeout(()=>s.remove(),1000);
-    document.body.appendChild(s);
-  }
+function star(x,y,dx,dy,delay,w){
+  const s=document.createElement("span");
+  s.className="star"+(w?" w":"");
+  s.style.left=(x-6)+"px";
+  s.style.top=(y-6)+"px";
+  s.style.setProperty("--dx",dx+"px");
+  s.style.setProperty("--dy",dy+"px");
+  s.style.animationDelay=delay+"ms";
+  s.addEventListener("animationend",()=>s.remove());
+  setTimeout(()=>s.remove(),1400);
+  document.body.appendChild(s);
 }
+// registering a tile sends a ring of sparks round its border, four a side clockwise from the top-left corner,
+// each flying outward from its edge; list rows keep only the ball fill and the colour change
 function burstAt(id){
-  const el=prefs.view==="binder"?bTiles.get(id):prefs.view==="pocket"?pTiles.get(id):rowMap.get(id).querySelector(".slot");
+  const el=prefs.view==="binder"?bTiles.get(id):prefs.view==="pocket"?pTiles.get(id):null;
   if(!el)return;
-  const r=el.getBoundingClientRect();
-  burst(r.left+r.width/2,r.top+r.height/2);
+  const r=el.getBoundingClientRect(),w=r.width,h=r.height;
+  const side=(i,t)=>[[r.left+w*t,r.top,0,-1],[r.right,r.top+h*t,1,0],[r.right-w*t,r.bottom,0,1],[r.left,r.bottom-h*t,-1,0]][i];
+  for(let i=0;i<16;i++){const [x,y,nx,ny]=side(i>>2,((i&3)+.5)/4);star(x,y,nx*26,ny*26,i*20,i%2)}
 }
 // long press toggles Pending; only the click that ends that hold is swallowed, a new pointerdown clears it
 let holdId=null;
