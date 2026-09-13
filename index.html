@@ -76,8 +76,10 @@
   .sugg .no{font-family:ui-monospace,Menlo,monospace;color:var(--ink-dim);font-size:12px}
 
   .filters{display:flex;flex-wrap:wrap;margin-top:2px}
-  /* desktop: a short search box and the filters share one row, underline and button bottoms aligned */
-  @media (min-width:700px){.hrow{display:flex;align-items:flex-end}.hrow>.search{flex:0 0 300px}.hrow>.filters{flex:1;margin:0 0 0 14px}}
+  /* desktop: the search box and the filters share one row, bottoms aligned; the filters sit at their natural width against the
+     column's right edge (the last chevron flush with the gear and the progress bar) and the search takes whatever is left, so an
+     added menu shrinks the search and nothing else moves */
+  @media (min-width:700px){.hrow{display:flex;align-items:flex-end}.hrow>.search{flex:1;min-width:160px}.hrow>.filters{flex:0 1 auto;min-width:0;margin:0 0 0 14px}.filters .dd:last-child .ddbtn{padding-right:0}.filters .dd:last-child.has .ddbtn::before{right:2px}}
   .dd{position:relative;flex:none}
   .ddbtn{display:inline-flex;align-items:center;gap:2px;padding:0 6px 0 10px;min-height:40px;border:0;border-left:1px solid var(--line-soft);background:none;color:var(--ink-dim);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;position:relative;-webkit-tap-highlight-color:transparent}
   .dd:first-child .ddbtn{border-left:0;padding-left:2px}
