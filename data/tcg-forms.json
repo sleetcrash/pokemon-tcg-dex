@@ -1,0 +1,337 @@
+{
+ "_about": "Curated TCG-only form rules for the National Card Dex. A TCG form is a card that depicts the Pokemon as something fundamentally different from its base self (Dark, Light, Crystal, Owner's, Delta Species, Star, Detective Pikachu, a costume), never a promo stamp, a rarity, a reprint, an art style or a game mechanic. scripts/build-tcg-forms.py reads this file after the owner's review: one entry per species per form type, ranks in file order after Tera, the card sheet matching each type by the same rule. A rule is a name regex (JavaScript syntax, tested against the English card name), a TCGdex set id, or a list of card ids or exact names. Mechanics are recorded so cards can be filtered later; they emit no entries.",
+ "_sources": [
+  "Bulbapedia: Owner's Pokemon (TCG), Dark Pokemon (TCG), Light Pokemon (TCG), Shining Pokemon (TCG), Crystal Pokemon (TCG), Delta Species (TCG), Pokemon Star (TCG), Detective Pikachu (TCG)",
+  "TCGdex v2 English cards, category Pokemon, read 2026-09-13 (19,925 cards)"
+ ],
+ "_species": "resolve a card to its species by stripping these markers from the English name, in order, up to three passes, then matching the dex's base names case-insensitively; TCGdex dexId is the fallback",
+ "_strip": [
+  "^(Dark|Light|Shining|Radiant|Special Delivery|Detective|Flying|Surfing) ",
+  "^.+?'s ",
+  " (☆|Star)( δ)?$",
+  " δ$",
+  " (ex|EX|GX|V|VMAX|VSTAR|BREAK|LV\\.X|LEGEND|Prime|G|GL|4|C|FB|E4)$",
+  "-(EX|GX)$",
+  " (with Grey Felt Hat|Libre|at the Museum|on the Ball)$"
+ ],
+ "_counts": {
+  "Shining": {
+   "cards": 20,
+   "species": 18,
+   "unresolved_names": []
+  },
+  "Star": {
+   "cards": 27,
+   "species": 27,
+   "unresolved_names": []
+  },
+  "Dark": {
+   "cards": 114,
+   "species": 64,
+   "unresolved_names": []
+  },
+  "Light": {
+   "cards": 21,
+   "species": 21,
+   "unresolved_names": []
+  },
+  "Crystal": {
+   "cards": 9,
+   "species": 9,
+   "unresolved_names": []
+  },
+  "Owner": {
+   "cards": 549,
+   "species": 254,
+   "unresolved_names": [
+    "Giovanni's Nidoran ♀",
+    "Giovanni's Nidoran ♂",
+    "Team Rocket's Nidoran♀",
+    "Team Rocket's Nidoran♂"
+   ]
+  },
+  "Delta": {
+   "cards": 188,
+   "species": 135,
+   "unresolved_names": [
+    "Nidoran♀ δ",
+    "Nidoran♂ δ"
+   ]
+  },
+  "Detective": {
+   "cards": 18,
+   "species": 18,
+   "unresolved_names": []
+  },
+  "Costume": {
+   "cards": 7,
+   "species": 3,
+   "unresolved_names": []
+  }
+ },
+ "_mechanic_counts": {
+  "ex": 1371,
+  "EX": 434,
+  "GX": 588,
+  "V": 605,
+  "VMAX": 209,
+  "VSTAR": 94,
+  "BREAK": 35,
+  "LV.X": 30,
+  "LEGEND": 18,
+  "SP": 107,
+  "Tag Team": 133,
+  "Radiant": 16,
+  "Prism Star": 16,
+  "Prime": 0
+ },
+ "forms": [
+  {
+   "type": "Shining",
+   "name": "Shining",
+   "parent": "Shiny",
+   "rank": 0.6,
+   "glyph": "✦",
+   "rule": {
+    "name": "^Shining "
+   },
+   "note": "Neo Revelation, Neo Destiny, Shining Legends and their promos: cards printed as Shining <name>. Shining Fates and later shiny-vault cards carry the plain name and are not caught here; they belong to the Shiny (game) entry once a set-and-number list exists."
+  },
+  {
+   "type": "Star",
+   "name": "Pokemon Star",
+   "parent": "Shiny",
+   "rank": 0.7,
+   "glyph": "☆",
+   "rule": {
+    "name": " (☆|Star)( δ)?$"
+   },
+   "note": "The Gold Star cards of the EX era plus Greninja Star (SWSH promo). TCGdex writes one as Pikachu Star rather than the symbol, so the rule accepts both; Charizard, Gyarados and Mew Star delta count under Star and under Delta."
+  },
+  {
+   "type": "Dark",
+   "name": "Dark",
+   "rank": 7,
+   "glyph": "D",
+   "rule": {
+    "name": "^Dark "
+   },
+   "note": "Team Rocket, Neo Genesis, Neo Destiny, Legendary Collection, EX Team Rocket Returns and the SWSH promos (Dark Sylveon V). Pokemon cards only; Dark Ball and other Trainers never match because the build reads Pokemon cards alone."
+  },
+  {
+   "type": "Light",
+   "name": "Light",
+   "rank": 8,
+   "glyph": "L",
+   "rule": {
+    "name": "^Light "
+   },
+   "note": "Neo Destiny plus Light Toxtricity (SWSH promo)."
+  },
+  {
+   "type": "Crystal",
+   "name": "Crystal",
+   "rank": 9,
+   "glyph": "C",
+   "rule": {
+    "cards": [
+     "ecard2-148",
+     "ecard2-149",
+     "ecard2-150",
+     "ecard3-145",
+     "ecard3-146",
+     "ecard3-147",
+     "ecard3-148",
+     "ecard3-149",
+     "ecard3-150"
+    ]
+   },
+   "note": "Aquapolis 148 to 150 and Skyridge 145 to 150: the card name is the plain species (the Crystal Type Poke-Body is the marker), so the rule is the nine card ids."
+  },
+  {
+   "type": "Owner",
+   "name": "Owner's",
+   "rank": 10,
+   "glyph": "initial",
+   "rule": {
+    "name": "^(Ash|Arven|Blaine|Brock|Cynthia|Erika|Ethan|Giovanni|Holon|Hop|Imakuni\\?|Iono|Koga|Lance|Larry|Lillie|Lt\\.\\ Surge|Marnie|Misty|N|Rocket|Sabrina|Steven|Team\\ Aqua|Team\\ Magma|Team\\ Rocket)'s "
+   },
+   "owners": [
+    "Ash",
+    "Arven",
+    "Blaine",
+    "Brock",
+    "Cynthia",
+    "Erika",
+    "Ethan",
+    "Giovanni",
+    "Holon",
+    "Hop",
+    "Imakuni?",
+    "Iono",
+    "Koga",
+    "Lance",
+    "Larry",
+    "Lillie",
+    "Lt. Surge",
+    "Marnie",
+    "Misty",
+    "N",
+    "Rocket",
+    "Sabrina",
+    "Steven",
+    "Team Aqua",
+    "Team Magma",
+    "Team Rocket"
+   ],
+   "note": "Gym Heroes and Gym Challenge, the EX Team Magma vs Team Aqua and Team Rocket Returns runs, Holon, the anime and Scarlet & Violet trainer runs (N's, Lillie's, Hop's, Marnie's, Iono's, Arven's, Larry's, Ethan's, Cynthia's, Steven's, Ash's), Lance's Charizard and the Imakuni? card. The glyph is the owner's initial (T for the teams). Not on any English Pokemon card in TCGdex: Team Galactic's, Pryce's, May's, Forina's, Alto Mare's; Team Plasma is a badge, not a name, and is left out."
+  },
+  {
+   "type": "Delta",
+   "name": "Delta Species",
+   "rank": 11,
+   "glyph": "δ",
+   "rule": {
+    "name": " δ$"
+   },
+   "note": "EX Delta Species through EX Dragon Frontiers, the delta symbol as a suffix (after a Star or an ex where both apply)."
+  },
+  {
+   "type": "Detective",
+   "name": "Detective Pikachu",
+   "rank": 12,
+   "glyph": "?",
+   "rule": {
+    "set": "det1"
+   },
+   "note": "Every Pokemon card of the Detective Pikachu set (TCGdex set id det1, 18 cards): the movie's realistic re-designs count as a different depiction, the owner's call."
+  },
+  {
+   "type": "Costume",
+   "name": "Costume",
+   "rank": 13,
+   "glyph": "*",
+   "rule": {
+    "names": [
+     "Special Delivery Pikachu",
+     "Special Delivery Charizard",
+     "Special Delivery Bidoof",
+     "Pikachu Libre",
+     "Pikachu with Grey Felt Hat"
+    ],
+    "cards": [
+     "basep-24"
+    ]
+   },
+   "note": "A name list, not a regex, by design. basep-24 is the Wizards Black Star promo Birthday Pikachu (TCGdex names it ___________'s Pikachu, the fill-in owner line). Flying and Surfing Pikachu already live in the dex as game-side entries; the cap Pikachu are game forms too. Not listed on purpose: Pikachu on the Ball, Eevee on the Ball (the football promos: a pose, not a costume) and Pikachu at the Museum; say if they should count."
+  }
+ ],
+ "mechanics": [
+  {
+   "type": "ex",
+   "rule": {
+    "name": " ex$"
+   },
+   "note": ""
+  },
+  {
+   "type": "EX",
+   "rule": {
+    "name": "(-EX| EX)$"
+   },
+   "note": ""
+  },
+  {
+   "type": "GX",
+   "rule": {
+    "name": "(-GX| GX)$"
+   },
+   "note": ""
+  },
+  {
+   "type": "V",
+   "rule": {
+    "name": " V$"
+   },
+   "note": "VMAX cards depict the Gigantamax form (Dynamax where no Gigantamax exists) and V cards Dynamax, which the dex already reads."
+  },
+  {
+   "type": "VMAX",
+   "rule": {
+    "name": " VMAX$"
+   },
+   "note": "VMAX cards depict the Gigantamax form (Dynamax where no Gigantamax exists) and V cards Dynamax, which the dex already reads."
+  },
+  {
+   "type": "VSTAR",
+   "rule": {
+    "name": " VSTAR$"
+   },
+   "note": ""
+  },
+  {
+   "type": "BREAK",
+   "rule": {
+    "name": " BREAK$"
+   },
+   "note": ""
+  },
+  {
+   "type": "LV.X",
+   "rule": {
+    "name": " LV\\.X$"
+   },
+   "note": ""
+  },
+  {
+   "type": "LEGEND",
+   "rule": {
+    "name": " LEGEND$"
+   },
+   "note": ""
+  },
+  {
+   "type": "SP",
+   "rule": {
+    "name": " (G|GL|4|C|FB|E4)( LV\\.X)?$"
+   },
+   "note": ""
+  },
+  {
+   "type": "Tag Team",
+   "rule": {
+    "name": " & "
+   },
+   "note": ""
+  },
+  {
+   "type": "Radiant",
+   "rule": {
+    "name": "^Radiant "
+   },
+   "note": ""
+  },
+  {
+   "type": "Prism Star",
+   "rule": {
+    "name": " ◇$"
+   },
+   "note": ""
+  },
+  {
+   "type": "Prime",
+   "rule": {
+    "name": " Prime$"
+   },
+   "note": "TCGdex writes no Prime suffix in the name; the HGSS Prime cards need a set-and-number rule if ever wanted."
+  }
+ ],
+ "_review": [
+  "Owner: confirm the 26 prefixes; the blank-name promos (___________'s Pikachu and kin) are read as Costume (basep-24) and otherwise ignored.",
+  "Star: TCGdex is missing Espeon Star, Groudon Star, Kyogre Star, Metagross Star and Mewtwo Star from the English list (the Bulbapedia list has 28 cards, TCGdex 23), so those species get no Star entry until TCGdex carries them; say if a set-and-number list should fill the gap.",
+  "Shining: the Shining Fates and shiny-vault cards are out of this file (plain names); the Shiny game entry lists them once a list exists.",
+  "Costume: three borderline promos named in the note.",
+  "Anime forms: Crystal Onix and the pink Butterfree have no card, so no anime type is written.",
+  "Glyphs are proposals: a letter in the ball colour at the art window's bottom-right; edit freely."
+ ]
+}
