@@ -240,8 +240,8 @@
   @keyframes lift{to{transform:translateY(var(--lift)) scale(var(--grow));box-shadow:var(--float)}}
   @keyframes bob{from{transform:translateY(var(--lift)) scale(var(--grow));box-shadow:var(--float)}to{transform:translateY(var(--rise)) scale(var(--grow));box-shadow:var(--float-hi)}}
   .card .face{width:100%;aspect-ratio:63/88;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--art);transition:background-color .3s}
-  .card.pk .ph{flex:none;height:max(18px,11cqw);display:flex;justify-content:space-between;align-items:center;gap:3cqw;padding:0 3cqw;background:var(--card);border-bottom:1px solid var(--line)}
-  .card.pk .pname{font-size:max(8px,min(7.5cqw,calc(140cqw / var(--nl,9))));font-weight:700;color:var(--ink-dim);line-height:1.1;min-width:0}
+  .card.pk .ph{flex:none;min-height:max(18px,11cqw);display:flex;justify-content:space-between;align-items:center;gap:3cqw;padding:1.2cqw 3cqw;background:var(--card);border-bottom:1px solid var(--line)}
+  .card.pk .pname{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:max(8px,min(7cqw,calc(150cqw / var(--nl,9))));font-weight:700;color:var(--ink-dim);line-height:1.1;min-width:0}
   .card.pk.own .pname{color:var(--ink)}
   .card .pno{flex:none;font-family:ui-monospace,Menlo,monospace;font-size:max(9px,6cqw);color:var(--ink-dim)}
   .card.pk .part{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
