@@ -432,8 +432,8 @@
     <div class="sugg" id="sugg" role="listbox"></div>
   </div>
   <div class="filters">
-    <div class="dd" id="ddGen"><button class="ddbtn" type="button">Generation</button><div class="ddpanel"><label><input type="checkbox" value="1">Gen 1</label><label><input type="checkbox" value="2">Gen 2</label><label><input type="checkbox" value="3">Gen 3</label><label><input type="checkbox" value="4">Gen 4</label><label><input type="checkbox" value="5">Gen 5</label><label><input type="checkbox" value="6">Gen 6</label><label><input type="checkbox" value="7">Gen 7</label><label><input type="checkbox" value="8">Gen 8</label><label><input type="checkbox" value="9">Gen 9</label></div></div>
-    <div class="dd" id="ddRegion"><button class="ddbtn" type="button">Region</button><div class="ddpanel"><label><input type="checkbox" value="Kanto">Kanto</label><label><input type="checkbox" value="Johto">Johto</label><label><input type="checkbox" value="Hoenn">Hoenn</label><label><input type="checkbox" value="Sinnoh">Sinnoh</label><label><input type="checkbox" value="Unova">Unova</label><label><input type="checkbox" value="Kalos">Kalos</label><label><input type="checkbox" value="Alola">Alola</label><label><input type="checkbox" value="Galar">Galar</label><label><input type="checkbox" value="Hisui">Hisui</label><label><input type="checkbox" value="Paldea">Paldea</label><label><input type="checkbox" value="POGO">POGO</label></div></div>
+    <div class="dd" id="ddGen"><button class="ddbtn" type="button">Generation</button><div class="ddpanel"><label><input id="genAll" type="checkbox" value="*">All generations</label><div class="pdiv"></div><label><input type="checkbox" value="1">Gen 1</label><label><input type="checkbox" value="2">Gen 2</label><label><input type="checkbox" value="3">Gen 3</label><label><input type="checkbox" value="4">Gen 4</label><label><input type="checkbox" value="5">Gen 5</label><label><input type="checkbox" value="6">Gen 6</label><label><input type="checkbox" value="7">Gen 7</label><label><input type="checkbox" value="8">Gen 8</label><label><input type="checkbox" value="9">Gen 9</label></div></div>
+    <div class="dd" id="ddRegion"><button class="ddbtn" type="button">Region</button><div class="ddpanel"><label><input id="regionAll" type="checkbox" value="*">All regions</label><div class="pdiv"></div><label><input type="checkbox" value="Kanto">Kanto</label><label><input type="checkbox" value="Johto">Johto</label><label><input type="checkbox" value="Hoenn">Hoenn</label><label><input type="checkbox" value="Sinnoh">Sinnoh</label><label><input type="checkbox" value="Unova">Unova</label><label><input type="checkbox" value="Kalos">Kalos</label><label><input type="checkbox" value="Alola">Alola</label><label><input type="checkbox" value="Galar">Galar</label><label><input type="checkbox" value="Hisui">Hisui</label><label><input type="checkbox" value="Paldea">Paldea</label><label><input type="checkbox" value="POGO">POGO</label></div></div>
     <div class="dd" id="ddForm"><button class="ddbtn" type="button">Forms</button><div class="ddpanel">
       <label><input id="formAll" type="checkbox" value="*">All Forms</label>
       <div class="pdiv"></div>
@@ -1277,22 +1277,26 @@ function wireDropdown(dd){
     btn.setAttribute("aria-expanded",dd.classList.toggle("open"));
   });
 }
-function ddInit(id,noun,allLabel){
-  const dd=$(id),btn=dd.querySelector(".ddbtn"),boxes=[...dd.querySelectorAll('input[type="checkbox"]')];
+// an optional master row checks every box; it shows checked (all on), a dash (some on) or clear (none on, the same as all)
+function ddInit(id,noun,allLabel,masterId){
+  const dd=$(id),btn=dd.querySelector(".ddbtn"),master=masterId?$(masterId):null,boxes=[...dd.querySelectorAll('input[type="checkbox"]')].filter(b=>b!==master);
   wireDropdown(dd);
   function update(){
     const on=boxes.filter(b=>b.checked);
     btn.textContent=on.length===0?allLabel:on.length===1?on[0].parentElement.textContent.trim():`${on.length} ${noun}`;
     dd.classList.toggle("has",on.length>0);
+    if(master){master.checked=on.length===boxes.length;master.indeterminate=on.length>0&&on.length<boxes.length}
   }
-  boxes.forEach(b=>b.addEventListener("change",()=>{update();page=0;applyFilters()}));
+  const changed=()=>{update();page=0;applyFilters()};
+  boxes.forEach(b=>b.addEventListener("change",changed));
+  if(master)master.addEventListener("change",()=>{boxes.forEach(b=>b.checked=master.checked);changed()});
   return {
     selected:()=>new Set(boxes.filter(b=>b.checked).map(b=>b.value)),
     clear(){boxes.forEach(b=>b.checked=false);update()}
   };
 }
-const ddGen=ddInit("ddGen","gens","Generation"),
-      ddRegion=ddInit("ddRegion","regions","Region"),
+const ddGen=ddInit("ddGen","gens","Generation","genAll"),
+      ddRegion=ddInit("ddRegion","regions","Region","regionAll"),
       ddStatus=ddInit("ddStatus","statuses","Status");
 
 // Forms menu: shown-type checkboxes (checked = shown); display prefs live under the gear
