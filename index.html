@@ -472,7 +472,8 @@
         <label><input type="radio" name="placement" value="regional">Regional Dex (Kanto first)</label>
         <label><input type="radio" name="placement" value="regional-desc">Regional Dex (Paldea first)</label>
         <div class="pdiv"></div>
-        <label><input type="radio" name="placement" value="group">Type: Base-Form</label>
+        <label><input type="radio" name="placement" value="group">Forms (List all at End)</label>
+        <label><input type="radio" name="placement" value="group-first">Forms (List all at Start)</label>
       </div>
     </div>
     <div class="dd" id="ddOpt">
@@ -562,9 +563,11 @@ if(!prefs.bcols){prefs.bcols=prefs.per===16?4:3;prefs.brows=prefs.bcols}
 if(!prefs.pcols)prefs.pcols=3;
 const perNow=()=>prefs.bcols*prefs.brows;
 if(prefs.entries!=="col")prefs.entries="sep";
-if(!["group","regional"].includes(prefs.placement))prefs.placement="dex";
+if(!["group","group-first","regional"].includes(prefs.placement))prefs.placement="dex";
+// the two forms orders group by form type and have no direction
+const grouped=()=>prefs.placement==="group"||prefs.placement==="group-first";
 if(prefs.dir!=="desc")prefs.dir="asc";
-const placeValue=()=>prefs.placement+(prefs.dir==="desc"&&prefs.placement!=="group"?"-desc":"");
+const placeValue=()=>prefs.placement+(prefs.dir==="desc"&&!grouped()?"-desc":"");
 delete prefs.sort;delete prefs.sortBy;delete prefs.group;delete prefs.incBase;
 
 const $=id=>document.getElementById(id);
@@ -1248,13 +1251,14 @@ const speciesRegion=n=>(n>=899&&n<=905)?"Hisui":(n===808||n===809)?"POGO":GENREG
 let ORDERED=DEX;
 function computeOrder(){
   const out=orderAsc();
-  return prefs.dir==="desc"&&prefs.placement!=="group"?[...out].reverse():out;
+  return prefs.dir==="desc"&&!grouped()?[...out].reverse():out;
 }
 function orderAsc(){
   if(prefs.placement==="dex")return DEX;
   const rank=e=>({"":0,Other:1,Regional:2,Mega:3,Gmax:4,Dynamax:5,Tera:6})[e[5]];
   const key=prefs.placement==="regional"
     ?e=>{const reg=e[5]==="Regional"?e[3]:speciesRegion(e[0]);const m=RK[reg];return [RIDX[reg],m&&m[e[0]]!==undefined?m[e[0]]:990000+e[0],rank(e),0,e[1]]}
+    :prefs.placement==="group-first"?e=>[e[5]?0:1,rank(e),e[5]==="Regional"?REGIDX[e[3]]:0,e[0],e[1]]
     :e=>[0,rank(e),e[5]==="Regional"?REGIDX[e[3]]:0,e[0],e[1]];
   return [...DEX].sort((a,b)=>{
     const ka=key(a),kb=key(b);
@@ -1392,7 +1396,7 @@ function setEntries(v){
 }
 entryRadios.forEach(r=>r.addEventListener("change",()=>{if(r.checked)setEntries(r.value)}));
 function setPlacement(v){
-  const [p,d]=v.split("-");prefs.placement=p;prefs.dir=d==="desc"?"desc":"asc";store.save("dex-il-ui",prefs);
+  const desc=v.endsWith("-desc");prefs.placement=desc?v.slice(0,-5):v;prefs.dir=desc?"desc":"asc";store.save("dex-il-ui",prefs);
   placeRadios.forEach(r=>r.checked=r.value===placeValue());
   updateFormBtn();
   resort();
@@ -1874,7 +1878,7 @@ const jumpArr=()=>prefs.view==="list"?dispArr:visArr;
 const jumpEl=id=>prefs.view==="list"?rowMap.get(id):prefs.view==="pocket"?pTiles.get(id):bTiles.get(id);
 const docTop=el=>el.getBoundingClientRect().top+window.scrollY;
 function bandOf(e){
-  if(prefs.placement==="group"&&e[5])return e[5]==="Regional"?e[3]:e[5]==="Other"?"Forms":e[5];
+  if(grouped()&&e[5])return e[5]==="Regional"?e[3]:e[5]==="Other"?"Forms":e[5];
   if(prefs.placement==="regional"&&e[5]==="Regional")return e[3];
   return speciesRegion(e[0]);
 }
