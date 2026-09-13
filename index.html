@@ -283,17 +283,17 @@
   .card .lt span{font-size:max(7px,5.4cqw);font-weight:750;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
   .card .lt b{font-family:ui-monospace,Menlo,monospace;font-size:max(7px,4.6cqw);font-weight:600;letter-spacing:.06em;color:var(--ink-dim)}
   .card .strip{position:absolute;left:0;right:0;bottom:0;z-index:3;height:max(22px,13cqw);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2cqw;padding:0 2.5cqw;background:oklch(0.98 0.004 95 / .92);border-top:1px solid oklch(0.25 0.02 95 / .15);transform:translateY(100%);transition:transform .22s cubic-bezier(.2,.7,.2,1)}
-  /* the strip slides up on hover (mouse), stays pinned after a sideways swipe (touch), and shows on keyboard focus.
+  /* the strip slides up on hover (mouse) and shows on keyboard focus; touch reaches it through the Reveal tags switch.
      The tile's touch-action must be exactly pan-y: WebKit arms the recognizers that keep a sideways drag from starting
-     a scroll only for that value, so pan-y pinch-zoom hands the swipe to the scroll view on iOS and the strip never pins;
+     a scroll only for that value, so the binder's page-turn swipe survives on iOS;
      it blurs what it covers only while shown, so a thousand hidden strips cost no compositing layers */
-  .card.pin .strip,.card:focus-visible .strip{transform:none;backdrop-filter:blur(6px)}
+  .card:focus-visible .strip{transform:none;backdrop-filter:blur(6px)}
   @media (hover:hover){.card:hover .strip{transform:none;backdrop-filter:blur(6px)}}
   .card .strip .ptag{display:flex;justify-content:center;align-items:center;gap:2.5cqw;min-width:0;overflow:hidden}
   .card .strip .chip{flex:none;font-size:max(8px,5cqw);padding:0;background:none;white-space:nowrap}
   .card .pprice{position:absolute;right:5cqw;bottom:10cqw;z-index:1;display:flex;transition:bottom .22s cubic-bezier(.2,.7,.2,1)}
   .card .pprice a{font-family:ui-monospace,Menlo,monospace;font-size:max(8px,5.5cqw);font-weight:700;line-height:1;padding:1.4cqw 2cqw;background:var(--ink);color:var(--card);text-decoration:none;white-space:nowrap;box-shadow:0 0 0 1px var(--card),0 2px 6px oklch(0.2 0.02 95 / .45)}
-  .card.pin .pprice,.card:focus-visible .pprice{bottom:calc(max(22px,13cqw) + 4cqw)}
+  .card:focus-visible .pprice{bottom:calc(max(22px,13cqw) + 4cqw)}
   @media (hover:hover){.card:hover .pprice{bottom:calc(max(22px,13cqw) + 4cqw)}}
   .card .pball{position:relative;flex:none;justify-self:end;width:max(12px,6.5cqw);height:max(12px,6.5cqw);border-radius:50%;border:max(1.5px,0.7cqw) solid var(--line)}
   .card.own .pball,.card.pend .pball{border-color:transparent}
@@ -305,7 +305,7 @@
   .card.own .setc::before,.card.pend .setc::before{background:var(--ink)}
   /* the remove X floats at the card's top-right corner and reveals with the strip (hover, pin, focus); inert at rest so a first tap on touch still registers */
   .card .rmx{position:absolute;top:2.5cqw;right:2.5cqw;z-index:4;width:max(18px,10cqw);height:max(18px,10cqw);padding:0;border:0;border-radius:50%;background:var(--ink);color:var(--card);box-shadow:0 0 0 1px var(--card);display:grid;place-items:center;font-size:max(13px,7cqw);font-weight:700;line-height:1;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .22s;-webkit-tap-highlight-color:transparent}
-  .card.pin .rmx,.card:focus-visible .rmx{opacity:1;pointer-events:auto}
+  .card:focus-visible .rmx{opacity:1;pointer-events:auto}
   @media (hover:hover){.card:hover .rmx{opacity:1;pointer-events:auto}}
   @container (max-width:60px){.card .rmx{display:none}}
   /* narrow slots shed strip content instead of overflowing it: under 110px the strip keeps lookup and ball only */
@@ -1175,8 +1175,8 @@ function burstAt(id){
   const side=(i,t)=>[[r.left+w*t,r.top,0,-1],[r.right,r.top+h*t,1,0],[r.right-w*t,r.bottom,0,1],[r.left,r.bottom-h*t,-1,0]][i];
   for(let i=0;i<16;i++){const [x,y,nx,ny]=side(i>>2,((i&3)+.5)/4);star(x,y,nx*26,ny*26,i*20,i%2)}
 }
-// long press toggles Pending; only the click that ends that hold is swallowed, a new pointerdown clears it
-let holdId=null;
+// long press toggles Pending (mouse) or opens the touch menu; only the click that ends that hold is swallowed, a new pointerdown clears it
+let holdId=null,ctxHold=false;
 // the searched entry floats (.found) until a tap lands it; that tap only lands it, any status change lands it too
 let foundId=null;
 function landFound(){
@@ -1202,32 +1202,37 @@ function handleTap(id){
   if(next===true&&motionOn())burstAt(id);
   setState(id,next);
 }
+// the touch menu on a row or tile: the long press opens it in place of the mouse's hold-to-pend, so one thumb reaches
+// pending, the card sheet, a card's removal and the blank-slot items without a swipe
+function touchMenu(el,id){
+  if(blankOf.get(el))return ctxFor(el);
+  const items=[[owned[id]==="p"?"Clear pending":"Mark pending",()=>togglePending(id)],["Find cards",()=>openCards(byId.get(id))]];
+  if(cardArt(id))items.push(["Remove card",()=>removeArt(id)]);
+  return items.concat(ctxFor(el));
+}
 function armLongPress(container,sel){
-  let t=null,sx=0,sy=0,tid=null,held=null,fired=false,swipe=null,ptype="mouse";
+  let t=null,sx=0,sy=0,tid=null,held=null,fired=false,ptype="mouse";
   container.addEventListener("pointerdown",ev=>{
     holdId=null;ptype=ev.pointerType;
-    if(!ev.isPrimary){end();return}
+    if(!ev.isPrimary){drop();return}
     const el=ev.target.closest(sel);
-    if(!el||!el.dataset.id||ev.button!==0||ev.target.closest(".cardbtn,.setc,.rmx,a"))return;
-    sx=ev.clientX;sy=ev.clientY;tid=Number(el.dataset.id);
+    if(!el||!(el.dataset.id||blankOf.has(el))||ev.button!==0||ev.target.closest(".cardbtn,.setc,.rmx,a"))return;
+    sx=ev.clientX;sy=ev.clientY;tid=Number(el.dataset.id)||null;
     held=el;fired=false;el.classList.add("hold","down");
-    swipe=ev.pointerType!=="mouse"&&el.classList.contains("card")?el:null;
-    t=setTimeout(()=>{t=null;fired=true;el.classList.remove("hold");togglePending(tid)},450);
+    // a mouse hold marks pending (a blank has no status); a touch hold opens the menu, on a blank the one that removes it
+    t=setTimeout(()=>{t=null;fired=true;el.classList.remove("hold");if(ptype==="mouse"){if(tid)togglePending(tid)}else{ctxHold=true;openCtx(sx,sy,touchMenu(el,tid))}},450);
   });
   const drop=()=>{
     if(t){clearTimeout(t);t=null}
     if(held){held.classList.remove("hold","down");held=null}
     if(fired){holdId=tid;fired=false}
   };
-  const end=()=>{drop();swipe=null};
-  // a sideways swipe on a tile (24px across, and more across than down by half again) pins its strip; the hold is already off past 8px
+  // the hold is off past 8px of drift; a sideways drag on a binder tile is the page-turn swipe, the tile itself has no swipe
   container.addEventListener("pointermove",ev=>{
-    const dx=ev.clientX-sx,dy=ev.clientY-sy;
-    if(t&&Math.hypot(dx,dy)>8)drop();
-    if(swipe&&Math.abs(dx)>24&&Math.abs(dx)>Math.abs(dy)*1.5){pinStrip(swipe);holdId=tid;swipe=null}
+    if(t&&Math.hypot(ev.clientX-sx,ev.clientY-sy)>8)drop();
   });
-  container.addEventListener("pointerup",end);
-  container.addEventListener("pointercancel",end);
+  container.addEventListener("pointerup",drop);
+  container.addEventListener("pointercancel",drop);
   // a mouse right click on a row or tile opens the blank-slot menu (Pending stays the long press only); the native menu
   // stays suppressed so a touch long press cannot pop a callout; links and buttons keep theirs
   container.addEventListener("contextmenu",ev=>{
@@ -1256,12 +1261,6 @@ function armKeys(container,sel,cols,edge){
     else if(ev.key==="c")openCards(byId.get(id));
   });
 }
-// one strip is pinned at a time; a pointerdown outside its tile or a scroll releases it
-let pinned=null;
-function pinStrip(el){unpinStrip();pinned=el;el.classList.add("pin")}
-function unpinStrip(){if(pinned){pinned.classList.remove("pin");pinned=null}}
-document.addEventListener("pointerdown",ev=>{if(pinned&&!pinned.contains(ev.target))unpinStrip()},{passive:true});
-document.addEventListener("scroll",unpinStrip,{passive:true});
 armLongPress(list,".row");armKeys(list,".row",()=>1);
 // an arrow past the edge of a binder page turns it and lands on the first (or last) tile of the new page
 armLongPress(book,".card");armKeys(book,".card",()=>prefs.bcols,dir=>{
@@ -1552,7 +1551,7 @@ function initBinder(CardBinder){
   bItems=binderItems();indexBinder();
   cb=new CardBinder(book,{items:bItems,cols:prefs.bcols,rows:prefs.brows,keys:false,animate:motionOn(),name:binderName(),itemDone:e=>e.blank?null:owned[e[1]]===true,
     renderItem:e=>e.blank?blankTile(e):binderTile(e,bTiles),
-    onChange:s=>{page=s.page;unpinStrip();closeCtx();for(const[id,el]of bTiles)if(!el.isConnected)bTiles.delete(id);const first=book.querySelector(".cb-book>.cb-leaf:not(.cb-ghost) [data-id]");if(first)first.tabIndex=0;keepHeader();updateCurrentJump(true)}});
+    onChange:s=>{page=s.page;closeCtx();for(const[id,el]of bTiles)if(!el.isConnected)bTiles.delete(id);const first=book.querySelector(".cb-book>.cb-leaf:not(.cb-ghost) [data-id]");if(first)first.tabIndex=0;keepHeader();updateCurrentJump(true)}});
   applyCover();tally();
 }
 // blank slots and pages: a blank sits before or after the entry it was added on and follows that entry through filters
@@ -1850,8 +1849,11 @@ document.addEventListener("click",e=>{
   if(!e.target.closest(".search"))sugg.style.display="none";
   if(!e.target.closest(".dd"))closeMenus();
   if(!e.target.closest(".plabel.danger"))disarmClear();
-  if(!e.target.closest(".ctx"))closeCtx();
+  // the click that ends a touch hold lands after its menu opened (the tile's own handler has already cleared holdId); it must not close it
+  if(e.target.closest(".ctx"))return;
+  if(ctxHold)ctxHold=false;else closeCtx();
 });
+document.addEventListener("pointerdown",()=>{ctxHold=false},{passive:true,capture:true});
 
 // named lists + sync code: collection state as a bitmap over DEX order
 const NEWER={1:["Other","Gmax","Dynamax","Tera"],2:["Other","Gmax","Dynamax","Tera"],3:["Gmax","Dynamax","Tera"],4:["Dynamax","Tera"],6:[]};
