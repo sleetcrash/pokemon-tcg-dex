@@ -383,6 +383,7 @@
   .cfilters[hidden]{display:none}
   .cprog{position:absolute;left:0;bottom:-1px;height:2px;width:0;background:var(--shell);transition:width .25s ease,opacity .3s;pointer-events:none}
   .ddpanel label small{font-size:11.5px;color:var(--ink-dim);margin-left:2px}
+  .ddpanel label.off{color:var(--ink-dim);cursor:default}
   .cbody{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:8px 12px 20px}
   .cbody.detail{display:flex;flex-direction:column;padding-bottom:0}
   .cmsg{font-size:13px;color:var(--ink-dim);line-height:1.5;padding:8px 2px}
@@ -484,6 +485,7 @@
       <label class="cpick"><span>Font colour</span><input id="fontIn" type="color" value="#6b6d75" aria-label="Font colour"><span class="sw" id="fontSw"></span></label>
       <div class="crow mails"><span>Mailer</span><button type="button" data-mail="#1b1d20" style="--sw:#1b1d20" aria-label="Black mailer"></button><button type="button" data-mail="#a8723c" style="--sw:#a8723c" aria-label="Kraft mailer"></button><button type="button" data-mail="#f1eee7" style="--sw:#f1eee7" aria-label="White mailer"></button><button type="button" data-mail="#f0a9c2" style="--sw:#f0a9c2" aria-label="Pink mailer"></button></div>
       <label class="cpick"><span>Mailer colour</span><input id="mailIn" type="color" value="#1b1d20" aria-label="Mailer colour"><span class="sw" id="mailSw"></span></label>
+      <label id="genPagesRow"><input id="genPages" type="checkbox">New page per generation<small id="genPagesNote" hidden>(dex orders only)</small></label>
       <button id="optCover" class="plabel" type="button">Reset colours</button>
     </div></div>
     <button id="vPocket" type="button" aria-label="Pocket view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="3.5" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="3.5" y="15.9" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="15.9" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="15.9" width="4.6" height="4.6" rx="1"/></svg></button>
@@ -1232,7 +1234,8 @@ function armLongPress(container,sel){
     if(ev.target.closest("a,button,input"))return;
     ev.preventDefault();
     const el=ev.target.closest(sel);
-    if(el&&ptype==="mouse")openCtx(ev.clientX,ev.clientY,ctxFor(el));
+    const items=el&&ptype==="mouse"?ctxFor(el):[];
+    if(items.length)openCtx(ev.clientX,ev.clientY,items);
   });
 }
 function armKeys(container,sel,cols,edge){
@@ -1438,9 +1441,14 @@ entryRadios.forEach(r=>r.addEventListener("change",()=>{if(r.checked)setEntries(
 function setPlacement(v){
   const desc=v.endsWith("-desc");prefs.placement=desc?v.slice(0,-5):v;prefs.dir=desc?"desc":"asc";store.save("dex-il-ui",prefs);
   placeRadios.forEach(r=>r.checked=r.value===placeValue());
-  updateFormBtn();
+  updateFormBtn();syncGenPages();
   resort();
 }
+// the generation-page toggle only means something under the two dex orders
+const genPages=$("genPages");
+function syncGenPages(){genPages.checked=!!prefs.genPages;genPages.disabled=grouped();$("genPagesRow").classList.toggle("off",grouped());$("genPagesNote").hidden=!grouped()}
+syncGenPages();
+genPages.addEventListener("change",()=>{prefs.genPages=genPages.checked;store.save("dex-il-ui",prefs);if(prefs.view==="binder")renderBinder()});
 placeRadios.forEach(r=>r.addEventListener("change",()=>{if(r.checked)setPlacement(r.value)}));
 const ddOpt=$("ddOpt");
 [ddOpt,$("ddOrder"),$("custList"),$("custBinder"),$("custPocket")].forEach(wireDropdown);
@@ -1560,8 +1568,22 @@ function slotItems(arr){
   arr.forEach(e=>out.push(...(before.get(e[1])||[]),e,...(after.get(e[1])||[])));
   return out;
 }
+const PAD={blank:true,k:"pad"};
 function binderItems(){
   const per=perNow();let out=slotItems(visArr);
+  // each generation (each region under Regional order) starts on a fresh page: the page before a boundary is padded with
+  // fillers that count for nothing; a slot blank takes the band of the entry it precedes
+  if(prefs.genPages&&!grouped()){
+    const bandKey=prefs.placement==="regional"?e=>e[5]==="Regional"?e[3]:speciesRegion(e[0]):e=>baseGen(e[0]);
+    const padded=[];let last=null;
+    out.forEach((x,i)=>{
+      let k=last;
+      if(!x.blank)k=bandKey(x);else{const n=out.slice(i).find(y=>!y.blank);if(n)k=bandKey(n)}
+      if(last!==null&&k!==last)while(padded.length%per)padded.push(PAD);
+      last=k;padded.push(x);
+    });
+    out=padded;
+  }
   BLANKS.forEach(m=>{
     if(m.k!=="page")return;
     const i=out.findIndex(x=>!x.blank&&x[1]===m.b);if(i<0)return;
@@ -1606,7 +1628,7 @@ function closeCtx(){ctx.hidden=true}
 document.addEventListener("scroll",closeCtx,{passive:true});
 function ctxFor(el){
   const m=blankOf.get(el);
-  if(m)return [[m.k==="page"?"Remove blank page":"Remove blank slot",()=>removeBlank(m)]];
+  if(m)return m===PAD?[]:[[m.k==="page"?"Remove blank page":"Remove blank slot",()=>removeBlank(m)]];
   const id=Number(el.dataset.id);
   const items=[["Blank slot before",()=>addBlank({k:"slot",b:id,at:"before"})],["Blank slot after",()=>addBlank({k:"slot",b:id,at:"after"})]];
   if(prefs.view==="binder")items.push(["Blank page before",()=>addBlank({k:"page",b:id,at:"before"})],["Blank page after",()=>addBlank({k:"page",b:id,at:"after"})]);
