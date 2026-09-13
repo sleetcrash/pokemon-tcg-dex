@@ -578,7 +578,7 @@ const rowMap=new Map(),expMap=new Map();
 // market price of the chosen binder card, filled into the row's empty middle when visible
 function priceLink(p){
   const a=document.createElement("a");
-  a.href=p.url;a.target="_blank";a.rel="noopener";a.textContent=fmtPrice(conv({unit:"USD",v:p.rows[0][1]}));
+  a.href=p.url;a.target="_blank";a.rel="noopener";a.textContent=fmtPrice(conv({unit:p.rows[0][2]||"USD",v:p.rows[0][1]}));
   return a;
 }
 function fillRowPrice(row){
@@ -686,7 +686,12 @@ function priceInfo(id){
     const rows=[];
     if(tp)for(const[k,l]of[["normal","Normal"],["holofoil","Holo"],["reverse-holofoil","Reverse"]])
       if(tp[k]&&tp[k].marketPrice!=null)rows.push([l,tp[k].marketPrice]);
-    const url=d&&/^https:\/\//.test(d.tcgUrl)?d.tcgUrl:"https://www.tcgplayer.com/search/pokemon/product?productLineName=pokemon&q="+encodeURIComponent((d&&d.name)||"");
+    let url=d&&/^https:\/\//.test(d.tcgUrl)?d.tcgUrl:"https://www.tcgplayer.com/search/pokemon/product?productLineName=pokemon&q="+encodeURIComponent((d&&d.name)||"");
+    // no TCGplayer listing (Japanese and European prints): Cardmarket's trend in EUR, linked to its product page
+    if(!rows.length){
+      const cm=d&&d.pricing&&d.pricing.cardmarket,v=cm&&(cm.trend||cm.avg30||cm.low);
+      if(v){rows.push(["Cardmarket",v,"EUR"]);url=cm.idProduct?"https://www.cardmarket.com/en/Pokemon/Products?idProduct="+cm.idProduct:"https://www.cardmarket.com/en/Pokemon/Products/Search?searchString="+encodeURIComponent(d.name||"")}
+    }
     return rows.length?{rows,url}:null;
   }).catch(()=>{PRICES.delete(cid);return null}));
   return PRICES.get(cid);
