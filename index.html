@@ -23,7 +23,7 @@
     --line:oklch(0.6 0.01 95); --line-soft:oklch(0.8 0.01 95); --line-hi:oklch(0.24 0.012 95);
     --accent:oklch(0.55 0.19 25);
     --shell:oklch(0.5 0.17 25); --shell-deep:oklch(0.4 0.14 25); --shell-dim:oklch(0.9 0.05 25);
-    --pend:oklch(0.55 0.12 85); --pend-deep:oklch(0.42 0.1 85); --pend-lite:oklch(0.82 0.13 88);
+    --pend:oklch(0.55 0.12 85); --pend-lite:oklch(0.82 0.13 88);
     --poly:oklch(0.23 0.006 260); --poly-hi:oklch(from var(--poly) calc(l + .13) c h);
     --ok:oklch(0.5 0.13 150); --glow:oklch(0.62 0.22 28); --shadow:0 8px 24px oklch(0.25 0.02 95 / .16);
     --icon-search:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%222.5%22 width=%2214%22 height=%2219%22/%3E%3Ccircle cx=%2214.5%22 cy=%2215%22 r=%224.2%22/%3E%3Cline x1=%2217.6%22 y1=%2218.1%22 x2=%2221%22 y2=%2221.5%22/%3E%3C/svg%3E");
@@ -209,10 +209,10 @@
   .ctx button{display:block;width:100%;height:38px;padding:0 14px;border:0;background:none;color:var(--ink);font-size:13px;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
   @media (hover:hover){.ctx button:hover{background:var(--card-hi)}}
   /* pill switch: shell red track when on, paper knob */
-  .tog input{width:42px;height:24px;border-radius:12px;background:var(--line);position:relative;transition:background .2s}
-  .tog input::after,.tog input:checked::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border:0;background:var(--card);border-radius:50%;box-shadow:0 1px 2px oklch(0 0 0 / .3);transform:none;transition:left .2s}
-  .tog input:checked{background:var(--shell)}
-  .tog input:checked::after{left:20px}
+  label.tog input{width:42px;height:24px;border-radius:12px;background:var(--line);position:relative;transition:background .2s}
+  label.tog input::after,label.tog input:checked::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border:0;background:var(--card);border-radius:50%;box-shadow:0 1px 2px oklch(0 0 0 / .3);transform:none;transition:left .2s}
+  label.tog input:checked{background:var(--shell)}
+  label.tog input:checked::after{left:20px}
   .cpick{position:relative}
   .cpick input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;margin:0}
   .cpick .sw{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--ink-dim);margin-left:auto;background:var(--sw,#34363c)}
@@ -447,6 +447,7 @@
   .still .card,.still .card .strip{transition:none}
   .still .row.pend .slot::before{animation:none;opacity:.6}
   .still .card.ringed::after{display:none}
+  .still .track i,.still .track b{transition:none}
 </style>
 </head>
 <body>
@@ -528,7 +529,7 @@
       </div>
     </div>
   </div>
-  <div class="hbar"><div class="count"><b id="have">0</b><span id="pend"></span> / <span id="total">0</span> <span class="pct" id="pct"></span></div><div class="track"><i id="hFill"></i><b id="hPend"></b></div></div>
+  <div class="hbar"><div class="count"><b id="have">0</b><span id="pend"></span> / <span id="total">0</span> <span id="pct"></span></div><div class="track"><i id="hFill"></i><b id="hPend"></b></div></div>
  </div>
 </header>
 
@@ -668,7 +669,7 @@ function syncEntryUI(id){
   row.classList.toggle("pend",owned[id]==="p");
   [["binder",bTiles.get(id)],["pocket",pTiles.get(id)]].forEach(([view,card])=>{
     if(!card)return;
-    if(owned[id]===true&&!card.classList.contains("own")&&prefs.view===view&&motionOn()){card.classList.add("ringed");card.addEventListener("animationend",function h(ev){if(ev.animationName!=="ringfade")return;card.classList.remove("ringed");card.removeEventListener("animationend",h)})}
+    if(owned[id]===true&&!card.classList.contains("own")&&prefs.view===view&&motionOn()){card.classList.remove("ringed");void card.offsetWidth;card.classList.add("ringed");card.addEventListener("animationend",function h(ev){if(ev.animationName!=="ringfade")return;card.classList.remove("ringed");card.removeEventListener("animationend",h)})}
     card.classList.toggle("own",owned[id]===true);card.classList.toggle("pend",owned[id]==="p");syncMailer(card,id)});
 }
 // a pending entry is in the post: its face holds the mailer it ships in, added or removed as the state changes
@@ -695,6 +696,7 @@ function refreshChip(n){
 // under a Status filter an entry that stops matching leaves in place; nothing else re-renders
 function setState(id,st){
   if(id===foundId)landFound();
+  if(st===true&&owned[id]!==true&&motionOn())burstAt(id);
   if(st===undefined)delete owned[id];else owned[id]=st;
   store.save("dex-il",owned);
   syncEntryUI(id);tally();
@@ -1204,9 +1206,7 @@ function togglePending(id){
 function handleTap(id){
   if(id===holdId){holdId=null;return}
   if(id===foundId){landFound();return}
-  const next=owned[id]===undefined?true:owned[id]===true?undefined:true;
-  if(next===true&&motionOn())burstAt(id);
-  setState(id,next);
+  setState(id,owned[id]===undefined?true:owned[id]===true?undefined:true);
 }
 // the touch menu on a row or tile: the long press opens it in place of the mouse's hold-to-pend, so one thumb reaches
 // pending, the card sheet, a card's removal and the blank-slot items without a swipe
@@ -1226,7 +1226,7 @@ function armLongPress(container,sel){
     sx=ev.clientX;sy=ev.clientY;tid=Number(el.dataset.id)||null;
     held=el;fired=false;el.classList.add("hold","down");
     // a mouse hold marks pending (a blank has no status); a touch hold opens the menu, on a blank the one that removes it
-    t=setTimeout(()=>{t=null;fired=true;el.classList.remove("hold");if(ptype==="mouse"){if(tid)togglePending(tid)}else{ctxHold=true;openCtx(sx,sy,touchMenu(el,tid))}},450);
+    t=setTimeout(()=>{t=null;fired=true;el.classList.remove("hold");if(ptype==="mouse"){if(tid)togglePending(tid)}else{const items=touchMenu(el,tid);if(items.length){ctxHold=true;openCtx(sx,sy,items)}}},450);
   });
   const drop=()=>{
     if(t){clearTimeout(t);t=null}
@@ -1283,7 +1283,7 @@ function tally(){
   $("pend").textContent=pen?` +${pen}`:"";
   const pct=reg/DEX.length*100;
   $("pct").textContent=pct.toFixed(pct&&pct<10?1:0)+"%";
-  hFill.style.width=pct+"%";hPend.style.left=pct+"%";hPend.style.width=pen/DEX.length*100+"%";
+  $("hFill").style.width=pct+"%";$("hPend").style.left=pct+"%";$("hPend").style.width=pen/DEX.length*100+"%";
   syncBinderMeta(reg,pen,$("pct").textContent);
 }
 tally();
@@ -1580,10 +1580,11 @@ function binderItems(){
   // fillers that count for nothing; a slot blank takes the band of the entry it precedes
   if(prefs.genPages&&!grouped()){
     const bandKey=prefs.placement==="regional"?e=>e[5]==="Regional"?e[3]:speciesRegion(e[0]):e=>baseGen(e[0]);
+    const bands=new Array(out.length);
+    for(let i=out.length-1,k=null;i>=0;i--){if(!out[i].blank)k=bandKey(out[i]);bands[i]=k}
     const padded=[];let last=null;
     out.forEach((x,i)=>{
-      let k=last;
-      if(!x.blank)k=bandKey(x);else{const n=out.slice(i).find(y=>!y.blank);if(n)k=bandKey(n)}
+      const k=bands[i]??last;
       if(last!==null&&k!==last)while(padded.length%per)padded.push(PAD);
       last=k;padded.push(x);
     });
@@ -2052,10 +2053,9 @@ function scrubAt(y,btnHint){
 }
 jumps.addEventListener("touchmove",ev=>ev.preventDefault(),{passive:false});
 jumps.addEventListener("pointerdown",ev=>{
+  // the arrows keep their own click (keyboard too); the scrub must not capture a press that starts on one
+  if(ev.target.closest(".jtop,.jend"))return;
   ev.preventDefault();
-  // the rail captures the pointer for the scrub, so its arrows act here rather than on a click that would land on the rail
-  const arrow=ev.target.closest(".jtop,.jend");
-  if(arrow){if(arrow.classList.contains("show"))window.scrollTo({top:arrow===toTop?0:document.documentElement.scrollHeight,behavior:"smooth"});return}
   try{jumps.setPointerCapture(ev.pointerId)}catch(e){}
   scrubAt(ev.clientY,ev.target.closest(".jp"));
 });
@@ -2094,6 +2094,8 @@ function updateJumpBtns(){
   const y=window.scrollY,rest=document.documentElement.scrollHeight-window.innerHeight-y;
   toTop.classList.toggle("show",y>500);toEnd.classList.toggle("show",rest>500);
 }
+toTop.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+toEnd.addEventListener("click",()=>window.scrollTo({top:document.documentElement.scrollHeight,behavior:"smooth"}));
 window.addEventListener("scroll",()=>{
   slideHeader();
   if(!cjRaf){cjRaf=true;requestAnimationFrame(()=>{cjRaf=false;updateJumpBtns();updateCurrentJump()})}
