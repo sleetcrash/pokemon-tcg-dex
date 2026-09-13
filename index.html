@@ -216,8 +216,6 @@
   .cpick{position:relative}
   .cpick input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;margin:0}
   .cpick .sw{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--ink-dim);margin-left:auto;background:var(--sw,#34363c)}
-  .crow.mails button{width:22px;height:22px;border-radius:50%;border-color:var(--ink-dim);background:var(--sw)}
-  .crow.mails button:first-of-type{margin-left:auto}
   /* desktop: the shell widens to 960px and the pocket grid follows it, with tiles capped near 260px so a three-column run does not balloon */
   @media(min-width:1000px){
     :root{--col:960px}
@@ -489,12 +487,11 @@
     <button id="vBinder" type="button" aria-label="Binder view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="15" height="17" rx="2"/><line x1="9.5" y1="3.5" x2="9.5" y2="20.5"/><line x1="3" y1="8" x2="6.5" y2="8"/><line x1="3" y1="12" x2="6.5" y2="12"/><line x1="3" y1="16" x2="6.5" y2="16"/></svg></button>
     <div class="dd cust" id="custBinder" hidden><button class="ddbtn" type="button" aria-label="Binder options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddpanel">
       <div class="crow"><span>Size</span><div id="gpGrid"></div><span id="gpLbl" class="lbl">3 &#215; 3</span></div>
-      <label class="cpick"><span>Binder colour</span><input id="coverIn" type="color" value="#34363c" aria-label="Binder colour"><span class="sw" id="coverSw"></span></label>
-      <label class="cpick"><span>Font colour</span><input id="fontIn" type="color" value="#6b6d75" aria-label="Font colour"><span class="sw" id="fontSw"></span></label>
-      <div class="crow mails"><span>Mailer</span><button type="button" data-mail="#1b1d20" style="--sw:#1b1d20" aria-label="Black mailer"></button><button type="button" data-mail="#a8723c" style="--sw:#a8723c" aria-label="Kraft mailer"></button><button type="button" data-mail="#f1eee7" style="--sw:#f1eee7" aria-label="White mailer"></button><button type="button" data-mail="#f0a9c2" style="--sw:#f0a9c2" aria-label="Pink mailer"></button></div>
-      <label class="cpick"><span>Mailer colour</span><input id="mailIn" type="color" value="#1b1d20" aria-label="Mailer colour"><span class="sw" id="mailSw"></span></label>
+      <label class="cpick"><span>Binder color</span><input id="coverIn" type="color" value="#34363c" aria-label="Binder color"><span class="sw" id="coverSw"></span></label>
+      <label class="cpick"><span>Font color</span><input id="fontIn" type="color" value="#6b6d75" aria-label="Font color"><span class="sw" id="fontSw"></span></label>
+      <label class="cpick"><span>Mailer color</span><input id="mailIn" type="color" value="#1b1d20" aria-label="Mailer color"><span class="sw" id="mailSw"></span></label>
       <label id="genPagesRow"><input id="genPages" type="checkbox">New page per generation<small id="genPagesNote" hidden>(dex orders only)</small></label>
-      <button id="optCover" class="plabel" type="button">Reset colours</button>
+      <button id="optCover" class="plabel" type="button">Reset colors</button>
     </div></div>
     <button id="vPocket" type="button" aria-label="Pocket view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="3.5" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="3.5" y="15.9" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="15.9" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="15.9" width="4.6" height="4.6" rx="1"/></svg></button>
     <div class="dd cust" id="custPocket" hidden><button class="ddbtn" type="button" aria-label="Pocket options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddpanel">
@@ -1757,7 +1754,6 @@ function applyMail(){
 }
 applyMail();
 mailIn.addEventListener("input",()=>{prefs.mail=mailIn.value;applyMail()});
-document.querySelectorAll(".mails button").forEach(b=>b.addEventListener("click",()=>{prefs.mail=b.dataset.mail;applyMail()}));
 $("optCover").addEventListener("click",()=>{delete prefs.cover;delete prefs.font;delete prefs.mail;applyCover();applyMail();closeMenus()});
 
 // search: jump to the entry in whichever view is active
