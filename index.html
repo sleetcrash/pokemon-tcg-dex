@@ -150,7 +150,6 @@
   /* the tile's ball glow holds still: its infinite pulse ran inside the hidden strip and stalled the tile's repaint on iOS Safari when the entry left pending */
   .card.pend .pball::before{animation:none;opacity:.6}
   .row.hs.pend .slot::before,.card.hs.pend .pball::before{background-image:var(--hball);inset:-30%}
-  .row.pend::before{opacity:1;background:linear-gradient(180deg,var(--pend-lite),var(--pend-deep) 50%,var(--pend-lite))}
   .star{position:fixed;width:10px;height:10px;pointer-events:none;z-index:60;background:var(--pend-lite);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:starfly .6s ease-out forwards;opacity:0}
   .star.w{background:#f4f2ec;width:7px;height:7px}
   @keyframes starfly{0%{transform:translate(0,0) scale(1) rotate(0deg);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0) rotate(120deg);opacity:0}}
