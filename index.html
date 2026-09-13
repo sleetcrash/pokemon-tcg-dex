@@ -24,7 +24,7 @@
     --accent:oklch(0.55 0.19 25);
     --shell:oklch(0.5 0.17 25); --shell-deep:oklch(0.4 0.14 25); --shell-dim:oklch(0.9 0.05 25);
     --pend:oklch(0.55 0.12 85); --pend-deep:oklch(0.42 0.1 85); --pend-lite:oklch(0.82 0.13 88);
-    --poly:oklch(0.23 0.006 260); --poly-hi:oklch(0.36 0.008 260);
+    --poly:oklch(0.23 0.006 260); --poly-hi:oklch(from var(--poly) calc(l + .13) c h);
     --ok:oklch(0.5 0.13 150); --glow:oklch(0.62 0.22 28); --shadow:0 8px 24px oklch(0.25 0.02 95 / .16);
     --icon-search:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%222.5%22 width=%2214%22 height=%2219%22/%3E%3Ccircle cx=%2214.5%22 cy=%2215%22 r=%224.2%22/%3E%3Cline x1=%2217.6%22 y1=%2218.1%22 x2=%2221%22 y2=%2221.5%22/%3E%3C/svg%3E");
     --icon-find:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.6%22 stroke-linecap=%22round%22%3E%3Ccircle cx=%2211%22 cy=%2211%22 r=%226.5%22/%3E%3Cline x1=%2216%22 y1=%2216%22 x2=%2220.5%22 y2=%2220.5%22/%3E%3C/svg%3E");
@@ -216,6 +216,8 @@
   .cpick{position:relative}
   .cpick input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;margin:0}
   .cpick .sw{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--ink-dim);margin-left:auto;background:var(--sw,#34363c)}
+  .crow.mails button{width:22px;height:22px;border-radius:50%;border-color:var(--ink-dim);background:var(--sw)}
+  .crow.mails button:first-of-type{margin-left:auto}
   /* desktop: the shell widens to 960px and the pocket grid follows it, with tiles capped near 260px so a three-column run does not balloon */
   @media(min-width:1000px){
     :root{--col:960px}
@@ -480,6 +482,8 @@
       <div class="crow"><span>Size</span><div id="gpGrid"></div><span id="gpLbl" class="lbl">3 &#215; 3</span></div>
       <label class="cpick"><span>Binder colour</span><input id="coverIn" type="color" value="#34363c" aria-label="Binder colour"><span class="sw" id="coverSw"></span></label>
       <label class="cpick"><span>Font colour</span><input id="fontIn" type="color" value="#6b6d75" aria-label="Font colour"><span class="sw" id="fontSw"></span></label>
+      <div class="crow mails"><span>Mailer</span><button type="button" data-mail="#1b1d20" style="--sw:#1b1d20" aria-label="Black mailer"></button><button type="button" data-mail="#a8723c" style="--sw:#a8723c" aria-label="Kraft mailer"></button><button type="button" data-mail="#f1eee7" style="--sw:#f1eee7" aria-label="White mailer"></button><button type="button" data-mail="#f0a9c2" style="--sw:#f0a9c2" aria-label="Pink mailer"></button></div>
+      <label class="cpick"><span>Mailer colour</span><input id="mailIn" type="color" value="#1b1d20" aria-label="Mailer colour"><span class="sw" id="mailSw"></span></label>
       <button id="optCover" class="plabel" type="button">Reset colours</button>
     </div></div>
     <button id="vPocket" type="button" aria-label="Pocket view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="3.5" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="3.5" y="15.9" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="15.9" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="15.9" width="4.6" height="4.6" rx="1"/></svg></button>
@@ -1715,7 +1719,18 @@ function applyCover(){
 }
 coverIn.addEventListener("input",()=>{prefs.cover=coverIn.value;applyCover()});
 fontIn.addEventListener("input",()=>{prefs.font=fontIn.value;applyCover()});
-$("optCover").addEventListener("click",()=>{delete prefs.cover;delete prefs.font;applyCover();closeMenus()});
+// the mailer is a status, not a binder part: its colour applies to every pending tile in binder and pocket (--poly-hi follows it in CSS)
+const mailIn=$("mailIn"),mailSw=$("mailSw"),MAIL_DEFAULT="#1b1d20";
+function applyMail(){
+  const m=hex(prefs.mail);
+  if(!m)delete prefs.mail;store.save("dex-il-ui",prefs);
+  if(m)document.documentElement.style.setProperty("--poly",m);else document.documentElement.style.removeProperty("--poly");
+  mailSw.style.setProperty("--sw",m||MAIL_DEFAULT);mailIn.value=m||MAIL_DEFAULT;
+}
+applyMail();
+mailIn.addEventListener("input",()=>{prefs.mail=mailIn.value;applyMail()});
+document.querySelectorAll(".mails button").forEach(b=>b.addEventListener("click",()=>{prefs.mail=b.dataset.mail;applyMail()}));
+$("optCover").addEventListener("click",()=>{delete prefs.cover;delete prefs.font;delete prefs.mail;applyCover();applyMail();closeMenus()});
 
 // search: jump to the entry in whichever view is active
 const q=$("q"),sugg=$("sugg");
