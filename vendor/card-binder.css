@@ -1,9 +1,9 @@
-/* card-binder v2.6.0 (2026-09-13) */
+/* card-binder v2.7.0 (2026-09-14) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
 .cb-host{
-  --cb-cover:oklch(0.3 0.006 260);--cb-cover-hi:oklch(0.345 0.006 260);--cb-sheet:oklch(0.37 0.004 260);--cb-pocket:oklch(0.335 0.004 260);
+  --cb-cover:oklch(0.3 0.006 260);--cb-cover-hi:oklch(0.345 0.006 260);--cb-sheet:oklch(from var(--cb-cover) calc(l + .07 * var(--cb-press)) calc(c * .7) h);--cb-pocket:oklch(from var(--cb-cover) calc(l + .035 * var(--cb-press)) calc(c * .7) h);   /* the inside follows the cover: a step lighter on a dark cover, a step darker on a light one */
   --cb-seam:oklch(0.66 0.005 260 / .5);--cb-thread:oklch(0.86 0.02 80);   /* thread: the progress fill and the stitch line; --cb-font (setFont) overrides it for the pressed title and the fill */--cb-stitch:color-mix(in oklch, var(--cb-thread), transparent 55%);
   --cb-paper:oklch(0.98 0.004 95);--cb-ink:oklch(0.22 0.012 95);--cb-ink-dim:oklch(0.47 0.012 95);
   --cb-line:oklch(0.6 0.01 95);--cb-line-soft:oklch(0.8 0.01 95);

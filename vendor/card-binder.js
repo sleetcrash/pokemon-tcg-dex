@@ -1,4 +1,4 @@
-// card-binder v2.6.0 (2026-09-13)
+// card-binder v2.7.0 (2026-09-14)
 // card-binder: a pocket-page binder as a physical object. Zero dependencies, ES module.
 // new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, itemDone, cover, font, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, onChange})
 //   items        array of anything; renderItem(item, index) returns the element that sits in a pocket (give it the pocket aspect)
@@ -22,7 +22,7 @@
 // perspective distance for a turn, in page widths: the free edge of a swinging page grows by at most 1 / (1 - 1 / PERSP)
 const PERSP=10;
 export class CardBinder{
-  static VERSION="2.6.0";
+  static VERSION="2.7.0";
   constructor(host,o={}){
     this.host=host;this.items=o.items||[];this.renderItem=o.renderItem||(x=>{const d=document.createElement("div");d.textContent=String(x);return d});
     this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";this.itemDone=o.itemDone||null;
