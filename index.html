@@ -390,8 +390,6 @@
   .cfilters{position:relative;margin:0;padding:0 8px;border-bottom:1px solid var(--line-soft)}
   .cfilters[hidden]{display:none}
   .cprog{position:absolute;left:0;bottom:-1px;height:2px;width:0;background:var(--shell);transition:width .25s ease,opacity .3s;pointer-events:none}
-  .ddpanel label small{font-size:11.5px;color:var(--ink-dim);margin-left:2px}
-  .ddpanel label.off{color:var(--ink-dim);cursor:default}
   .cbody{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:8px 12px 20px}
   .cbody.detail{display:flex;flex-direction:column;padding-bottom:0}
   .cmsg{font-size:13px;color:var(--ink-dim);line-height:1.5;padding:8px 2px}
@@ -490,7 +488,7 @@
     <button id="vBinder" type="button" aria-label="Binder view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="15" height="17" rx="2"/><line x1="9.5" y1="3.5" x2="9.5" y2="20.5"/><line x1="3" y1="8" x2="6.5" y2="8"/><line x1="3" y1="12" x2="6.5" y2="12"/><line x1="3" y1="16" x2="6.5" y2="16"/></svg></button>
     <div class="dd cust" id="custBinder" hidden><button class="ddbtn" type="button" aria-label="Binder options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddpanel">
       <div class="crow"><span>Size</span><div id="gpGrid"></div><span id="gpLbl" class="lbl">3 &#215; 3</span></div>
-      <label id="genPagesRow"><input id="genPages" type="checkbox">New page per generation<small id="genPagesNote" hidden>(dex orders only)</small></label>
+      <label><input id="genPages" type="checkbox">New page per generation</label>
     </div></div>
     <button id="vPocket" type="button" aria-label="Pocket view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="3.5" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="3.5" y="15.9" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="15.9" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="15.9" width="4.6" height="4.6" rx="1"/></svg></button>
     <div class="dd cust" id="custPocket" hidden><button class="ddbtn" type="button" aria-label="Pocket options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddpanel">
@@ -1451,13 +1449,11 @@ entryRadios.forEach(r=>r.addEventListener("change",()=>{if(r.checked)setEntries(
 function setPlacement(v){
   const desc=v.endsWith("-desc");prefs.placement=desc?v.slice(0,-5):v;prefs.dir=desc?"desc":"asc";store.save("dex-il-ui",prefs);
   placeRadios.forEach(r=>r.checked=r.value===placeValue());
-  updateFormBtn();syncGenPages();
+  updateFormBtn();
   resort();
 }
-// the generation-page toggle only means something under the two dex orders
 const genPages=$("genPages");
-function syncGenPages(){genPages.checked=!!prefs.genPages;genPages.disabled=grouped();$("genPagesRow").classList.toggle("off",grouped());$("genPagesNote").hidden=!grouped()}
-syncGenPages();
+genPages.checked=!!prefs.genPages;
 genPages.addEventListener("change",()=>{prefs.genPages=genPages.checked;store.save("dex-il-ui",prefs);if(prefs.view==="binder")renderBinder()});
 placeRadios.forEach(r=>r.addEventListener("change",()=>{if(r.checked)setPlacement(r.value)}));
 const ddOpt=$("ddOpt");
@@ -1581,9 +1577,9 @@ function slotItems(arr){
 const PAD={blank:true,k:"pad"};
 function binderItems(){
   const per=perNow();let out=slotItems(visArr);
-  // each generation (each region under Regional order) starts on a fresh page: the page before a boundary is padded with
-  // fillers that count for nothing; a slot blank takes the band of the entry it precedes
-  if(prefs.genPages&&!grouped()){
+  // each generation (each region under Regional order) starts on a fresh page, in whatever order the entries run: the page
+  // before a boundary is padded with fillers that count for nothing; a slot blank takes the band of the entry it precedes
+  if(prefs.genPages){
     const bandKey=prefs.placement==="regional"?e=>e[5]==="Regional"?e[3]:speciesRegion(e[0]):e=>baseGen(e[0]);
     const bands=new Array(out.length);
     for(let i=out.length-1,k=null;i>=0;i--){if(!out[i].blank)k=bandKey(out[i]);bands[i]=k}
