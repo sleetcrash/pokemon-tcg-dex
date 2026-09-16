@@ -1,4 +1,4 @@
-/* card-binder v2.9.0 (2026-09-15) */
+/* card-binder v2.9.1 (2026-09-15) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
@@ -177,7 +177,7 @@
 .cb-board.cb-sl{clip-path:inset(-40px -40px -40px 0)}
 .cb-board.cb-sr{clip-path:inset(-40px 0 -40px -40px)}
 .cb-board:not(.cb-inside){--cb-cast:0 0 0 transparent}
-.cb-flier .cb-face::after,.cb-flier .cb-face .cb-foot,.cb-ghost .cb-tabs{display:none}
+.cb-flier .cb-face::after,.cb-flier .cb-face .cb-foot,.cb-host:not(.cb-two) .cb-ghost .cb-tabs{display:none}   /* one page at a time no tab moves with the page */
 .cb-ghost.cb-lift{transform-origin:left center;animation:cb-lift calc(var(--cb-turn) * .7) cubic-bezier(.5,0,.8,.4) both}
 .cb-ghost.cb-drop{transform-origin:left center;animation:cb-drop calc(var(--cb-turn) * .7) cubic-bezier(.2,.6,.4,1) both}
 @keyframes cb-flip-fwd{to{transform:rotateY(-180deg)}}

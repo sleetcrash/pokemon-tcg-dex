@@ -1,4 +1,4 @@
-// card-binder v2.9.0 (2026-09-15)
+// card-binder v2.9.1 (2026-09-15)
 // card-binder: a pocket-page binder as a physical object. Zero dependencies, ES module.
 // new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, itemDone, cover, font, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, tabs, onTab, onChange})
 //   items        array of anything; renderItem(item, index) returns the element that sits in a pocket (give it the pocket aspect)
@@ -26,7 +26,7 @@
 // perspective distance for a turn, in page widths: the free edge of a swinging page grows by at most 1 / (1 - 1 / PERSP)
 const PERSP=10;
 export class CardBinder{
-  static VERSION="2.9.0";
+  static VERSION="2.9.1";
   constructor(host,o={}){
     this.host=host;this.items=o.items||[];this.renderItem=o.renderItem||(x=>{const d=document.createElement("div");d.textContent=String(x);return d});
     this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";this.itemDone=o.itemDone||null;
@@ -75,7 +75,7 @@ export class CardBinder{
   // its shape) at the positions the leaves have after the render; a cover opening keeps the book in its shut shape, with the landing
   // leaf out of the layout, until the board lands, so the far half of the cover does not appear before the board gets there
   flip(snap,dir,was){
-    const host=this.host,book=this.book,L=this.leafL,R=this.leafR,gone=[],hr=host.getBoundingClientRect();let opened=null,unhold=null;
+    const host=this.host,book=this.book,L=this.leafL,R=this.leafR,gone=[],settle=[],hr=host.getBoundingClientRect();let opened=null;
     // a ghost sits on whole screen pixels: the edge of a transformed layer is blended with the page behind it, and at the spine that read as a light line
     const ghost=(el,r)=>{el.hidden=false;el.inert=true;el.classList.add("cb-ghost");const l=Math.round(r.left),t=Math.round(r.top);el.style.left=l-hr.left+"px";el.style.top=t-hr.top+"px";el.style.width=Math.round(r.left+r.width)-l+"px";el.style.height=Math.round(r.top+r.height)-t+"px";host.appendChild(el);gone.push(el);return el};
     const rect=el=>el.getBoundingClientRect();
@@ -96,7 +96,16 @@ export class CardBinder{
       if(!under){opened=land;land.hidden=true;this.layout(was)}
       // the landing leaf keeps its old band (page number and page bar) until the sheet lands; the new band would show before the page did
       const held=land===L?snap.L:snap.R;
-      if(held){const f=land.lastElementChild,np=land.dataset.p;land.dataset.p=held.dataset.p;f.replaceChildren(...[...held.lastElementChild.childNodes].map(n=>n.cloneNode(true)));unhold=()=>{land.dataset.p=np;this.foot(land)}}
+      if(held){const f=land.lastElementChild,np=land.dataset.p;land.dataset.p=held.dataset.p;f.replaceChildren(...[...held.lastElementChild.childNodes].map(n=>n.cloneNode(true)));settle.push(()=>{land.dataset.p=np;this.foot(land)})}
+      // the sheet carries its own tabs, the ones on both its faces (they change sides with it); every other tab stays where it sits: the ghost
+      // waiting underneath keeps its old stack, and the landing leaf hides its new stack and the new current mark until the sheet lands. The
+      // mark rides the sheet (old on its front, new on its back) only when the sheet carries the old one; otherwise it moves when the sheet lands
+      const ids=el=>new Set([...el.querySelectorAll(".cb-tab")].map(b=>b.dataset.i)),fr=ids(front),bk=ids(back);
+      [front,back].forEach(f=>f.querySelectorAll(".cb-tab").forEach(b=>{if(!fr.has(b.dataset.i)||!bk.has(b.dataset.i))b.remove()}));
+      if(!front.querySelector(".cb-cur"))back.querySelectorAll(".cb-cur").forEach(b=>b.classList.remove("cb-cur"));
+      const stacks=[...land.querySelectorAll(":scope>.cb-tabs")],marks=[...book.querySelectorAll(".cb-tab.cb-cur")];
+      stacks.forEach(s=>s.hidden=true);marks.forEach(b=>b.classList.remove("cb-cur"));
+      settle.push(()=>{stacks.forEach(s=>s.hidden=false);marks.forEach(b=>b.classList.add("cb-cur"))});
       let box;
       if(cov){
         // the book is shut now (it stayed shut for an open, render() shut it for a close), and the board takes its box on the whole pixels
@@ -113,7 +122,7 @@ export class CardBinder{
     else{if(snap.L)ghost(snap.L,rect(L));ghost(L.cloneNode(true),rect(L)).classList.add("cb-drop")}
     book.classList.add("cb-turning");
     let done=false;
-    const end=()=>{if(done)return;done=true;this.endTurn=null;gone.forEach(g=>g.remove());if(unhold)unhold();if(opened){opened.hidden=false;this.layout(this.closed)}book.classList.remove("cb-turning")};
+    const end=()=>{if(done)return;done=true;this.endTurn=null;gone.forEach(g=>g.remove());settle.forEach(f=>f());if(opened){opened.hidden=false;this.layout(this.closed)}book.classList.remove("cb-turning")};
     this.endTurn=end;
     gone[gone.length-1].addEventListener("animationend",end,{once:true});
     const t=getComputedStyle(book).getPropertyValue("--cb-turn").trim(),ms=t.endsWith("ms")?parseFloat(t):parseFloat(t)*1000;
