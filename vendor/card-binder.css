@@ -1,4 +1,4 @@
-/* card-binder v2.7.0 (2026-09-14) */
+/* card-binder v2.8.1 (2026-09-15) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
@@ -12,6 +12,7 @@
   --cb-bpad:6px;--cb-lpad:calc(var(--cb-gap) * .7);--cb-ppad:calc(var(--cb-gap) * .3);
   --cb-press:1;                        /* the imprint on the shut front cover: 1 lifts the groove floor off a dark cover, -1 sinks it into a light one; setCover sets it for hex colours */
   --cb-foot:18px;                      /* the cover band under each page (this plus --cb-bpad): page number in the outer corner, that page's bar in the middle */
+  --cb-tabw:30px;--cb-tab-mark:var(--cb-ink);--cb-tabpad:0px;   /* tab dividers: one tab column's width beside the page, the bar marking the current tab at its outer edge; tabpad is what the module reserves for the columns */
   --cb-spine:36px;--cb-turn:.75s;      /* turn: how long one sheet takes to swing over the spine; the module sets --cb-persp per turn from the page width */
   --cb-reserve:160px;  /* reserve: viewport height taken by everything outside the book when cb-fit is on (site header, margins, this pager) */
   --cb-mono:ui-monospace,Menlo,monospace;
@@ -24,7 +25,10 @@
 .cb-host.cb-two.cb-fit{
   --cb-tileh:calc((100svh - var(--cb-reserve) - 2 * var(--cb-bpad) - var(--cb-foot) - 2 * var(--cb-lpad) - (var(--cb-rows) - 1) * var(--cb-gap) - var(--cb-rows) * 2 * var(--cb-ppad)) / var(--cb-rows));
   --cb-pagew:calc(var(--cb-cols) * (var(--cb-tileh) * var(--cb-aw) / var(--cb-ah) + 2 * var(--cb-ppad)) + (var(--cb-cols) - 1) * var(--cb-gap) + 2 * var(--cb-lpad));
-  max-width:min(100%,max(360px,calc(2 * var(--cb-pagew) + var(--cb-spine) + 2 * var(--cb-bpad))))}
+  max-width:min(100%,max(360px,calc(2 * var(--cb-pagew) + var(--cb-spine) + 2 * var(--cb-bpad) + 2 * var(--cb-tabpad))))}
+.cb-host.cb-tabbed{--cb-tabpad:calc(var(--cb-tabw) * var(--cb-tabcols,1));padding-inline:var(--cb-tabpad);box-sizing:border-box}
+.cb-host:not(.cb-two){--cb-tabw:24px}
+.cb-host.cb-tabbed:not(.cb-two){padding-inline:0 var(--cb-tabpad)}   /* one page at a time every tab sits on the right */
 
 .cb-book{position:relative;display:grid;container-type:inline-size;padding:var(--cb-bpad) var(--cb-bpad) calc(var(--cb-bpad) + var(--cb-foot));touch-action:pan-y}
 .cb-book,.cb-board{border-radius:6px;
@@ -72,6 +76,23 @@
 .cb-total .cb-prog>span{background:oklch(0 0 0 / .1);box-shadow:none}
 .cb-total .cb-prog>span>i{background:var(--cb-ink)}
 .cb-total .cb-prog small{font-size:11px;color:var(--cb-ink-dim)}
+
+/* tab dividers: paper index tabs down the outer edge of each page, one slot per tab from the top, the turned ones on the left page of a
+   spread and the rest on the right; a tab in the second column is a wider tab that runs under the first column's, the way a thick set is cut */
+.cb-tabs{position:absolute;top:0;bottom:0;width:var(--cb-tabw);pointer-events:none}
+.cb-tabs.cb-tr{left:100%}
+.cb-tabs.cb-tl{right:100%}
+.cb-tab{position:absolute;left:0;top:calc(var(--i) * 100% / var(--n));width:calc(100% + var(--c) * 100%);height:calc(100% / var(--n) - 3px);padding:0 0 0 calc(var(--c) * var(--cb-tabw));z-index:calc(3 - var(--c));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border:0;border-radius:0 5px 5px 0;background:var(--cb-paper);color:var(--cb-tab-ink,var(--cb-ink-dim));
+  font:650 8px/1 system-ui,-apple-system,sans-serif;text-transform:uppercase;letter-spacing:0;cursor:pointer;pointer-events:auto;user-select:none;-webkit-tap-highlight-color:transparent;transition:color .15s;
+  box-shadow:0 1px 2px oklch(0 0 0 / .45),inset 0 0 0 1px oklch(0 0 0 / .18)}
+.cb-tabs.cb-tl .cb-tab{left:auto;right:0;padding:0 calc(var(--c) * var(--cb-tabw)) 0 0;border-radius:5px 0 0 5px}
+.cb-tab span{display:block}
+.cb-tab.cb-cur{color:var(--cb-tab-ink,var(--cb-ink));box-shadow:inset -3px 0 0 var(--cb-tab-mark),0 1px 2px oklch(0 0 0 / .45),inset 0 0 0 1px oklch(0 0 0 / .18)}
+.cb-tabs.cb-tl .cb-tab.cb-cur{box-shadow:inset 3px 0 0 var(--cb-tab-mark),0 1px 2px oklch(0 0 0 / .45),inset 0 0 0 1px oklch(0 0 0 / .18)}
+.cb-tab:focus-visible{outline:2px solid var(--cb-ink);outline-offset:1px}
+@media (hover:hover){.cb-tab:hover{color:var(--cb-tab-ink,var(--cb-ink))}}
+.cb-host:not(.cb-two) .cb-tab{font-size:7.5px}
 
 /* the inside of a cover, and the closed covers */
 .cb-leaf.cb-cov{padding:0;background:none;box-shadow:none}
@@ -157,7 +178,7 @@
 .cb-board.cb-sl{clip-path:inset(-40px -40px -40px 0)}
 .cb-board.cb-sr{clip-path:inset(-40px 0 -40px -40px)}
 .cb-board:not(.cb-inside){--cb-cast:0 0 0 transparent}
-.cb-flier .cb-face::after,.cb-flier .cb-face .cb-foot{display:none}
+.cb-flier .cb-face::after,.cb-flier .cb-face .cb-foot,.cb-ghost .cb-tabs{display:none}
 .cb-ghost.cb-lift{transform-origin:left center;animation:cb-lift calc(var(--cb-turn) * .7) cubic-bezier(.5,0,.8,.4) both}
 .cb-ghost.cb-drop{transform-origin:left center;animation:cb-drop calc(var(--cb-turn) * .7) cubic-bezier(.2,.6,.4,1) both}
 @keyframes cb-flip-fwd{to{transform:rotateY(-180deg)}}
