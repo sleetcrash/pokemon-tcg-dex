@@ -492,7 +492,7 @@
     <button id="vBinder" type="button" aria-label="Binder view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="15" height="17" rx="2"/><line x1="9.5" y1="3.5" x2="9.5" y2="20.5"/><line x1="3" y1="8" x2="6.5" y2="8"/><line x1="3" y1="12" x2="6.5" y2="12"/><line x1="3" y1="16" x2="6.5" y2="16"/></svg></button>
     <div class="dd cust" id="custBinder" hidden><button class="ddbtn" type="button" aria-label="Binder options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddpanel">
       <div class="crow"><span>Size</span><div id="gpGrid"></div><span id="gpLbl" class="lbl">3 &#215; 3</span></div>
-      <label><input id="genPages" class="box" type="checkbox">Start each generation's dex on a new page</label>
+      <label><input id="genPages" class="box" type="checkbox">Start each region's dex on a new page</label>
     </div></div>
     <button id="vPocket" type="button" aria-label="Pocket view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="3.5" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="3.5" y="15.9" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="15.9" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="15.9" width="4.6" height="4.6" rx="1"/></svg></button>
     <div class="dd cust" id="custPocket" hidden><button class="ddbtn" type="button" aria-label="Pocket options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddpanel">
@@ -1577,10 +1577,11 @@ function slotItems(arr){
 const PAD={blank:true,k:"pad"};
 function binderItems(){
   const per=perNow();let out=slotItems(visArr);
-  // each generation (each region under Regional order) starts on a fresh page, in whatever order the entries run: the page
-  // before a boundary is padded with fillers that count for nothing; a slot blank takes the band of the entry it precedes
+  // each region starts on a fresh page, in whatever order the entries run, banded the way the tab dividers are (bandOf: GO and Hisui
+  // are regions without a generation): the page before a boundary is padded with fillers that count for nothing; a slot blank takes
+  // the band of the entry it precedes
   if(prefs.genPages){
-    const bandKey=prefs.placement==="regional"?e=>e[5]==="Regional"?e[3]:speciesRegion(e[0]):e=>baseGen(e[0]);
+    const bandKey=bandOf;
     const bands=new Array(out.length);
     for(let i=out.length-1,k=null;i>=0;i--){if(!out[i].blank)k=bandKey(out[i]);bands[i]=k}
     const padded=[];let last=null;
