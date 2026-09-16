@@ -1,4 +1,4 @@
-/* card-binder v2.9.1 (2026-09-15) */
+/* card-binder v2.9.2 (2026-09-16) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
@@ -12,7 +12,7 @@
   --cb-bpad:6px;--cb-lpad:calc(var(--cb-gap) * .7);--cb-ppad:calc(var(--cb-gap) * .3);
   --cb-press:1;                        /* the imprint on the shut front cover: 1 lifts the groove floor off a dark cover, -1 sinks it into a light one; setCover sets it for hex colours */
   --cb-foot:18px;                      /* the cover band under each page (this plus --cb-bpad): page number in the outer corner, that page's bar in the middle */
-  --cb-tabw:30px;--cb-tab-mark:var(--cb-ink);--cb-tabpad:0px;   /* tab dividers: one tab column's width beside the page, the bar marking the current tab at its outer edge; tabpad is what the module reserves for the columns */
+  --cb-tabw:30px;--cb-tab-mark:var(--cb-ink);--cb-tabpad:0px;   /* tab dividers: one tab column's width beside the page, the fill of the current tab; tabpad is what the module reserves for the columns */
   --cb-spine:36px;--cb-turn:.75s;      /* turn: how long one sheet takes to swing over the spine; the module sets --cb-persp per turn from the page width */
   --cb-reserve:160px;  /* reserve: viewport height taken by everything outside the book when cb-fit is on (site header, margins, this pager) */
   --cb-mono:ui-monospace,Menlo,monospace;
@@ -85,12 +85,12 @@
 .cb-tabs.cb-tl{right:100%}
 .cb-tab{position:absolute;left:0;top:calc(var(--i) * 100% / var(--n));width:calc(100% + var(--c) * 100%);height:calc(100% / var(--n) - 3px);padding:0 0 0 calc(var(--c) * var(--cb-tabw));z-index:calc(3 - var(--c));
   display:flex;align-items:center;justify-content:center;border:0;border-radius:0 5px 5px 0;background:var(--cb-paper);color:var(--cb-tab-ink,var(--cb-ink-dim));
-  writing-mode:vertical-rl;font:650 8.5px/1 system-ui,-apple-system,sans-serif;text-transform:uppercase;letter-spacing:var(--cb-tabtrack,.14em);white-space:nowrap;cursor:pointer;pointer-events:auto;user-select:none;-webkit-tap-highlight-color:transparent;transition:color .15s;
+  writing-mode:vertical-rl;font:650 8.5px/1 system-ui,-apple-system,sans-serif;text-transform:uppercase;letter-spacing:var(--cb-tabtrack,.14em);white-space:nowrap;cursor:pointer;pointer-events:auto;user-select:none;-webkit-tap-highlight-color:transparent;transition:color .15s,background-color .15s;
   box-shadow:0 1px 2px oklch(0 0 0 / .45),inset 0 0 0 1px oklch(0 0 0 / .18)}
 .cb-tabs.cb-tl .cb-tab{left:auto;right:0;transform:rotate(180deg)}
-.cb-tab.cb-cur{color:var(--cb-tab-ink,var(--cb-ink));box-shadow:inset -3px 0 0 var(--cb-tab-mark),0 1px 2px oklch(0 0 0 / .45),inset 0 0 0 1px oklch(0 0 0 / .18)}
+.cb-tab.cb-cur{background:var(--cb-tab-mark);color:var(--cb-paper)}
 .cb-tab:focus-visible{outline:2px solid var(--cb-ink);outline-offset:1px}
-@media (hover:hover){.cb-tab:hover{color:var(--cb-tab-ink,var(--cb-ink))}}
+@media (hover:hover){.cb-tab:not(.cb-cur):hover{color:var(--cb-tab-ink,var(--cb-ink))}}
 .cb-host:not(.cb-two) .cb-tab{font-size:7.5px}
 
 /* the inside of a cover, and the closed covers */
