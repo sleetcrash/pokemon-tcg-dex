@@ -1,4 +1,4 @@
-/* card-binder v2.8.1 (2026-09-15) */
+/* card-binder v2.9.0 (2026-09-15) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
@@ -77,19 +77,18 @@
 .cb-total .cb-prog>span>i{background:var(--cb-ink)}
 .cb-total .cb-prog small{font-size:11px;color:var(--cb-ink-dim)}
 
-/* tab dividers: paper index tabs down the outer edge of each page, one slot per tab from the top, the turned ones on the left page of a
-   spread and the rest on the right; a tab in the second column is a wider tab that runs under the first column's, the way a thick set is cut */
+/* tab dividers: paper index tabs down the outer edge of each page, one slot per tab from the top, the label running down the tab (up it on
+   a left page: the same tab turned round), the turned ones on the left page of a spread and the rest on the right; a tab in the second
+   column is a wider tab that runs under the first column's, the way a thick set is cut */
 .cb-tabs{position:absolute;top:0;bottom:0;width:var(--cb-tabw);pointer-events:none}
 .cb-tabs.cb-tr{left:100%}
 .cb-tabs.cb-tl{right:100%}
 .cb-tab{position:absolute;left:0;top:calc(var(--i) * 100% / var(--n));width:calc(100% + var(--c) * 100%);height:calc(100% / var(--n) - 3px);padding:0 0 0 calc(var(--c) * var(--cb-tabw));z-index:calc(3 - var(--c));
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border:0;border-radius:0 5px 5px 0;background:var(--cb-paper);color:var(--cb-tab-ink,var(--cb-ink-dim));
-  font:650 8px/1 system-ui,-apple-system,sans-serif;text-transform:uppercase;letter-spacing:0;cursor:pointer;pointer-events:auto;user-select:none;-webkit-tap-highlight-color:transparent;transition:color .15s;
+  display:flex;align-items:center;justify-content:center;border:0;border-radius:0 5px 5px 0;background:var(--cb-paper);color:var(--cb-tab-ink,var(--cb-ink-dim));
+  writing-mode:vertical-rl;font:650 8.5px/1 system-ui,-apple-system,sans-serif;text-transform:uppercase;letter-spacing:var(--cb-tabtrack,.14em);white-space:nowrap;cursor:pointer;pointer-events:auto;user-select:none;-webkit-tap-highlight-color:transparent;transition:color .15s;
   box-shadow:0 1px 2px oklch(0 0 0 / .45),inset 0 0 0 1px oklch(0 0 0 / .18)}
-.cb-tabs.cb-tl .cb-tab{left:auto;right:0;padding:0 calc(var(--c) * var(--cb-tabw)) 0 0;border-radius:5px 0 0 5px}
-.cb-tab span{display:block}
+.cb-tabs.cb-tl .cb-tab{left:auto;right:0;transform:rotate(180deg)}
 .cb-tab.cb-cur{color:var(--cb-tab-ink,var(--cb-ink));box-shadow:inset -3px 0 0 var(--cb-tab-mark),0 1px 2px oklch(0 0 0 / .45),inset 0 0 0 1px oklch(0 0 0 / .18)}
-.cb-tabs.cb-tl .cb-tab.cb-cur{box-shadow:inset 3px 0 0 var(--cb-tab-mark),0 1px 2px oklch(0 0 0 / .45),inset 0 0 0 1px oklch(0 0 0 / .18)}
 .cb-tab:focus-visible{outline:2px solid var(--cb-ink);outline-offset:1px}
 @media (hover:hover){.cb-tab:hover{color:var(--cb-tab-ink,var(--cb-ink))}}
 .cb-host:not(.cb-two) .cb-tab{font-size:7.5px}

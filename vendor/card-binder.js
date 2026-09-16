@@ -1,4 +1,4 @@
-// card-binder v2.8.1 (2026-09-15)
+// card-binder v2.9.0 (2026-09-15)
 // card-binder: a pocket-page binder as a physical object. Zero dependencies, ES module.
 // new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, itemDone, cover, font, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, tabs, onTab, onChange})
 //   items        array of anything; renderItem(item, index) returns the element that sits in a pocket (give it the pocket aspect)
@@ -15,9 +15,9 @@
 //   startClosed  begin on the shut front cover (default true); keys: arrow keys turn pages (default true; off when items handle arrows)
 //   swipe        a sideways touch or pen swipe across the book turns the page (default true)
 //   animate      page turns move like one sheet: the turning page flips over the spine with the next page on its back (default true)
-//   tabs         [{label, short, page, color}, ...] tab dividers down the outer edge of the pages, one slot per tab from the top: label in
-//                stacked letters (short when the slot is too small for it, and always one page at a time), page the 0-based page the tab
-//                turns to on a click, color an optional CSS colour for its letters; setTabs(list) replaces them
+//   tabs         [{label, short, page, color}, ...] tab dividers down the outer edge of the pages, one slot per tab from the top: label
+//                runs sideways down the tab (short when the slot is too small for it), page the 0-based page the tab turns to on a click,
+//                color an optional CSS colour for its letters; setTabs(list) replaces them
 //   onTab(tab)   fires after a tab click has turned to its page
 //   onChange(state) fires after every render with {page, closed, pages, total, spread, cols, rows}
 // Pages pair like a real binder: inside front cover + page 1, then 2 + 3, and the last page sits alone on the left facing the
@@ -26,7 +26,7 @@
 // perspective distance for a turn, in page widths: the free edge of a swinging page grows by at most 1 / (1 - 1 / PERSP)
 const PERSP=10;
 export class CardBinder{
-  static VERSION="2.8.1";
+  static VERSION="2.9.0";
   constructor(host,o={}){
     this.host=host;this.items=o.items||[];this.renderItem=o.renderItem||(x=>{const d=document.createElement("div");d.textContent=String(x);return d});
     this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";this.itemDone=o.itemDone||null;
@@ -169,29 +169,30 @@ export class CardBinder{
   paintFeet(){[this.leafL,this.leafR].forEach(l=>{if(!l.hidden)this.foot(l)})}
   // tab dividers: one slot per tab down the outer edge of the pages; on a spread the tabs turned past (page at or before the left page)
   // sit on the left page's edge and the rest on the right page's, one page at a time every tab sits on the right; the covers carry none.
-  // The stack is fitted to the page height: full labels while the tallest fits its slot, else the short labels, else a second (then a
-  // third) column further out, the way a thick divider set is cut; on a spread a second column of full labels comes before the short
-  // ones, one page at a time the labels are short from the start. The current tab is the last one at or before the last page shown
+  // The stack is fitted to the page height: the labels run sideways down the tab, tracked at .14em, tightening to .04em when the longest
+  // would overrun its slot; then the short labels; then a second (and a third) column further out, the way a thick divider set is cut.
+  // The current tab is the last one at or before the last page shown
   setTabs(list){this.tabs=list||[];this.paintTabs()}
   paintTabs(){
     const L=this.leafL,R=this.leafR,h=this.tabH=L.offsetHeight,N=this.tabs.length,two=this.spread;
     [L,R].forEach(l=>l.querySelectorAll(":scope>.cb-tabs").forEach(s=>s.remove()));
     this.host.classList.toggle("cb-tabbed",N>0);
     if(!N||this.closed)return;
-    const fs=two?8:7.5,len=k=>Math.max(...this.tabs.map(t=>String(t[k]||t.label||"").length)),need=k=>len(k)*(fs+1)+5;
-    let cols=1,short=!two;
+    const fs=two?8.5:7.5,ctx=this.ctx||(this.ctx=document.createElement("canvas").getContext("2d"));ctx.font=`650 ${fs}px system-ui,-apple-system,sans-serif`;
+    const text=(t,k)=>String(k==="short"&&t.short||t.label).toUpperCase(),longest=k=>this.tabs.reduce((m,t)=>{const s=text(t,k),w=ctx.measureText(s).width;return w>m.w?{w,n:s.length}:m},{w:0,n:1});
+    let cols=1,short=false,track=.14;
     const slot=()=>h/Math.ceil(N/cols)-3;
-    if(!short&&slot()<need("label")){cols=2;if(slot()<need("label"))short=true}
-    while(slot()<need("short")&&cols<3)cols++;
+    const fits=k=>{const {w,n}=longest(k);track=Math.max(.04,Math.min(.14,(slot()-6-w)/(n*fs)));return w+n*fs*track+6<=slot()};
+    if(!fits("label")){short=true;while(!fits("short")&&cols<3)cols++}
     const per=Math.ceil(N/cols),last=Math.min(this.page,this.pages-1),left=two?this.page-1:-1;
-    this.host.style.setProperty("--cb-tabcols",cols);
+    this.host.style.setProperty("--cb-tabcols",cols);this.host.style.setProperty("--cb-tabtrack",track.toFixed(3)+"em");
     const stack=side=>{const s=document.createElement("div");s.className="cb-tabs "+side;s.style.setProperty("--n",per);return s};
     const sL=stack("cb-tl"),sR=stack("cb-tr");let cur=-1;
     this.tabs.forEach((t,i)=>{if(t.page<=last)cur=i});
     this.tabs.forEach((t,i)=>{
       const b=document.createElement("button");b.type="button";b.className="cb-tab"+(i===cur?" cb-cur":"");b.dataset.i=i;b.setAttribute("aria-label",t.label);
       b.style.setProperty("--i",i%per);b.style.setProperty("--c",Math.floor(i/per));if(t.color)b.style.setProperty("--cb-tab-ink",t.color);
-      [...String(short&&t.short||t.label).toUpperCase()].forEach(ch=>{const c=document.createElement("span");c.textContent=ch;b.appendChild(c)});
+      b.textContent=text(t,short?"short":"label");
       (t.page<=left?sL:sR).appendChild(b);
     });
     const put=(leaf,s)=>{if(!leaf.hidden&&!leaf.classList.contains("cb-cov")&&s.childElementCount)leaf.insertBefore(s,leaf.lastElementChild)};
