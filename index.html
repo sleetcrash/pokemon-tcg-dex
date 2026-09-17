@@ -187,15 +187,22 @@
   .views .cust .ddbtn{color:var(--shell)}
   .views svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
   #custBinder .ddpanel{min-width:300px}
+  #custBinder .ddpanel,#custPocket .ddpanel{overflow:visible;max-height:none}   /* the size flyout sits beside the panel */
   #ddOpt .ddpanel{min-width:364px}
-  .crow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line-soft);font-size:13.5px;color:var(--ink)}
-  .crow>span:first-child{width:92px;flex:none;font-weight:600}
-  #gpGrid,#ppGrid{display:grid;gap:4px}
+  .sub{position:relative}
+  .srow{display:flex;align-items:center;gap:10px;width:100%;padding:0 10px 0 12px;height:42px;border:0;border-bottom:1px solid var(--line-soft);background:none;font:inherit;font-size:13.5px;font-weight:600;color:var(--ink);white-space:nowrap;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent}
+  .srow svg{width:16px;height:16px;flex:none;stroke:var(--ink-dim);transition:transform .15s}
+  .sub.open .srow svg{stroke:var(--ink)}
+  .subpanel{display:none;position:absolute;left:calc(100% + 2px);top:-1px;background:var(--card);border:1px solid var(--line-soft);border-radius:4px;box-shadow:0 4px 14px oklch(0.25 0.02 95 / .12);z-index:46}
+  .sub.open .subpanel{display:block}
+  @media (max-width:699px){.subpanel{position:static;border:0;border-bottom:1px solid var(--line-soft);border-radius:0;box-shadow:none}.sub.open .srow svg{transform:rotate(90deg)}}
+  .ddpanel .sub:last-child .srow,.ddpanel .sub:last-child .subpanel{border-bottom:0}
+  .crow{display:grid;gap:4px;padding:10px 12px}
   #gpGrid{grid-template-columns:repeat(6,20px);grid-auto-rows:20px}
   #ppGrid{grid-template-columns:repeat(6,20px);grid-auto-rows:28px}
   .crow button{border:1px solid var(--line);background:var(--card);padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .crow button.hi{background:var(--ink);border-color:var(--ink)}
-  .crow .lbl{margin-left:auto;white-space:nowrap;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink)}
+  .srow .lbl{margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:400;color:var(--ink)}
   .curs{flex-wrap:wrap;gap:6px}
   .curs>span:first-child{width:auto;margin-right:2px}
   .curs button{height:28px;padding:0 9px;border-radius:14px;font:inherit;font-size:13px;font-weight:700;color:var(--ink-dim);background:none;border:1px solid var(--line)}
@@ -492,12 +499,12 @@
     </div></div>
     <button id="vBinder" type="button" aria-label="Binder view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="15" height="17" rx="2"/><line x1="9.5" y1="3.5" x2="9.5" y2="20.5"/><line x1="3" y1="8" x2="6.5" y2="8"/><line x1="3" y1="12" x2="6.5" y2="12"/><line x1="3" y1="16" x2="6.5" y2="16"/></svg></button>
     <div class="dd cust" id="custBinder"><button class="ddbtn" type="button" aria-label="Binder options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddpanel">
-      <div class="crow"><span>Size</span><div id="gpGrid"></div><span id="gpLbl" class="lbl">3 &#215; 3</span></div>
+      <div class="sub" id="subSize"><button class="srow" type="button"><span>Customize Size</span><span id="gpLbl" class="lbl">3 &#215; 3</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button><div class="subpanel"><div class="crow" id="gpGrid"></div></div></div>
       <label><input id="genPages" class="box" type="checkbox">Start each region's dex on a new page</label>
     </div></div>
     <button id="vPocket" type="button" aria-label="Pocket view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="3.5" width="4.6" height="4.6" rx="1"/><rect x="3.5" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="9.7" width="4.6" height="4.6" rx="1"/><rect x="3.5" y="15.9" width="4.6" height="4.6" rx="1"/><rect x="9.7" y="15.9" width="4.6" height="4.6" rx="1"/><rect x="15.9" y="15.9" width="4.6" height="4.6" rx="1"/></svg></button>
     <div class="dd cust" id="custPocket"><button class="ddbtn" type="button" aria-label="Pocket options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddpanel">
-      <div class="crow"><span>Columns</span><div id="ppGrid"></div><span id="ppLbl" class="lbl">3 columns</span></div>
+      <div class="sub" id="subCols"><button class="srow" type="button"><span>Customize Size</span><span id="ppLbl" class="lbl">3 columns</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button><div class="subpanel"><div class="crow" id="ppGrid"></div></div></div>
     </div></div>
     <div class="dd" id="ddOrder">
       <button class="ddbtn" type="button" aria-label="Sort"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 4v16M4.5 17l3 3 3-3"/><path d="M16.5 20V4M13.5 7l3-3 3 3"/></svg></button>
@@ -1327,6 +1334,13 @@ function orderAsc(){
 let visArr=DEX,dispArr=DEX,page=0,tabRow=null;
 function closeMenus(except){
   document.querySelectorAll(".dd.open").forEach(x=>{if(x!==except){x.classList.remove("open");x.querySelector(".ddbtn").setAttribute("aria-expanded","false")}});
+  document.querySelectorAll(".sub.open").forEach(x=>{if(x.closest(".dd")!==except){x.classList.remove("open");x.querySelector(".srow").setAttribute("aria-expanded","false")}});
+}
+// a row inside a panel that opens its own panel beside it (under it on a phone)
+function wireSub(sub,onOpen){
+  const row=sub.querySelector(".srow");
+  row.setAttribute("aria-haspopup","true");row.setAttribute("aria-expanded","false");
+  row.addEventListener("click",e=>{e.stopPropagation();const open=sub.classList.toggle("open");row.setAttribute("aria-expanded",open);if(open)onOpen()});
 }
 function wireDropdown(dd){
   const btn=dd.querySelector(".ddbtn");
@@ -1644,15 +1658,15 @@ function ctxFor(el){
 }
 // pocket view: one continuous vertical run of binder tiles, column count selectable
 // via a one-row picker (mouse) or pinch (touch, and ctrl+wheel trackpad pinch)
-const ppGrid=$("ppGrid"),ppLbl=$("ppLbl"),custPocket=$("custPocket");
+const ppGrid=$("ppGrid"),ppLbl=$("ppLbl");
 for(let cc=1;cc<=6;cc++){
   const b=document.createElement("button");b.type="button";b.dataset.c=cc;
   b.addEventListener("mouseenter",()=>ppHi(cc));
   b.addEventListener("click",()=>{setPCols(cc);closeMenus()});
   ppGrid.appendChild(b);
 }
-custPocket.querySelector(".ddbtn").addEventListener("click",()=>{if(custPocket.classList.contains("open"))ppHi(prefs.pcols)});
 function ppHi(c){[...ppGrid.children].forEach(el=>el.classList.toggle("hi",+el.dataset.c<=c));ppLbl.textContent=c===1?"1 column":`${c} columns`}
+wireSub($("subCols"),()=>ppHi(prefs.pcols));ppHi(prefs.pcols);
 function setPCols(c){
   c=Math.min(6,Math.max(1,c));
   if(c===prefs.pcols)return;
@@ -1721,18 +1735,18 @@ $("vList").addEventListener("click",()=>setView("list"));
 $("vBinder").addEventListener("click",()=>setView("binder"));
 $("vPocket").addEventListener("click",()=>setView("pocket"));
 // binder size: hover-to-preview grid picker, up to 6x6
-const gpGrid=$("gpGrid"),gpLbl=$("gpLbl"),custBinder=$("custBinder");
+const gpGrid=$("gpGrid"),gpLbl=$("gpLbl");
 for(let r=1;r<=6;r++)for(let cc=1;cc<=6;cc++){
   const b=document.createElement("button");b.type="button";b.dataset.c=cc;b.dataset.r=r;
   b.addEventListener("mouseenter",()=>gpHi(cc,r));
   b.addEventListener("click",()=>{setGrid(cc,r);closeMenus()});
   gpGrid.appendChild(b);
 }
-custBinder.querySelector(".ddbtn").addEventListener("click",()=>{if(custBinder.classList.contains("open"))gpHi(prefs.bcols,prefs.brows)});
 function gpHi(c,r){
   [...gpGrid.children].forEach(el=>el.classList.toggle("hi",+el.dataset.c<=c&&+el.dataset.r<=r));
   gpLbl.textContent=`${c} × ${r}`;
 }
+wireSub($("subSize"),()=>gpHi(prefs.bcols,prefs.brows));gpHi(prefs.bcols,prefs.brows);
 function setGrid(c,r){
   prefs.bcols=c;prefs.brows=r;store.save("dex-il-ui",prefs);
   page=0;renderBinder();
