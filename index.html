@@ -494,8 +494,7 @@
   <div class="views">
     <button id="vList" class="on" type="button" aria-label="List view"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="9" y1="6.5" x2="20" y2="6.5"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="17.5" x2="20" y2="17.5"/><circle cx="4.8" cy="6.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="4.8" cy="12" r="1.1" fill="currentColor" stroke="none"/><circle cx="4.8" cy="17.5" r="1.1" fill="currentColor" stroke="none"/></svg></button>
     <div class="dd cust" id="custList"><button class="ddbtn" type="button" aria-label="List options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddpanel">
-      <label><input type="radio" name="entries" value="sep" checked>Separate entries</label>
-      <label><input type="radio" name="entries" value="col">Collapsible entries</label>
+      <label class="tog"><span>Collapsible entries</span><input id="entriesIn" type="checkbox" role="switch"></label>
     </div></div>
     <button id="vBinder" type="button" aria-label="Binder view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="15" height="17" rx="2"/><line x1="9.5" y1="3.5" x2="9.5" y2="20.5"/><line x1="3" y1="8" x2="6.5" y2="8"/><line x1="3" y1="12" x2="6.5" y2="12"/><line x1="3" y1="16" x2="6.5" y2="16"/></svg></button>
     <div class="dd cust" id="custBinder"><button class="ddbtn" type="button" aria-label="Binder options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddpanel">
@@ -1449,7 +1448,7 @@ function resort(){
   page=0;applyFilters();
 }
 const placeRadios=[...document.querySelectorAll('input[name="placement"]')];
-const entryRadios=[...document.querySelectorAll('input[name="entries"]')];
+const entriesIn=$("entriesIn");
 const spriteRadios=[...document.querySelectorAll('input[name="sprites"]')];
 spriteRadios.forEach(r=>{r.checked=r.value===(prefs.sprites||"game");r.addEventListener("change",()=>{
   prefs.sprites=r.value;store.save("dex-il-ui",prefs);
@@ -1458,13 +1457,13 @@ spriteRadios.forEach(r=>{r.checked=r.value===(prefs.sprites||"game");r.addEventL
 })});
 function setEntries(v){
   prefs.entries=v;store.save("dex-il-ui",prefs);
-  entryRadios.forEach(r=>r.checked=r.value===v);
+  entriesIn.checked=v==="col";
   if(v==="col"&&formShown().size===1){formBoxes.forEach(b=>b.checked=true);updateFormBtn()}
   placeRadios.forEach(r=>{if(r.value!=="dex")r.disabled=v==="col"});
   if(v==="col"&&placeValue()!=="dex"){setPlacement("dex");return}
   applyFilters();
 }
-entryRadios.forEach(r=>r.addEventListener("change",()=>{if(r.checked)setEntries(r.value)}));
+entriesIn.addEventListener("change",()=>setEntries(entriesIn.checked?"col":"sep"));
 function setPlacement(v){
   const desc=v.endsWith("-desc");prefs.placement=desc?v.slice(0,-5):v;prefs.dir=desc?"desc":"asc";store.save("dex-il-ui",prefs);
   placeRadios.forEach(r=>r.checked=r.value===placeValue());
@@ -2115,7 +2114,7 @@ window.addEventListener("scroll",()=>{
   if(!cjRaf){cjRaf=true;requestAnimationFrame(()=>{cjRaf=false;updateJumpBtns();updateCurrentJump()})}
 },{passive:true});
 
-entryRadios.forEach(r=>r.checked=r.value===prefs.entries);
+entriesIn.checked=prefs.entries==="col";
 placeRadios.forEach(r=>{if(r.value!=="dex")r.disabled=prefs.entries==="col"});
 setPlacement(placeValue());
 setView(prefs.view);
