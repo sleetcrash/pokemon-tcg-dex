@@ -185,6 +185,8 @@
   .views .cust.open .ddbtn svg{transform:rotate(180deg)}
   .views>button.on,.views .dd.has .ddbtn,.views .dd.open .ddbtn{color:var(--ink)}
   .views .cust .ddbtn{color:var(--shell)}
+  /* mouse: a view chevron keeps its width but shows only over its icon, itself, its open menu, or keyboard focus */
+  @media (hover:hover){.views .cust .ddbtn svg{opacity:0;transition:opacity .15s}.views>button:hover+.cust .ddbtn svg,.views .cust:hover .ddbtn svg,.views .cust.open .ddbtn svg,.views .cust .ddbtn:focus-visible svg{opacity:1}}
   .views svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
   #custBinder .ddpanel{min-width:300px}
   #custBinder .ddpanel,#custPocket .ddpanel{overflow:visible;max-height:none}   /* the size flyout sits beside the panel */
