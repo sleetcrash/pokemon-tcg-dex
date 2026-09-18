@@ -44,7 +44,16 @@
   .still header{transition:none}
   .hwrap{max-width:var(--col);margin:0 auto;padding:0 var(--gutter)}
   .band{background:var(--shell);color:var(--card);padding:6px 0;margin-bottom:6px}
-  .brand{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .brand{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  /* site-wide pickers ride the band's right end at the band's own height; the button's hit area reaches past the band */
+  .band .dd{margin:-6px 0}
+  .band .ddbtn{min-height:28px;padding:0 0 0 8px;border:0;gap:5px;font-size:12px;letter-spacing:.04em;color:var(--card)}
+  .band .ddbtn::before{content:"";position:absolute;inset:-4px -6px -8px}
+  .band .ddbtn::after{content:"";width:14px;height:14px;background:currentColor;opacity:.75;-webkit-mask:var(--icon-chev) center/contain no-repeat;mask:var(--icon-chev) center/contain no-repeat}
+  .band .ddbtn i{font-style:normal;font-weight:400;opacity:.75}
+  .band .dd.open .ddbtn{color:var(--card)}
+  .band .ddpanel{left:auto;right:0;min-width:150px}
+  .band .ddpanel label i{font-style:normal;color:var(--ink-dim);width:1ch;text-align:center}
   h1{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
   /* the collection's progress is the header's bottom edge: registered in shell red, pending in amber after it, the count at the bar's right end */
   .hbar{display:flex;flex-direction:column;align-items:flex-end;gap:3px;padding-top:2px}
@@ -211,11 +220,9 @@
   .seg::before{content:"";position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/var(--n));border-radius:6px;background:var(--ink);transform:translateX(calc(var(--i)*100%));transition:transform .2s}
   .seg:has(input:nth-of-type(2):checked){--i:1}
   .seg:has(input:nth-of-type(3):checked){--i:2}
-  .seg:has(input:nth-of-type(4):checked){--i:3}
   .seg input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;margin:0}
   .seg input::after{content:none}
   .seg label{position:relative;height:30px;padding:0;border:0;gap:0;justify-content:center;font-size:12.5px;font-weight:600;color:var(--ink-dim);transition:color .2s}
-  .seg label small{font-size:10px;font-weight:600;margin-left:3px;letter-spacing:.04em}
   .seg input:checked+label{color:var(--card)}
   .seg input:focus-visible+label{outline:2px solid var(--shell);outline-offset:-2px;border-radius:6px}
 
@@ -476,6 +483,15 @@
  <div class="band"><div class="hwrap">
   <div class="brand">
     <h1>National Card Dex</h1>
+    <div class="dd" id="ddCur">
+      <button class="ddbtn" type="button"></button>
+      <div class="ddpanel">
+        <label><input type="radio" name="cur" value="USD"><i>$</i>USD</label>
+        <label><input type="radio" name="cur" value="CAD"><i>$</i>CAD</label>
+        <label><input type="radio" name="cur" value="EUR"><i>&euro;</i>EUR</label>
+        <label><input type="radio" name="cur" value="GBP"><i>&pound;</i>GBP</label>
+      </div>
+    </div>
   </div>
  </div></div>
  <div class="hwrap">
@@ -542,7 +558,6 @@
         <label><input id="motionIn" class="box" type="checkbox">Animations</label>
         <div class="pdiv"></div>
         <div class="segrow"><span>Sprites</span><div class="seg" role="radiogroup" aria-label="Sprites"><input type="radio" name="sprites" value="origin" id="spr0"><label for="spr0">Original</label><input type="radio" name="sprites" value="game" id="spr1" checked><label for="spr1">+FRLG/HGSS</label><input type="radio" name="sprites" value="home" id="spr2"><label for="spr2">Home</label></div></div>
-        <div class="segrow"><span>Currency</span><div class="seg" style="--n:4" role="radiogroup" aria-label="Currency"><input type="radio" name="cur" value="USD" id="cur0"><label for="cur0">$<small>USD</small></label><input type="radio" name="cur" value="CAD" id="cur1"><label for="cur1">$<small>CAD</small></label><input type="radio" name="cur" value="EUR" id="cur2"><label for="cur2">&euro;<small>EUR</small></label><input type="radio" name="cur" value="GBP" id="cur3"><label for="cur3">&pound;<small>GBP</small></label></div></div>
         <div class="pdiv"></div>
         <button id="optLists" class="plabel" type="button">Manage lists</button>
         <button id="optClearCards" class="plabel" type="button">Clear all cards</button>
@@ -1163,8 +1178,11 @@ function showCard(c){
   paint(c);
   tget("cards/"+c.id,c.lang).then(d=>{if(!d||!box.isConnected)return;absorb(c,d);paint(d)}).catch(()=>{});
 }
+const curBtn=$("ddCur").querySelector(".ddbtn");
+const curLabel=()=>{curBtn.innerHTML="<i>"+SYM[prefs.cur].slice(-1)+"</i>"+prefs.cur;curBtn.setAttribute("aria-label","Currency: "+prefs.cur)};
+curLabel();
 [...document.querySelectorAll('input[name="cur"]')].forEach(r=>{r.checked=r.value===prefs.cur;r.addEventListener("change",()=>{
-  prefs.cur=r.value;store.save("dex-il-ui",prefs);
+  prefs.cur=r.value;store.save("dex-il-ui",prefs);curLabel();
   if(cCards)cCards.forEach(updateCell);repaintPrices();
 })});
 function repaintPrices(){
@@ -1481,7 +1499,7 @@ genPages.checked=!!prefs.genPages;
 genPages.addEventListener("change",()=>{prefs.genPages=genPages.checked;store.save("dex-il-ui",prefs);if(prefs.view==="binder")renderBinder()});
 placeRadios.forEach(r=>r.addEventListener("change",()=>{if(r.checked)setPlacement(r.value)}));
 const ddOpt=$("ddOpt");
-[ddOpt,$("ddOrder"),$("ddLook"),$("custList"),$("custBinder"),$("custPocket")].forEach(wireDropdown);
+[ddOpt,$("ddCur"),$("ddOrder"),$("ddLook"),$("custList"),$("custBinder"),$("custPocket")].forEach(wireDropdown);
 // destructive options arm on the first tap and act on the second; any other click disarms
 const confirms=[];
 function armConfirm(btn,armedLabel,action){
