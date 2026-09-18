@@ -507,8 +507,8 @@
       <label><input id="formAll" type="checkbox" value="*">All Forms</label>
       <div class="pdiv"></div>
       <label><input type="checkbox" value="" checked>Base</label>
-      <label><input type="checkbox" value="Other">Base Variations</label>
-      <label><input type="checkbox" value="Regional">Regionals</label>
+      <label><input type="checkbox" value="Other" checked>Base Variations</label>
+      <label><input type="checkbox" value="Regional" checked>Regionals</label>
       <label><input type="checkbox" value="Mega">Megas</label>
       <label><input type="checkbox" value="Dynamax">Dynamax</label>
       <label><input type="checkbox" value="Gmax">Gigantamax</label>
@@ -1401,10 +1401,10 @@ const ddFormEl=$("ddForm"),formBtn=ddFormEl.querySelector(".ddbtn"),
       formAll=$("formAll"),formBoxes=[...ddFormEl.querySelectorAll('input[type="checkbox"]')].filter(b=>b!==formAll);
 wireDropdown(ddFormEl);
 function formShown(){return new Set(formBoxes.filter(b=>b.checked).map(b=>b.value))}
-const FORM_DEFAULT=new Set([""]);
+const FORM_DEFAULT=new Set(["","Other","Regional"]);
+const formIsDefault=()=>formBoxes.every(b=>b.checked===FORM_DEFAULT.has(b.value));
 function updateFormBtn(){
-  const on=formBoxes.filter(b=>b.checked),set=new Set(on.map(b=>b.value));
-  const isDefault=set.size===FORM_DEFAULT.size&&[...FORM_DEFAULT].every(v=>set.has(v));
+  const on=formBoxes.filter(b=>b.checked),isDefault=formIsDefault();
   const all=on.length===formBoxes.length;
   formAll.checked=all;formAll.indeterminate=!all&&on.length>0;
   formBtn.textContent=isDefault?"Forms":all?"All forms":on.length===0?"None":on.length===1?on[0].parentElement.textContent.trim():`${on.length} forms`;
@@ -1482,7 +1482,7 @@ spriteRadios.forEach(r=>{r.checked=r.value===(prefs.sprites||"game");r.addEventL
 function setEntries(v){
   prefs.entries=v;store.save("dex-il-ui",prefs);
   entriesIn.checked=v==="col";
-  if(v==="col"&&formShown().size===1){formBoxes.forEach(b=>b.checked=true);updateFormBtn()}
+  if(v==="col"&&(formIsDefault()||formShown().size===1)){formBoxes.forEach(b=>b.checked=true);updateFormBtn()}
   placeRadios.forEach(r=>{if(r.value!=="dex")r.disabled=v==="col"});
   if(v==="col"&&placeValue()!=="dex"){setPlacement("dex");return}
   applyFilters();
