@@ -1287,6 +1287,10 @@ function armLongPress(container,sel){
     if(items.length)openCtx(ev.clientX,ev.clientY,items);
   });
 }
+// in the binder the left and right arrows turn the page from anywhere on the page. A tile reached with the keyboard (Tab, or an up or down
+// arrow from a tile) keeps them for walking the tiles, as before, until a pointer press hands them back to the pages
+let tileKeys=false;
+document.addEventListener("pointerdown",()=>{tileKeys=false},{capture:true,passive:true});
 function armKeys(container,sel,cols,edge){
   container.addEventListener("keydown",ev=>{
     const el=ev.target.closest("[data-id]");
@@ -1294,6 +1298,8 @@ function armKeys(container,sel,cols,edge){
     const id=Number(el.dataset.id);
     const step={ArrowDown:cols(),ArrowUp:-cols(),ArrowRight:1,ArrowLeft:-1}[ev.key];
     if(step){
+      if(edge&&!tileKeys&&(ev.key==="ArrowRight"||ev.key==="ArrowLeft"))return;
+      tileKeys=true;
       ev.preventDefault();
       const vis=[...container.querySelectorAll(sel)].filter(x=>x.style.display!=="none"&&!x.closest(".cb-ghost"));
       let j=vis.indexOf(el)+step;
@@ -1312,6 +1318,12 @@ armLongPress(book,".card");armKeys(book,".card",()=>prefs.bcols,dir=>{
   const t=[...book.querySelectorAll(".cb-book>.cb-leaf:not([hidden]):not(.cb-ghost) [data-id]")],f=dir>0?t[0]:t[t.length-1];
   if(f){t.forEach(x=>x.tabIndex=-1);f.tabIndex=0;f.focus({preventScroll:true})}
   else book.querySelector(`[data-go="${dir>0?"prev":"next"}"]`).focus();
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Tab")tileKeys=true;
+  const dir={ArrowRight:1,ArrowLeft:-1}[e.key];
+  if(!dir||e.defaultPrevented||e.repeat||prefs.view!=="binder"||!cb||e.metaKey||e.ctrlKey||e.altKey||e.shiftKey||e.target.closest("input,select,textarea")||!ctx.hidden||document.querySelector("dialog[open],.dd.open"))return;
+  e.preventDefault();cb.turn(dir);
 });
 armLongPress(pgrid,".card");armKeys(pgrid,".card",()=>prefs.pcols);
 function tally(){
