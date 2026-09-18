@@ -205,11 +205,19 @@
   .crow button{border:1px solid var(--line);background:var(--card);padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .crow button.hi{background:var(--ink);border-color:var(--ink)}
   .srow .lbl{margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:400;color:var(--ink)}
-  .curs{flex-wrap:wrap;gap:6px}
-  .curs>span:first-child{width:auto;margin-right:2px}
-  .curs button{height:28px;padding:0 9px;border-radius:14px;font:inherit;font-size:13px;font-weight:700;color:var(--ink-dim);background:none;border:1px solid var(--line)}
-  .curs button small{font-size:10px;font-weight:600;margin-left:3px;letter-spacing:.04em}
-  .curs button.on{color:var(--card);background:var(--ink);border-color:var(--ink)}
+  /* segmented slider: an ink thumb slides under the picked label; --n segments, --i the picked index (from :has) */
+  .segrow{display:grid;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line-soft);font-size:13.5px;color:var(--ink)}
+  .seg{--n:3;--i:0;position:relative;display:grid;grid-template-columns:repeat(var(--n),1fr);padding:3px;border-radius:8px;background:var(--card-hi)}
+  .seg::before{content:"";position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/var(--n));border-radius:6px;background:var(--ink);transform:translateX(calc(var(--i)*100%));transition:transform .2s}
+  .seg:has(input:nth-of-type(2):checked){--i:1}
+  .seg:has(input:nth-of-type(3):checked){--i:2}
+  .seg:has(input:nth-of-type(4):checked){--i:3}
+  .seg input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;margin:0}
+  .seg input::after{content:none}
+  .seg label{position:relative;height:30px;padding:0;border:0;gap:0;justify-content:center;font-size:12.5px;font-weight:600;color:var(--ink-dim);transition:color .2s}
+  .seg label small{font-size:10px;font-weight:600;margin-left:3px;letter-spacing:.04em}
+  .seg input:checked+label{color:var(--card)}
+  .seg input:focus-visible+label{outline:2px solid var(--shell);outline-offset:-2px;border-radius:6px}
 
   #pocket{--cols:3;--gap:8px;padding:10px calc(var(--gutter) + 64px) 60px var(--gutter);max-width:min(100%,max(var(--col),calc(var(--cols) * 132px)));margin:0 auto}
   /* the binder view hosts the vendored card-binder module (vendor/card-binder.js and .css from sleetcrash/components); the tiles are its items,
@@ -496,7 +504,7 @@
   <div class="views">
     <button id="vList" class="on" type="button" aria-label="List view"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="9" y1="6.5" x2="20" y2="6.5"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="17.5" x2="20" y2="17.5"/><circle cx="4.8" cy="6.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="4.8" cy="12" r="1.1" fill="currentColor" stroke="none"/><circle cx="4.8" cy="17.5" r="1.1" fill="currentColor" stroke="none"/></svg></button>
     <div class="dd cust" id="custList"><button class="ddbtn" type="button" aria-label="List options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddpanel">
-      <label class="tog"><span>Collapsible entries</span><input id="entriesIn" type="checkbox" role="switch"></label>
+      <label><input id="entriesIn" class="box" type="checkbox">Collapsible entries</label>
     </div></div>
     <button id="vBinder" type="button" aria-label="Binder view"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="15" height="17" rx="2"/><line x1="9.5" y1="3.5" x2="9.5" y2="20.5"/><line x1="3" y1="8" x2="6.5" y2="8"/><line x1="3" y1="12" x2="6.5" y2="12"/><line x1="3" y1="16" x2="6.5" y2="16"/></svg></button>
     <div class="dd cust" id="custBinder"><button class="ddbtn" type="button" aria-label="Binder options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="ddpanel">
@@ -531,13 +539,10 @@
     <div class="dd" id="ddOpt">
       <button class="ddbtn" type="button" aria-label="Options"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M10.3 3.2h3.4l.5 2.3 1.6.8 2.1-1.2 2.4 2.4-1.2 2.1.8 1.6 2.3.5v3.4l-2.3.5-.8 1.6 1.2 2.1-2.4 2.4-2.1-1.2-1.6.8-.5 2.3h-3.4l-.5-2.3-1.6-.8-2.1 1.2-2.4-2.4 1.2-2.1-.8-1.6-2.3-.5v-3.4l2.3-.5.8-1.6-1.2-2.1 2.4-2.4 2.1 1.2 1.6-.8.5-2.3Z"/></svg></button>
       <div class="ddpanel">
-        <label class="tog"><span>Animations</span><input id="motionIn" type="checkbox" role="switch"></label>
+        <label><input id="motionIn" class="box" type="checkbox">Animations</label>
         <div class="pdiv"></div>
-        <label><input type="radio" name="sprites" value="origin">Sprites: Original Game</label>
-        <label><input type="radio" name="sprites" value="game" checked>Sprites: Original Game (+FRLG/HGSS)</label>
-        <label><input type="radio" name="sprites" value="home">Sprites: Pokemon Home</label>
-        <div class="pdiv"></div>
-        <div class="crow curs"><span>Currency</span><button type="button" data-cur="USD">$<small>USD</small></button><button type="button" data-cur="CAD">$<small>CAD</small></button><button type="button" data-cur="EUR">&euro;<small>EUR</small></button><button type="button" data-cur="GBP">&pound;<small>GBP</small></button></div>
+        <div class="segrow"><span>Sprites</span><div class="seg" role="radiogroup" aria-label="Sprites"><input type="radio" name="sprites" value="origin" id="spr0"><label for="spr0">Original</label><input type="radio" name="sprites" value="game" id="spr1" checked><label for="spr1">+FRLG/HGSS</label><input type="radio" name="sprites" value="home" id="spr2"><label for="spr2">Home</label></div></div>
+        <div class="segrow"><span>Currency</span><div class="seg" style="--n:4" role="radiogroup" aria-label="Currency"><input type="radio" name="cur" value="USD" id="cur0"><label for="cur0">$<small>USD</small></label><input type="radio" name="cur" value="CAD" id="cur1"><label for="cur1">$<small>CAD</small></label><input type="radio" name="cur" value="EUR" id="cur2"><label for="cur2">&euro;<small>EUR</small></label><input type="radio" name="cur" value="GBP" id="cur3"><label for="cur3">&pound;<small>GBP</small></label></div></div>
         <div class="pdiv"></div>
         <button id="optLists" class="plabel" type="button">Manage lists</button>
         <button id="optClearCards" class="plabel" type="button">Clear all cards</button>
@@ -1158,9 +1163,8 @@ function showCard(c){
   paint(c);
   tget("cards/"+c.id,c.lang).then(d=>{if(!d||!box.isConnected)return;absorb(c,d);paint(d)}).catch(()=>{});
 }
-const curBtns=[...document.querySelectorAll(".curs button")];
-curBtns.forEach(b=>{b.classList.toggle("on",b.dataset.cur===prefs.cur);b.addEventListener("click",()=>{
-  prefs.cur=b.dataset.cur;store.save("dex-il-ui",prefs);curBtns.forEach(x=>x.classList.toggle("on",x===b));
+[...document.querySelectorAll('input[name="cur"]')].forEach(r=>{r.checked=r.value===prefs.cur;r.addEventListener("change",()=>{
+  prefs.cur=r.value;store.save("dex-il-ui",prefs);
   if(cCards)cCards.forEach(updateCell);repaintPrices();
 })});
 function repaintPrices(){
