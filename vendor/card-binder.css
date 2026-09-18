@@ -1,4 +1,4 @@
-/* card-binder v2.9.3 (2026-09-17) */
+/* card-binder v2.10.0 (2026-09-18) */
 /* card-binder: a pocket-page binder as a physical object. Charcoal woven cover, dark pocket sheets, clear sleeves.
    Every colour and size is a token on the host, override them on the host element. Class names are cb- prefixed.
    Layout classes the module sets on the host: cb-two (spread mode), cb-fit (size the spread from the viewport height). */
@@ -13,6 +13,7 @@
   --cb-press:1;                        /* the imprint on the shut front cover: 1 lifts the groove floor off a dark cover, -1 sinks it into a light one; setCover sets it for hex colours */
   --cb-foot:18px;                      /* the cover band under each page (this plus --cb-bpad): page number in the outer corner, that page's bar in the middle */
   --cb-tabw:30px;--cb-tab-mark:var(--cb-ink);--cb-tabpad:0px;   /* tab dividers: one tab column's width beside the page, the bar marking the current tab at its outer edge; tabpad is what the module reserves for the columns */
+  --cb-navw:36px;--cb-navpad:0px;      /* the chevrons beside a spread: one button's width; navpad is the gutter the module reserves for the pair on each side */
   --cb-spine:36px;--cb-turn:.75s;      /* turn: how long one sheet takes to swing over the spine; the module sets --cb-persp per turn from the page width */
   --cb-reserve:160px;  /* reserve: viewport height taken by everything outside the book when cb-fit is on (site header, margins, this pager) */
   --cb-mono:ui-monospace,Menlo,monospace;
@@ -20,13 +21,14 @@
   --cb-ring:inset 0 1px 0 oklch(1 0 0 / .08),inset 0 0 0 1px oklch(0 0 0 / .35);
   --cb-cast:0 10px 24px oklch(0.2 0.02 95 / .35),0 1px 2px oklch(0.2 0.02 95 / .4);
   --cb-cols:3;--cb-rows:3;
-  display:block;position:relative;margin:0 auto;max-width:100%;overflow:clip;perspective:var(--cb-persp,1600px);font-family:system-ui,-apple-system,sans-serif;color:var(--cb-ink)}
-.cb-host.cb-two{--cb-bpad:16px;--cb-lpad:var(--cb-gap);--cb-ppad:calc(var(--cb-gap) * .45)}
+  display:block;position:relative;box-sizing:border-box;margin:0 auto;padding-inline:calc(var(--cb-tabpad) + var(--cb-navpad));max-width:100%;overflow:clip;perspective:var(--cb-persp,1600px);font-family:system-ui,-apple-system,sans-serif;color:var(--cb-ink)}
+.cb-host.cb-two{--cb-navpad:calc(2 * var(--cb-navw) + 4px);--cb-bpad:16px;--cb-lpad:var(--cb-gap);--cb-ppad:calc(var(--cb-gap) * .45)}
 .cb-host.cb-two.cb-fit{
   --cb-tileh:calc((100svh - var(--cb-reserve) - 2 * var(--cb-bpad) - var(--cb-foot) - 2 * var(--cb-lpad) - (var(--cb-rows) - 1) * var(--cb-gap) - var(--cb-rows) * 2 * var(--cb-ppad)) / var(--cb-rows));
   --cb-pagew:calc(var(--cb-cols) * (var(--cb-tileh) * var(--cb-aw) / var(--cb-ah) + 2 * var(--cb-ppad)) + (var(--cb-cols) - 1) * var(--cb-gap) + 2 * var(--cb-lpad));
-  max-width:min(100%,max(360px,calc(2 * var(--cb-pagew) + var(--cb-spine) + 2 * var(--cb-bpad) + 2 * var(--cb-tabpad))))}
-.cb-host.cb-tabbed{--cb-tabpad:calc(var(--cb-tabw) * var(--cb-tabcols,1));padding-inline:var(--cb-tabpad);box-sizing:border-box}
+  max-width:min(100%,max(360px,calc(2 * var(--cb-pagew) + var(--cb-spine) + 2 * var(--cb-bpad) + 2 * var(--cb-tabpad) + 2 * var(--cb-navpad))))}
+.cb-host.cb-tabbed{--cb-tabpad:calc(var(--cb-tabw) * var(--cb-tabcols,1))}
+.cb-host.cb-two.cb-tabbed{--cb-navpad:calc(2 * var(--cb-navw) + 4px - var(--cb-bpad))}   /* a tab starts at the page's edge, under the cover's rim, so the tab reserve has a rim's width to spare: the chevrons take it and sit 4px off the tabs */
 .cb-host:not(.cb-two){--cb-tabw:24px}
 .cb-host.cb-tabbed:not(.cb-two){padding-inline:0 var(--cb-tabpad)}   /* one page at a time every tab sits on the right */
 
@@ -137,7 +139,8 @@
 .cb-press::after{transform:translate(.75px,.75px);-webkit-text-stroke:1px oklch(from var(--cb-cover) calc(l + .1) c h)}
 @supports not (color:oklch(from red l c h)){.cb-press{-webkit-text-stroke-color:var(--cb-stitch)}.cb-press::before,.cb-press::after{display:none}}
 
-/* pager: first, previous, page box, next, last, and the optional size picker, centred under the book */
+/* pager: first, previous, page box, next, last, and the optional size picker, centred under the book; on a spread the four chevrons
+   leave the row for the host's side gutters (see below) */
 .cb-pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin-top:12px;position:relative}
 .cb-pager button{width:40px;height:40px;padding:0;border:0;border-radius:50%;background:none;color:var(--cb-ink-dim);display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .15s}
 .cb-pager button svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
@@ -155,7 +158,17 @@
 .cb-size .cb-pop>div{display:grid;grid-template-columns:repeat(6,22px);gap:4px}
 .cb-size .cb-pop>div button{width:22px;height:22px;min-width:0;padding:0;border:1px solid var(--cb-line);border-radius:2px}
 .cb-size .cb-pop>div button.cb-hi{background:var(--cb-ink);border-color:var(--cb-ink)}
-.cb-size .cb-pop .cb-slbl{margin-top:8px;text-align:center;font-family:var(--cb-mono);font-size:12px}
+.cb-size .cb-pop .cb-slbl{display:block;margin-top:8px;text-align:center;font-family:var(--cb-mono);font-size:12px}
+/* on a spread the chevrons sit beside the book, centred on its height (--cb-bookh, which the module keeps current): front cover and
+   previous on the left, next and back cover on the right, the covers outermost; the page box stays under the book */
+.cb-host.cb-two .cb-pager{position:static}
+.cb-host.cb-two .cb-pager [data-go]{position:absolute;top:calc(var(--cb-bookh,100%) / 2);width:var(--cb-navw);height:56px;margin-top:-28px;border-radius:6px}
+.cb-host.cb-two .cb-pager [data-go] svg{width:24px;height:24px}
+.cb-host.cb-two .cb-pager [data-go="first"]{left:0}
+.cb-host.cb-two .cb-pager [data-go="prev"]{left:var(--cb-navw)}
+.cb-host.cb-two .cb-pager [data-go="next"]{right:var(--cb-navw)}
+.cb-host.cb-two .cb-pager [data-go="last"]{right:0}
+.cb-host.cb-two .cb-size{top:auto;bottom:0;right:calc(var(--cb-tabpad) + var(--cb-navpad))}
 @media (max-width:600px){.cb-pager{gap:6px}.cb-pager button{width:36px;height:36px}.cb-pager button svg{width:18px;height:18px}.cb-pgo{margin:0 2px;font-size:13px}.cb-pgo input{width:46px;height:36px}.cb-size>button{width:auto;height:36px}.cb-size{position:static;flex-basis:100%;display:flex;justify-content:center;margin-top:4px}.cb-size .cb-pop{right:auto;left:50%;transform:translateX(-50%)}}
 
 /* page turns: ghosts the module stages in the host over the leaves for one turn. On a spread the turning page (.cb-flier: the lifted page on its

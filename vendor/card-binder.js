@@ -1,4 +1,4 @@
-// card-binder v2.9.3 (2026-09-17)
+// card-binder v2.10.0 (2026-09-18)
 // card-binder: a pocket-page binder as a physical object. Zero dependencies, ES module.
 // new CardBinder(host, {items, renderItem, cols, rows, name, inside, progress, progressLabel, itemDone, cover, font, spreadMinWidth, fit, pager, sizePicker, startClosed, keys, swipe, animate, tabs, onTab, onChange})
 //   items        array of anything; renderItem(item, index) returns the element that sits in a pocket (give it the pocket aspect)
@@ -11,7 +11,8 @@
 //   font         a CSS colour for the pressed title's groove and the progress fill; unset, both derive from the cover
 //   spreadMinWidth  viewport width from which two pages face each other (default 1000); below it one page at a time
 //   fit          on a spread, size the book from the viewport height so a whole spread shows (default true); set --cb-reserve on the host
-//   pager        render the built-in pager under the book (default true); sizePicker adds a cols x rows picker to it (default false)
+//   pager        render the built-in pager (default true): the page box under the book with the four chevrons beside it, or, on a spread, the
+//                chevrons beside the book, centred on its height; sizePicker adds a cols x rows picker to it (default false)
 //   startClosed  begin on the shut front cover (default true); keys: arrow keys turn pages (default true; off when items handle arrows)
 //   swipe        a sideways touch or pen swipe across the book turns the page (default true)
 //   animate      page turns move like one sheet: the turning page flips over the spine with the next page on its back (default true)
@@ -26,7 +27,7 @@
 // perspective distance for a turn, in page widths: the free edge of a swinging page grows by at most 1 / (1 - 1 / PERSP)
 const PERSP=10;
 export class CardBinder{
-  static VERSION="2.9.3";
+  static VERSION="2.10.0";
   constructor(host,o={}){
     this.host=host;this.items=o.items||[];this.renderItem=o.renderItem||(x=>{const d=document.createElement("div");d.textContent=String(x);return d});
     this.cols=o.cols||3;this.rows=o.rows||3;this.name=o.name||"";this.inside=o.inside||[];this.progress=o.progress;this.progressLabel=o.progressLabel||"";this.itemDone=o.itemDone||null;
@@ -36,8 +37,9 @@ export class CardBinder{
     host.classList.add("cb-host");host.innerHTML=`<div class="cb-book"><div class="cb-leaf"><div class="cb-grid"></div><div class="cb-foot"></div></div><div class="cb-leaf" hidden><div class="cb-grid"></div><div class="cb-foot"></div></div></div>`;
     this.book=host.firstElementChild;[this.leafL,this.leafR]=this.book.children;
     this.book.addEventListener("click",e=>{const t=e.target.closest(".cb-tab");if(t){const i=t.dataset.i,had=document.activeElement===t;this.goTo(this.tabs[i].page);this.onTab(this.tabs[i]);if(had)this.book.querySelector(`.cb-tab[data-i="${i}"]`)?.focus();return}if(this.swiped)return;if(this.closed)this.turn(this.closed==="front"?1:-1)});
-    // the tab stack is fitted to the page height, so it is laid out again when the page changes size (a window resize on a fitted spread)
-    if(typeof ResizeObserver!=="undefined")new ResizeObserver(()=>{if(this.tabs.length&&this.leafL.offsetHeight!==this.tabH)this.paintTabs()}).observe(this.book);
+    // the tab stack is fitted to the page height, so it is laid out again when the page changes size (a window resize on a fitted spread);
+    // the book's height goes to the host, where the chevrons beside a spread centre on it
+    if(typeof ResizeObserver!=="undefined")new ResizeObserver(()=>{this.host.style.setProperty("--cb-bookh",this.book.offsetHeight+"px");if(this.tabs.length&&this.leafL.offsetHeight!==this.tabH)this.paintTabs()}).observe(this.book);
     if(o.keys!==false)host.addEventListener("keydown",e=>{if(e.target.closest("input"))return;if(e.key==="ArrowRight")this.turn(1);else if(e.key==="ArrowLeft")this.turn(-1)});
     if(o.swipe!==false)this.armSwipe();
     if(o.cover)this.setCover(o.cover);
